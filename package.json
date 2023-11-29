@@ -1,19 +1,23 @@
 {
-  "name": "infintydeck",
-  "version": "1.0.0",
-  "description": "AR Cardgame Simulator",
-  "main": "index.js",
+  "name": "InfintyDeck",
+  "type": "module",
+  "main": "dist/index.js",
+  "packageManager": "yarn@4.0.2",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
-    "@types/express": "^4.16.1",
-    "tslint": "^5.12.1",
-    "typescript": "^3.3.3"
+    "@types/jest": "^29.5.10",
+    "@types/node": "^20.10.0",
+    "@types/three": "^0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.2"
   },
   "dependencies": {
-    "express": "^4.16.4"
+    "@ar-js-org/ar.js": "^3.4.5",
+    "three": "^0.158.0"
   }
 }

@@ -1,19 +1,13 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "esModuleInterop": true,
-        "target": "es6",
-        "moduleResolution": "node",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "target": "ES2020",
         "sourceMap": true,
-        "outDir": "dist"
+        "outDir": "dist",
+        "esModuleInterop": true
     },
-    "lib": [
-        "es2015"
-    ],
-   "scripts": {
-        "clean": "rimraf dist",
-        "start": "npm-run-all clean --parallel watch:build watch:server --print-label",
-        "watch:build": "tsc --watch",
-        "watch:server": "nodemon './dist/index.js' --watch './dist'"
-    }
+    "include": [
+        "src/**/*"
+    ]
 }

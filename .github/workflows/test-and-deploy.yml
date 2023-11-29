@@ -1,0 +1,67 @@
+name: Test and deploy
+
+on:
+    push:
+
+jobs:
+    Test:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v3
+            -   uses: actions/setup-node@v3
+                with:
+                    node-version: 16
+                    cache: 'yarn'
+            -   run: yarn install --frozen-lockfile # optional, --immutable
+            -   name: Run tests
+                run: yarn test
+    Deploy:
+        needs: Test
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v3
+            -   uses: actions/setup-node@v3
+                with:
+                    node-version: 16
+                    cache: 'yarn'
+            -   run: yarn install --frozen-lockfile # optional, --immutable
+            -   name: Compiled source code
+                run: yarn build
+            -   name: Zip compiled source code
+                run: |
+                    zip -r dist.zip dist/
+            -   name: Get latest release
+                uses: actions/github-script@v6
+                id: get_latest_release
+                with:
+                    script: |
+                        const { data: releases } = await github.rest.repos.listReleases({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            per_page: 1
+                        });
+                        return releases[0].tag_name;
+                    result-encoding: string
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Create release
+                id: create_release
+                uses: actions/create-release@v1
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                with:
+                    tag_name: ${{ steps.get_latest_release.outputs.result }}-${{ github.sha }}
+                    release_name: Release ${{ steps.get_latest_release.outputs.result }}-${{ github.sha }}
+                    draft: false
+                    prerelease: false
+            -   name: Upload release asset
+                id: upload-release-asset
+                uses: actions/upload-release-asset@v1
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                with:
+                    upload_url: ${{ steps.create_release.outputs.upload_url }}
+                    asset_path: dist.zip
+                    asset_name: 2023-tutorial-build-test-deploy.zip
+                    asset_content_type: application/zip
