@@ -1,5 +1,11 @@
 # Setup:
-Nachdem NodeJS installiert wurde schlicht die folgenden cmds ausführen:
+# Windows
+Node installieren [Link](https://nodejs.org/en)
+
+# Brew
+```sh
+brew install node corepack
+```
 
 ```sh
 # yarn von Node anschalten
