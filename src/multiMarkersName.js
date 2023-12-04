@@ -49,8 +49,17 @@ AFRAME.registerComponent('registerevents', {
 			const marker = this.el;
 
 			marker.addEventListener("markerFound", ()=> {
+				
 				var markerId = marker.id;
-				console.log('Marker Found: ', markerId);
+				var image = marker.querySelector('#text');
+				var position = marker.object3D.position;
+				if (position.x < 0 && image) {
+					//this attribute can be replaced by a cardback
+    				image.setAttribute('text', { color: 'green', align: 'center', value: marker.id, width: '5.5' });
+				} else {
+					image.setAttribute('text', { color: 'red', align: 'center', value: marker.id, width: '5.5' });
+				}
+				console.log('Marker Found: ', markerId, 'at ', marker.object3D.position);
 			});
 
 			marker.addEventListener("markerLost",() =>{
