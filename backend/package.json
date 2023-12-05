@@ -1,0 +1,17 @@
+{
+  "name": "infinitydeck-backend",
+  "version": "0.0.0",
+  "description": "Backend for InfinityDeck-app.",
+  "main": "app.js",
+  "scripts": {
+    "test": "test",
+    "start": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^6.3.0",
+    "ws": "^8.14.2"
+  },
+  "type": "module"
+}
