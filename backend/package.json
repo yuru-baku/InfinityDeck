@@ -4,8 +4,8 @@
   "description": "Backend for InfinityDeck-app.",
   "main": "app.js",
   "scripts": {
-    "test": "test",
-    "start": "node app.js"
+    "start": "node ./dist/app.js",
+    "build": "npx tsc"
   },
   "author": "",
   "license": "ISC",
@@ -13,5 +13,9 @@
     "mongodb": "^6.3.0",
     "ws": "^8.14.2"
   },
-  "type": "module"
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.3.3"
+  }
 }

@@ -1,5 +1,20 @@
+import { Room } from "./room";
+import { User } from "./user";
+
 export class MauMau {
-    constructor (room) {
+
+    room: Room;
+    deck: string[];
+    playedCards: string[];
+    drawPile: string[];
+    maxUsers: number = 4;
+    history: string[];
+    startTime: Date|undefined;
+    endTime: Date|undefined;
+    turn: number;
+
+
+    constructor (room: Room) {
         this.room = room;
         this.deck = [
             'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'cj', 'cq', 'ck', 'ca',
@@ -9,11 +24,7 @@ export class MauMau {
         ]; // All cards of this deck 
         this.playedCards = [ ];
         this.drawPile = [ ];        // "Nachziehstapel"
-        this.maxUsers = 4;
         this.history = [ ];
-        this.startTime;
-        this.endTime;
-        this.leaderboard = [ ];
         this.turn = 0;
     }
 
@@ -21,7 +32,7 @@ export class MauMau {
         // check user count
         if (this.room.users.length > this.maxUsers) {
             for (let user of this.room.users) {
-                user.ws.send({ error: 'Too many Users!' });
+                user.ws.send(JSON.stringify({ error: 'Too many Users!' }));
             }
             return;
         }
@@ -31,17 +42,17 @@ export class MauMau {
         // give users some handcards
         for (let i = 0; i < 7; i++) {
             for (let user of this.room.users) {
-                user.handcards.unshift(this.drawPile.pop());
+                user.handcards.unshift(this.drawPile.pop()!);
             }
         }
         // propagate handcards?
         for (let user of this.room.users) {
-            user.ws.send({
+            user.ws.send(JSON.stringify({
                 action: 'dealCards',
                 data: {
                     handcards: user.handcards
                 }
-            });
+            }));
             let historyEntry = [ 'dealCards', user.id, user.handcards.join(',')].join(':');
             this.history.unshift(historyEntry);
         }
@@ -50,14 +61,16 @@ export class MauMau {
     end() {
         this.endTime = new Date();
 
+        const leaderboard: string[] = [ ];
+
         this.notifyUsers('end', {
             startTime: this.startTime,
             endTime: this.endTime,
-            leaderboard: this.leaderboard
+            leaderboard: leaderboard
         });
         // finally persist and close
         this.room.db.collection('MauMau-Games').insertOne({
-            leaderboard: this.leaderboard,
+            leaderboard: leaderboard,
             history: this.history,
             startTiem: this.startTime,
             endTime: this.endTime,
@@ -65,40 +78,40 @@ export class MauMau {
         });
     }
 
-    drawCard(user, _) {
+    drawCard(user: User, _: any) {
         // check if it is the users turn
-        if (this.room.users[turn] !== user) {
-            user.ws.send({ error: 'It is not your turn!' });
+        if (this.room.users[this.turn] !== user) {
+            user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
             return;
         }
         // check if we need to shuffle deck
         if (this.drawPile.length <= 0) {
             this.shuffleDrawPile();
         }
-        const newCard = this.drawPile.pop();
+        const newCard = this.drawPile.pop()!;
         user.handcards.unshift(newCard);
-        user.ws.send({
+        user.ws.send(JSON.stringify({
             action: 'drawCard',
             data: {
                 newCard: newCard,
                 handcards: user.handcards,
                 nextActions: [ 'endTurn', 'playCard' ]
             }
-        });
+        }));
         this.history.unshift(`+${user.id}:${newCard}`);
         // do not hand to next user now, wait if he can play now
     }
 
-    playCard(user, data) {
+    playCard(user: User, data: any) {
         // check if it is the users turn
-        if (this.room.users[turn] !== user) {
-            user.ws.send({ error: 'It is not your turn!' });
+        if (this.room.users[this.turn] !== user) {
+            user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
             return;
         }
         // check if user has this card in his hand
         const cardIndex = user.handcards.findIndex(card => card === data.card);
         if (cardIndex < 0) {
-            user.ws.send({ error: 'The Server did not know you own this card. Please play another one' });
+            user.ws.send(JSON.stringify({ error: 'The Server did not know you own this card. Please play another one' }));
             return;
         }
         // play card
@@ -116,20 +129,20 @@ export class MauMau {
         this.endTurn(user, data);
     }
 
-    endTurn(user, _) {
+    endTurn(user: User, _: any) {
         // check if it is the users turn
-        if (this.room.users[turn] !== user) {
-            user.ws.send({ error: 'It is not your turn!' });
+        if (this.room.users[this.turn] !== user) {
+            user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
             return;
         }
         // just hand to next user
         this.turn = (this.turn) + 1 % this.room.users.length;
-        this.room.users[turn].ws.send({
+        this.room.users[this.turn].ws.send(JSON.stringify({
             action: 'yourTurn',
             data: {
                 nextActions: [ 'drawCard', 'playCard' ]
             }
-        });
+        }));
     }
 
     shuffleDrawPile() {
@@ -141,7 +154,7 @@ export class MauMau {
         this.history.unshift('shuffle');
     }
 
-    shuffleArray(array) {
+    shuffleArray(array: any[]) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             const tmp = array[i];
@@ -150,12 +163,12 @@ export class MauMau {
         } 
         return array;
     }
-    notifyUsers(action, data) {
+    notifyUsers(action: string, data: any) {
         for (let user of this.room.users) {
-            user.ws.send({
+            user.ws.send(JSON.stringify({
                 action: action,
                 data: data
-            });
+            }));
         }
     }
 }

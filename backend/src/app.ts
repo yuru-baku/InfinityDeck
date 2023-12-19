@@ -1,5 +1,5 @@
 import { MongoClient } from 'mongodb';
-import { WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 import { Room } from './models/room.js';
 import { User } from './models/user.js';
 
@@ -14,14 +14,14 @@ async function main() {
 
     const rooms = new Map();
     const wss = new WebSocketServer({ port: 8080 });
-    wss.on('connection', function connection(ws, req) {
+    wss.on('connection', function connection(ws: WebSocket, req) {
         // on connection create new room or join an open room
-        const room_id = req.url.match(/(?<=room=)\w*/);
-        let room;
+        const room_id = req.url?.match(/(?<=room=)\w*/);
+        let room: Room;
         if (room_id) { // get open room
             room = rooms.get(room_id);
             if (!room) {
-                ws.send({ error: `Room with id ${room_id} could not be found...`});
+                ws.send(JSON.stringify({ error: `Room with id ${room_id} could not be found...`}));
                 ws.close();
             }
             console.log('User joined', room_id);
@@ -29,7 +29,7 @@ async function main() {
             room = new Room(db);
             while (rooms.get(room.id)) {
                 console.log('Room was already taken!');
-                room = new Room();
+                room = new Room(db);
             }
             rooms.set(room.id, room);
             console.log('User created', room_id);
@@ -37,11 +37,11 @@ async function main() {
         // find user and join
         let user = new User(ws, '', 'Random')
         room.join(user);
-        ws.send({ action: 'joined', data: { roomId: room.id }});
+        ws.send(JSON.stringify({ action: 'joined', data: { roomId: room.id }}));
 
         ws.on('error', console.error);
         ws.on('close', data => {
-            let userCount = room.leave(data, user); // is he actually leaving?
+            let userCount = room.leave(user); // is he actually leaving?
             if (userCount <= 0) {
                 rooms.delete(room.id);
             }
