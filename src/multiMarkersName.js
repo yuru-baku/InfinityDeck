@@ -41,6 +41,17 @@ AFRAME.registerComponent('markers_start',{
 			textEl.object3D.rotation.set(-90, 0, 0);
 
 			markerEl.appendChild(textEl);
+
+
+			var ImageEl = document.createElement('a-image');
+			ImageEl.setAttribute('src', 'url(cardImages/hearts_ace.svg)');
+			ImageEl.setAttribute('id','card');
+
+			ImageEl.object3D.position.set(0, 0.0, 0); 
+			ImageEl.object3D.rotation.set(-90, 0, 0);
+    		markerEl.appendChild(ImageEl);
+		
+
 		}
 		createZoneMarkers(sceneEl);
 	}
@@ -85,19 +96,10 @@ AFRAME.registerComponent('registerevents', {
 			const marker = this.el;
 
 			marker.addEventListener("markerFound", ()=> {
-				
 				var markerId = marker.id;
-				var image = marker.querySelector('#text');
-				var position = marker.object3D.position;
-
 				addFoundMarker(marker, foundCardMarkers)
-
-				
-				if (position.x < 0 && image) {
-					//this attribute can be replaced by a cardback
-    				image.setAttribute('text', { color: 'green', align: 'center', value: marker.id, width: '5.5' });
-				} else {
-					image.setAttribute('text', { color: 'red', align: 'center', value: marker.id, width: '5.5' });
+				if (markerInZone(marker)){
+					turnCard(marker);
 				}
 				console.log('Marker Found: ', markerId, 'at ', marker.object3D.position);
 			});
@@ -107,8 +109,27 @@ AFRAME.registerComponent('registerevents', {
 				removeFoundMarker(marker, foundCardMarkers);
 				console.log('Marker Lost: ', markerId);
 			});
+			function checkMarkerInZone() {	
+				for (foundMarker of foundCardMarkers){
+					if (markerInZone(foundMarker)){
+						turnCard(foundMarker);
+					} else if (isCardBack(foundMarker)) {
+						showCard(foundMarker);
+					}
+				}
+				setTimeout(checkMarkerInZone, 100);
+			};
+			checkMarkerInZone();
 		},
+		
 	});
+
+function isCardBack(marker){
+    if (!marker) return false;
+    const imageEl = marker.querySelector('#card');
+    if (!imageEl) return false;
+    return imageEl.getAttribute('src') === 'url(cardImages/cardBackBlue.svg)';
+}
 
 AFRAME.registerComponent('registerevents_zone', {
 	init: function () {
@@ -215,9 +236,41 @@ function removeZone() {
 
 
 
-function markerInZone(){
+function markerInZone(marker) {
+    if (!marker) return false; 
 
+    const zoneMarker1 = document.getElementById('ZoneMarker_1');
+    const zoneMarker2 = document.getElementById('ZoneMarker_2');
+
+    if (!zoneMarker1 || !zoneMarker2) return false; 
+
+    const markerPosition = marker.object3D.position.clone();
+    const zoneMarker1Position = zoneMarker1.object3D.position.clone();
+    const zoneMarker2Position = zoneMarker2.object3D.position.clone();
+
+    const minX = Math.min(zoneMarker1Position.x, zoneMarker2Position.x);
+    const maxX = Math.max(zoneMarker1Position.x, zoneMarker2Position.x);
+    const minZ = Math.min(zoneMarker1Position.z, zoneMarker2Position.z);
+    const maxZ = Math.max(zoneMarker1Position.z, zoneMarker2Position.z);
+
+    return (
+        markerPosition.x >= minX &&
+        markerPosition.x <= maxX &&
+        markerPosition.z >= minZ &&
+        markerPosition.z <= maxZ
+    );
 }
+
+function turnCard(marker){
+	const imageEl = marker.querySelector('#card');
+	imageEl.setAttribute('src', 'url(cardImages/cardBackBlue.svg)');
+}
+
+function showCard(marker){
+	const imageEl = marker.querySelector('#card');
+	imageEl.setAttribute('src', 'url(cardImages/hearts_ace.svg)');
+}
+
 
 function addFoundMarker(marker, markerList) {
 	if (!markerList.includes(marker)) {
