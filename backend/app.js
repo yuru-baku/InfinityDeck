@@ -21,12 +21,12 @@ async function main() {
         if (room_id) { // get open room
             room = rooms.get(room_id);
             if (!room) {
-                ws.send('error');
+                ws.send({ error: `Room with id ${room_id} could not be found...`});
                 ws.close();
             }
             console.log('User joined', room_id);
         } else { // create new room
-            room = new Room();
+            room = new Room(db);
             while (rooms.get(room.id)) {
                 console.log('Room was already taken!');
                 room = new Room();
@@ -37,11 +37,11 @@ async function main() {
         // find user and join
         let user = new User(ws, '', 'Random')
         room.join(user);
-        ws.send(room.id);
+        ws.send({ action: 'joined', data: { roomId: room.id }});
 
         ws.on('error', console.error);
         ws.on('close', data => {
-            let userCount = room.leave(data, user);
+            let userCount = room.leave(data, user); // is he actually leaving?
             if (userCount <= 0) {
                 rooms.delete(room.id);
             }
