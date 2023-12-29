@@ -60,7 +60,7 @@ export class Room {
         const availableGameActions = [
             'start',
             'end',
-            'shuffle'
+            'shuffleDrawPile'
         ];
         const availableRoomActions = [
             'selectGame',

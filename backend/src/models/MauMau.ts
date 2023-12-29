@@ -120,7 +120,7 @@ export class MauMau {
         this.history.unshift(`-${user.id}:${playedCard}`)
         // check if it was the last card
         const wasLast = user.handcards.length <= 0;
-        this.notifyUsers('playedCard', { card: playedCard, wasLast: wasLast });
+        this.notifyUsers('playCard', { card: playedCard, wasLast: wasLast });
         if (wasLast) {
             // we do not check here if he needs to pull another card he can do so if he wants to :)
             this.history.unshift(`${user.id}:finished`)
