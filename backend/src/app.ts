@@ -16,15 +16,18 @@ async function main() {
     const wss = new WebSocketServer({ port: 8080 });
     wss.on('connection', function connection(ws: WebSocket, req) {
         // on connection create new room or join an open room
-        const room_id = req.url?.match(/(?<=room=)\w*/);
+        const room_id = req.url?.match(/(?<=roomId=)\w*/)?.at(0);
+        const name = req.url?.match(/(?<=name=)\w*/)?.at(0);
         let room: Room;
-        if (room_id) { // get open room
+        console.log(room_id, name)
+        if (room_id && room_id !== '' && room_id !== 'undefined') { // get open room
             room = rooms.get(room_id);
             if (!room) {
                 ws.send(JSON.stringify({ error: `Room with id ${room_id} could not be found...`}));
                 ws.close();
+                return;
             }
-            console.log('User joined', room_id);
+            console.log('User joined', room.id);
         } else { // create new room
             room = new Room(db);
             while (rooms.get(room.id)) {
@@ -32,12 +35,12 @@ async function main() {
                 room = new Room(db);
             }
             rooms.set(room.id, room);
-            console.log('User created', room_id);
+            console.log('User created', room.id);
         }
         // find user and join
-        let user = new User(ws, '', 'Random')
+        let user = new User(ws, undefined, name);
         room.join(user);
-        ws.send(JSON.stringify({ action: 'joined', data: { roomId: room.id }}));
+        ws.send(JSON.stringify({ action: 'connected', data: { roomId: room.id, users: room.users.map(user => { return { name: user.name, isOwner: user.isAdmin, id: user.id }}) }}));
 
         ws.on('error', console.error);
         ws.on('close', data => {

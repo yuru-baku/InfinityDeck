@@ -1,23 +1,26 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
-  import { useWebSocketStore } from '../stores/webSocketStore.js';
+  import { useWebSocketStore } from '../stores/webSocketStore';
 
   const router = useRouter();
   const store = useWebSocketStore();
-
   let name = ref('');
-  // let socket: WebSocket;
 
   function joinRoom() {
-    store.changeWebSocket(new WebSocket(`ws://localhost:8080?name=${name}`));
-
-    store.webSocket.addEventListener('message', (event) => {
-      console.log(event)
+    let roomId = router.currentRoute.value.query.roomId;
+    console.log(roomId)
+    store.changeWebSocket(new WebSocket(`ws://localhost:8080?name=${name.value}&roomId=${roomId}`));
+    // ToDo remove this EventListener
+    store.webSocket.addEventListener('message', (event : MessageEvent) => {
+      const data = JSON.parse(event.data);
+      if (data.action === 'connected') {
+        // navigate to lobby 
+        router.push(`/lobby?roomId=${data.data.roomId}`);
+      } else {
+        console.error('Could not join!');
+      }
     });
-    console.log(store.webSocket)
-    // navigate to lobby 
-    router.push('/lobby');
   }
 </script>
 

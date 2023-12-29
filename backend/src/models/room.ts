@@ -24,10 +24,12 @@ export class Room {
         // notify users
         this.users.forEach(u => {
             u.ws.send(JSON.stringify({
-                action: 'join',
-                user: {
-                    id: user.id,
-                    name: user.name
+                action: 'joined',
+                data: {
+                    user: {
+                        id: user.id,
+                        name: user.name
+                    }
                 }
             }));
         });
@@ -45,11 +47,17 @@ export class Room {
             'playCard',
             'endTurn'
         ];
+        const availableRoomActions = [
+            'getRoomInfo',
+        ];
         user.ws.on('message', (msg: string) => {
             const data: any = JSON.parse(msg);
             if (availableActions.includes(data.action)) {
                 // @ts-ignore
                 this.game[data.action](user, data);
+            } else if (availableRoomActions.includes(data.action)){
+                // @ts-ignore
+                this[data.action](user, data);
             }
         });
     }
@@ -91,6 +99,18 @@ export class Room {
             }));
         });
         return this.users.length;
+    }
+
+    getRoomInfo(user: User) {
+        user.ws.send(JSON.stringify({
+            action: 'gotRoomInfo',
+            data: {
+                you: { name: user.name, isOwner: user.isAdmin, id: user.id },
+                isLocal: false,
+                selectedGame: this.selectGame,
+                users: this.users.map(user => { return { name: user.name, isOwner: user.isAdmin, id: user.id }})
+            }
+        }))
     }
 
     selectGame() {
