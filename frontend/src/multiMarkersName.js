@@ -16,7 +16,7 @@ AFRAME.registerComponent('markers_start', {
 
 		//list of the markers
 		for (var i = 1; i < 17; i++) {
-			var url = "resources/markers/pattern-Individual_Blocks-" + i + ".patt";
+			var url = "../resources/markers/pattern-Individual_Blocks-" + i + ".patt";
 			markersURLArray.push(url);
 			markersNameArray.push('Marker_' + i);
 			//console.log(url);
@@ -43,7 +43,7 @@ AFRAME.registerComponent('markers_start', {
 
 
 			var ImageEl = document.createElement('a-image');
-			ImageEl.setAttribute('src', 'url(cardImages/hearts_ace.svg)');
+			ImageEl.setAttribute('src', 'url(../cardImages/hearts_ace.svg)');
 			ImageEl.setAttribute('id', 'card');
 
 			ImageEl.object3D.position.set(0, 0.0, 0);
@@ -52,7 +52,7 @@ AFRAME.registerComponent('markers_start', {
 
 
 		}
-		handZone = new Zone("resources/markers/ZoneMarker1.patt", "resources/markers/ZoneMarker2.patt", sceneEl, "hand");
+		handZone = new Zone("../resources/markers/ZoneMarker1.patt", "../resources/markers/ZoneMarker2.patt", sceneEl, "hand");
 	}
 });
 
