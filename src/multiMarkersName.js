@@ -6,6 +6,7 @@ var markersNameArray=[];
 
 var foundCardMarkers  =  [];
 var foundZoneMarkers = [];
+var handZone; 
 
 AFRAME.registerComponent('markers_start',{
 	init:function(){
@@ -53,42 +54,9 @@ AFRAME.registerComponent('markers_start',{
 		
 
 		}
-		createZoneMarkers(sceneEl);
+		handZone = new Zone("resources/markers/ZoneMarker1.patt", "resources/markers/ZoneMarker2.patt", sceneEl, "hand");
 	}
 });
-
-function createZoneMarkers(scene){
-	var markerEl = document.createElement('a-marker');
-	markerEl.setAttribute('type','pattern');
-	markerEl.setAttribute('url',"resources/markers/ZoneMarker1.patt");
-	markerEl.setAttribute('id',"ZoneMarker_1");
-	markerEl.setAttribute('registerevents_zone','');
-
-	scene.appendChild(markerEl);
-
-	var textEl = document.createElement('a-entity');	
-	textEl.setAttribute('id','text');
-	textEl.setAttribute('text',{color: 'red', align: 'center', value:"1", width: '5.5'});
-	textEl.object3D.position.set(0, 0.0, 0);
-	textEl.object3D.rotation.set(-90, 0, 0);
-	markerEl.appendChild(textEl);
-
-
-	var markerEl2 = document.createElement('a-marker');
-	markerEl2.setAttribute('type','pattern');
-	markerEl2.setAttribute('url',"resources/markers/ZoneMarker2.patt");
-	markerEl2.setAttribute('id',"ZoneMarker_2");
-	markerEl2.setAttribute('registerevents_zone','');
-	scene.appendChild(markerEl2);
-
-	var textEl2 = document.createElement('a-entity');
-	textEl2.setAttribute('id','text');
-	textEl2.setAttribute('text',{color: 'red', align: 'center', value:"2", width: '5.5'});
-	textEl2.object3D.position.set(0, 0.0, 0);
-	textEl2.object3D.rotation.set(-90, 0, 0);
-	markerEl2.appendChild(textEl2);
-}
-
 
 //Detect marker found and lost
 AFRAME.registerComponent('registerevents', {
@@ -98,7 +66,7 @@ AFRAME.registerComponent('registerevents', {
 			marker.addEventListener("markerFound", ()=> {
 				var markerId = marker.id;
 				addFoundMarker(marker, foundCardMarkers)
-				if (markerInZone(marker)){
+				if (handZone.markerInZone(marker)){
 					turnCard(marker);
 				}
 				console.log('Marker Found: ', markerId, 'at ', marker.object3D.position);
@@ -111,7 +79,7 @@ AFRAME.registerComponent('registerevents', {
 			});
 			function checkMarkerInZone() {	
 				for (foundMarker of foundCardMarkers){
-					if (markerInZone(foundMarker)){
+					if (handZone.markerInZone(foundMarker)){
 						turnCard(foundMarker);
 					} else if (isCardBack(foundMarker)) {
 						showCard(foundMarker);
@@ -123,13 +91,6 @@ AFRAME.registerComponent('registerevents', {
 		},
 		
 	});
-
-function isCardBack(marker){
-    if (!marker) return false;
-    const imageEl = marker.querySelector('#card');
-    if (!imageEl) return false;
-    return imageEl.getAttribute('src') === 'url(cardImages/cardBackBlue.svg)';
-}
 
 AFRAME.registerComponent('registerevents_zone', {
 	init: function () {
@@ -143,11 +104,11 @@ AFRAME.registerComponent('registerevents_zone', {
 			var position = marker.object3D.position;
 
 			addFoundMarker(marker, foundZoneMarkers)
-
-			if(isMarkerIdFound("ZoneMarker_1", foundZoneMarkers) && isMarkerIdFound("ZoneMarker_2", foundZoneMarkers)){
-				lastPosition1 = document.getElementById('ZoneMarker_1').object3D.position.clone();
-				lastPosition2 = document.getElementById('ZoneMarker_2').object3D.position.clone();
-				drawZone();
+			//add for loop here with zoneArray if we have multiple
+			if(isMarkerIdFound(handZone.getMarker1Id(), foundZoneMarkers) && isMarkerIdFound(handZone.getMarker2Id(), foundZoneMarkers)){
+				lastPosition1 = handZone.getZoneMarker1().object3D.position.clone();
+				lastPosition2 = handZone.getZoneMarker2().object3D.position.clone();
+				handZone.drawZone();
 			}
 		
 			console.log('Zone Marker Found: ', markerId, 'at ', marker.object3D.position);
@@ -156,110 +117,27 @@ AFRAME.registerComponent('registerevents_zone', {
 		marker.addEventListener("markerLost",() =>{
 			var markerId = marker.id;
 
-			if (marker.id === 'ZoneMarker_1' || marker.id === 'ZoneMarker_2') {
-				removeZone();
+			//add for loop here with zoneArray if we have multiple
+			if (marker.id === handZone.getMarker1Id() || marker.id === handZone.getMarker2Id()) {
+				handZone.removeZone();
 			}	
 
 			removeFoundMarker(marker, foundZoneMarkers);
 			console.log('Zone Marker Lost: ', markerId);
 		});
 
-		function checkMarkerPosition() {	
-			if (isMarkerIdFound("ZoneMarker_1", foundZoneMarkers) && isMarkerIdFound("ZoneMarker_2", foundZoneMarkers)) {
-				const marker1 = document.getElementById('ZoneMarker_1'); // Get ZoneMarker_1
-				const marker2 = document.getElementById('ZoneMarker_2'); // Get ZoneMarker_1
-				const currentPosition1 = marker1.object3D.position.clone();
-				const currentPosition2 = marker2.object3D.position.clone();
-
-				if (!lastPosition1.equals(currentPosition1) || !lastPosition2.equals(currentPosition2) ) {
-					lastPosition1.copy(currentPosition1); // Update the last position
-					lastPosition2.copy(currentPosition2); // Update the last position
-					removeZone();
-					drawZone(); // Redraw the zone whenever the position changes
-				} 
-
-			}
-			// Check periodically
-			setTimeout(checkMarkerPosition, 100); // Adjust the timing as needed
-		};
-		checkMarkerPosition();
-
-
+		handZone.redrawZoneEnable();
 	},
 });
 
-
-function drawZone() {
-    var sceneEl = document.querySelector('a-scene');
-    var marker1 = document.getElementById('ZoneMarker_1');
-    var marker2 = document.getElementById('ZoneMarker_2');
-
-    if (marker1 && marker2) {
-        var width = Math.abs(marker1.object3D.position.x - marker2.object3D.position.x);
-        var height = Math.abs(marker1.object3D.position.z - marker2.object3D.position.z);
-
-        var geometry = new THREE.PlaneGeometry(width, height);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
-
-        var zoneEntity = document.createElement('a-entity');
-        zoneEntity.setAttribute('geometry', { primitive: 'plane', width: width, height: height });
-        zoneEntity.setAttribute('material', { color: 0x00ff00, side: 'double', transparent: true, opacity: 0.5 });
-
-        // Set the position to the midpoint between markers
-        var midpoint = new THREE.Vector3();
-        midpoint.addVectors(marker1.object3D.position, marker2.object3D.position);
-        midpoint.divideScalar(2);
-        zoneEntity.object3D.position.copy(midpoint);
-
-        // Apply rotation to the zoneEntity
-        var direction = new THREE.Vector3().subVectors(marker2.object3D.position, marker1.object3D.position);
-        var angle = Math.atan2(direction.x, direction.z);
-        zoneEntity.object3D.rotation.set(0, 0, 0);
-
-        zoneEntity.setAttribute('id', 'zoneRectangle'); // Set an ID for easy access
-
-        sceneEl.appendChild(zoneEntity); // Append the zoneEntity to the scene
-    }
-}
-
-function removeZone() {
-    var sceneEl = document.querySelector('a-scene');
-    var existingZone = sceneEl.querySelector('#zoneRectangle'); // Find the plane by ID
-
-    if (existingZone) {
-        existingZone.parentNode.removeChild(existingZone);
-        console.log('Removed zone');
-    }
+function isCardBack(marker){
+    if (!marker) return false;
+    const imageEl = marker.querySelector('#card');
+    if (!imageEl) return false;
+    return imageEl.getAttribute('src') === 'url(cardImages/cardBackBlue.svg)';
 }
 
 
-
-
-
-function markerInZone(marker) {
-    if (!marker) return false; 
-
-    const zoneMarker1 = document.getElementById('ZoneMarker_1');
-    const zoneMarker2 = document.getElementById('ZoneMarker_2');
-
-    if (!zoneMarker1 || !zoneMarker2) return false; 
-
-    const markerPosition = marker.object3D.position.clone();
-    const zoneMarker1Position = zoneMarker1.object3D.position.clone();
-    const zoneMarker2Position = zoneMarker2.object3D.position.clone();
-
-    const minX = Math.min(zoneMarker1Position.x, zoneMarker2Position.x);
-    const maxX = Math.max(zoneMarker1Position.x, zoneMarker2Position.x);
-    const minZ = Math.min(zoneMarker1Position.z, zoneMarker2Position.z);
-    const maxZ = Math.max(zoneMarker1Position.z, zoneMarker2Position.z);
-
-    return (
-        markerPosition.x >= minX &&
-        markerPosition.x <= maxX &&
-        markerPosition.z >= minZ &&
-        markerPosition.z <= maxZ
-    );
-}
 
 function turnCard(marker){
 	const imageEl = marker.querySelector('#card');
@@ -289,4 +167,167 @@ function removeFoundMarker(marker, markerList) {
 
 function isMarkerIdFound(markerId, list){
 	return list.some(marker => marker.id === markerId);
+}
+
+
+
+
+class Zone{
+	constructor(marker1Url, marker2Url, sceneEl, name){
+		this.scene = sceneEl;
+		this.name = name;
+		this.zoneEntity = null;
+		
+		this.#createZoneMarkers(marker1Url, marker2Url);
+	}
+
+	getName(){
+		return this.name;
+	}
+
+	getZoneMarker1(){
+		return this.zoneMarker1;
+	}
+
+	getZoneMarker2(){
+		return this.zoneMarker1;
+	}
+
+	getMarker1Id(){
+		return this.zoneMarker1.getAttribute('id');
+	}
+
+	getMarker2Id(){
+		return this.zoneMarker2.getAttribute('id');
+	}
+
+	#createZoneMarkers(marker1Url, marker2Url){
+		var markerEl = document.createElement('a-marker');
+		markerEl.setAttribute('type','pattern');
+		markerEl.setAttribute('url',marker1Url);
+		markerEl.setAttribute('id',"ZoneMarker_1_" + this.name);
+		markerEl.setAttribute('registerevents_zone','');
+	
+		this.scene.appendChild(markerEl);
+	
+		var textEl = document.createElement('a-entity');	
+		textEl.setAttribute('id','text');
+		textEl.setAttribute('text',{color: 'red', align: 'center', value:"1", width: '5.5'});
+		textEl.object3D.position.set(0, 0.0, 0);
+		textEl.object3D.rotation.set(-90, 0, 0);
+		markerEl.appendChild(textEl);
+	
+	
+		var markerEl2 = document.createElement('a-marker');
+		markerEl2.setAttribute('type','pattern');
+		markerEl2.setAttribute('url',marker2Url);
+		markerEl2.setAttribute('id',"ZoneMarker_2_" + this.name);
+		markerEl2.setAttribute('registerevents_zone','');
+		this.scene.appendChild(markerEl2);
+	
+		var textEl2 = document.createElement('a-entity');
+		textEl2.setAttribute('id','text');
+		textEl2.setAttribute('text',{color: 'red', align: 'center', value:"2", width: '5.5'});
+		textEl2.object3D.position.set(0, 0.0, 0);
+		textEl2.object3D.rotation.set(-90, 0, 0);
+		markerEl2.appendChild(textEl2);
+
+		this.zoneMarker1 = markerEl;
+		this.zoneMarker2 = markerEl2;
+	}
+
+	drawZone() {
+		if (this.zoneMarker1 && this.zoneMarker2) {
+			var width = Math.abs(this.zoneMarker1.object3D.position.x - this.zoneMarker2.object3D.position.x);
+			var height = Math.abs(this.zoneMarker1.object3D.position.z - this.zoneMarker2.object3D.position.z);
+	
+			var geometry = new THREE.PlaneGeometry(width, height);
+			var material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+	
+			this.zoneEntity = document.createElement('a-entity');
+			this.zoneEntity.setAttribute('geometry', { primitive: 'plane', width: width, height: height });
+			this.zoneEntity.setAttribute('material', { color: 0x00ff00, side: 'double', transparent: true, opacity: 0.5 });
+
+			// Set the position to the midpoint between markers
+			var midpoint = new THREE.Vector3();
+			midpoint.addVectors(this.zoneMarker1.object3D.position, this.zoneMarker2.object3D.position);
+			midpoint.divideScalar(2);
+			this.zoneEntity.object3D.position.copy(midpoint);
+	
+			// Apply rotation to the zoneEntity
+			var direction = new THREE.Vector3().subVectors(this.zoneMarker2.object3D.position, this.zoneMarker1.object3D.position);
+			var angle = Math.atan2(direction.x, direction.z);
+			this.zoneEntity.object3D.rotation.set(0, 0, 0);
+	
+			this.zoneEntity.setAttribute('id', 'zoneRectangle_' + this.name);
+	
+			this.scene.appendChild(this.zoneEntity);
+		}
+	}
+	
+	 removeZone() {
+		if (this.zoneEntity) {
+			this.zoneEntity.parentNode.removeChild(this.zoneEntity);
+			this.zoneEntity = null;
+			console.log('Removed zone');
+		}
+	}
+
+	getZone(){
+		return this.zoneEntity;
+	}
+
+	getZoneId(){
+		return '#zoneRectangle_' + this.name;
+	}
+
+	markerInZone(marker) {
+		if (!marker) return false; 
+		if (!this.zoneMarker1 || !this.zoneMarker2) return false; 
+	
+		const markerPosition = marker.object3D.position.clone();
+		const zoneMarker1Position = this.zoneMarker1.object3D.position.clone();
+		const zoneMarker2Position = this.zoneMarker2.object3D.position.clone();
+	
+		const minX = Math.min(zoneMarker1Position.x, zoneMarker2Position.x);
+		const maxX = Math.max(zoneMarker1Position.x, zoneMarker2Position.x);
+		const minZ = Math.min(zoneMarker1Position.z, zoneMarker2Position.z);
+		const maxZ = Math.max(zoneMarker1Position.z, zoneMarker2Position.z);
+	
+		return (
+			markerPosition.x >= minX &&
+			markerPosition.x <= maxX &&
+			markerPosition.z >= minZ &&
+			markerPosition.z <= maxZ
+		);
+	}
+
+	redrawZoneDisable(){
+		this.moving = false;
+	}
+
+	redrawZoneEnable(){
+		this.moving = true;
+		this.#redrawZone()
+	}
+
+	#redrawZone(){
+		if (this.moving) {
+			if (isMarkerIdFound("ZoneMarker_1", foundZoneMarkers) && isMarkerIdFound("ZoneMarker_2", foundZoneMarkers)) {
+				const marker1 = document.getElementById('ZoneMarker_1'); // Get ZoneMarker_1
+				const marker2 = document.getElementById('ZoneMarker_2'); // Get ZoneMarker_1
+				const currentPosition1 = marker1.object3D.position.clone();
+				const currentPosition2 = marker2.object3D.position.clone();
+				if (!lastPosition1.equals(currentPosition1) || !lastPosition2.equals(currentPosition2) ) {
+					lastPosition1.copy(currentPosition1); // Update the last position
+					lastPosition2.copy(currentPosition2); // Update the last position
+					removeZone();
+					drawZone(); // Redraw the zone whenever the position changes
+				} 
+
+			}
+			// Check periodically
+			setTimeout(this.#redrawZone, 100); // Adjust the timing as needed
+			}
+	}
 }
