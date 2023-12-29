@@ -23,7 +23,7 @@ yarn test
 # Server Starten:
 
 ```sh
-npm i -g five-server@latest && five-server --port=8000
+five-server --port=8000
 ```
 
 Server öffnet sich auf [localhost](http://localhost:8000)
