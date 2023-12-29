@@ -1,3 +1,13 @@
+<script setup lang="ts">
+  import { ref } from 'vue';
+  import { useWebSocketStore } from '../stores/webSocketStore.js';
+
+  const store = useWebSocketStore();
+  console.log(store.webSocket)
+
+//   let model = defineModel<WebSocket>('socket', { type: WebSocket, required: true });
+
+</script>
 
 <template>
     <main class="vertical">
