@@ -19,7 +19,7 @@ AFRAME.registerComponent('markers_start', {
 
 		//list of the markers
 		for (var i = 1; i < 17; i++) {
-			var url = "../assets/markers/pattern-Individual_Blocks-" + i + ".patt";
+			var url = "./markers/pattern-Individual_Blocks-" + i + ".patt";
 			markersURLArray.push(url);
 			markersNameArray.push('Marker_' + i);
 			//console.log(url);
