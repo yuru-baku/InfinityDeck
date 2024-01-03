@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useWebSocketStore } from '@/stores/webSocketStore'
 import startButton from '@/components/startButton.vue'
+import toggleDiscription from '@/components/toggleDiscription.vue'
 import type { User } from '@/model/user'
 import type { Room } from '@/model/room'
 
@@ -35,29 +36,35 @@ store.webSocket.addEventListener('message', (event : MessageEvent) => {
 </script>
 
 <template>
-    <main class="lobby">
-        <div id="playerList" class="frame">
-            <div class="playerStatus" v-for="(user, i) in users" :key="user.id">
-                <font-awesome-icon icon="circle" />
-                <div class="playerOnline"></div>
-                {{ user.name }}
-            </div>
-            <div class="playerStatus" v-for="i in 4 - users.length">
-                <font-awesome-icon icon="circle" />
-                <div class="playerOffline"></div>
-                empty
-            </div>
-            <button id="invite">Copy Invite</button>
-        </div>
+  <main class="lobby">
+    <div id="playerList" class="frame">
+      <div class="playerStatus" v-for="(user, i) in users" :key="user.id">
+        <font-awesome-icon icon="circle" />
+        <div class="playerOnline"></div>
+        {{ user.name }}
+      </div>
+      <div class="playerStatus" v-for="i in 4 - users.length">
+        <font-awesome-icon icon="circle" />
+        <div class="playerOffline"></div>
+        empty
+      </div>
+      <button id="invite">Copy Invite</button>
+    </div>
 
-        <div id="column">
-            <div id="gameSettings" class="frame">
-                <div id="chooseGame" class="frame">
-                    <div class="frame">ROMME</div>
-                    <div class="frame">UNO</div>
-                </div>
-            </div>
-            <startButton></startButton>
+    <div id="column">
+      <div id="gameSettings" class="frame">
+        <div id="chooseGame" class="frame">
+          <div class="frame">ROMME</div>
+          <div class="frame">UNO</div>
         </div>
-    </main>
+        <div id="gameSettings">
+          <toggleDiscription isOn></toggleDiscription>
+          <toggleDiscription header="IsOn" info="yellow" :isOn="true"></toggleDiscription>
+          <toggleDiscription header="IsOff" info="yellow" :isOn="false"></toggleDiscription>
+          <toggleDiscription header="IsDefaultOff" info="yellow"></toggleDiscription>
+        </div>
+      </div>
+      <startButton></startButton>
+    </div>
+  </main>
 </template>

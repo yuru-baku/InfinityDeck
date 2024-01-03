@@ -10,5 +10,3 @@ const count = ref(0)
     START
   </button>
 </template>
-
-
