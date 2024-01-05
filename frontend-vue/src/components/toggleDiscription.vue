@@ -17,7 +17,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="frame">
+  <div class="frame toggleDiscription">
     <h4 class="toggleHeader">{{ header }}</h4>
     <p class="toggleInfo">{{ info }}</p>
     <toggle v-bind:isOn="isOn"></toggle>

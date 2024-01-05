@@ -45,16 +45,16 @@
         padding: 2px
         transition: all .2s ease
         background: #fff
-        border: 4px solid #f2f2f2
+        border: 4px solid colors.$toggleBorder
         border-radius: 2em
         &:after
             transition: all .2s ease
-            background: #f2f2f2
+            background: colors.$toggleBlue
             content: ""
             border-radius: 1em
 
     &:checked + .toggle-button
-        border: 4px solid #7FC6A6
-    &:after
-        left: 50%
-        background: #7FC6A6
+        //border: 4px solid #7FC6A6
+        &:after
+            left: 50%
+            

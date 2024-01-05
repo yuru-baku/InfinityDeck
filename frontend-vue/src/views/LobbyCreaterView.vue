@@ -51,20 +51,20 @@ store.webSocket.addEventListener('message', (event : MessageEvent) => {
       <button id="invite">Copy Invite</button>
     </div>
 
-    <div id="column">
+    <div class="column">
       <div id="gameSettings" class="frame">
         <div id="chooseGame" class="frame">
           <div class="frame">ROMME</div>
           <div class="frame">UNO</div>
         </div>
-        <div id="gameSettings">
+        <div class="frame gameConfig">
           <toggleDiscription isOn></toggleDiscription>
-          <toggleDiscription header="IsOn" info="yellow" :isOn="true"></toggleDiscription>
-          <toggleDiscription header="IsOff" info="yellow" :isOn="false"></toggleDiscription>
-          <toggleDiscription header="IsDefaultOff" info="yellow"></toggleDiscription>
+          <toggleDiscription header="IsOn" info="Some info" :isOn="true"></toggleDiscription>
+          <toggleDiscription header="IsOff" info="Click ME!" :isOn="false"></toggleDiscription>
+          <toggleDiscription header="IsDefaultOff" info="I am friendly"></toggleDiscription>
         </div>
       </div>
-      <startButton></startButton>
+    <startButton></startButton>
     </div>
   </main>
 </template>

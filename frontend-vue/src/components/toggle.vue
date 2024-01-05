@@ -1,13 +1,17 @@
 <script setup lang="ts">
-defineProps({
+const props = defineProps({
   isOn: {
     type: Boolean,
     default: false
   }
 })
+
+function iAmClicked(){
+  console.log("I am clicked. Yay!")
+}
 </script>
 
 <template>
-  <input class="toggle" type="checkbox" v-bind:checked="isOn" />
-  <label class="toggleButton"></label>
+  <input class="toggle" type="checkbox" v-bind:checked="isOn" onclick="iAmClicked()" />
+  <label class="toggle-button"></label>
 </template>
