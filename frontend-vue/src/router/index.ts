@@ -9,8 +9,9 @@ const router = createRouter({
     {
       path: '/',
       name: 'landing-page',
-      component: LandingView,
-    }, {
+      component: LandingView
+    },
+    {
       path: '/lobby',
       name: 'Lobby',
       component: LobbyCreaterView,

@@ -1,7 +1,10 @@
 @use 'colors'
 @use 'frame'
 @use 'button'
-@use 'startbutton'
+@use 'startButton'
+@use 'lobby'
+@use 'toggle'
+@use 'toggleDiscription'
 
 .vertical
   display: flex
@@ -15,94 +18,12 @@ html
 
 body
   display: flex
-  align-items: center
-  margin-left: auto
-  margin-right: auto
-  align-self: centers
+  padding: 1em
+  align-self: center
+  align-content: center
   justify-content: center
 
 *
   box-sizing: border-box
   border-radius: 4em
-
-input[type=text], select, textarea
-  width: 100%
-  padding: 12px
-  border: none
-  resize: vertical
-  &:focus, &:active
-    outline-width: 4px
-    background-color: colors.$frameBackgroundColor
-
-label
-  padding: 12px 12px 12px 0
-  display: inline-block
-
-input[type=submit]
-  background-color: #04AA6D
-  color: white
-  padding: 1em 1em
-  margin-top: auto
-  margin-left: 1em
-  border: none
-  cursor: pointer
-  float: right
-
-input[type=submit]:hover
-  background-color: #45a049
-
-.container
-  background-color: #f2f2f2
-  padding: 20px
-
-.row
-  margin-top: 0.5em
-
-/* Clear floats after the columns */
-.row::after
-  content: ""
-  display: table
-  clear: both
-
-/* Responsive layout - when the screen is less than 600px wide, make the two columns stack on top of each other instead of next to each other */
-@media screen and (max-width: 600px)
-  .col-25, .col-75, input[type=submit]
-    width: 100%
-    margin-top: 0
-
-/* Dropdown Button */
-.dropbtn
-  background-color: #04AA6D
-  color: white
-  padding: 16px
-  font-size: 16px
-  border: none
-
-/* The container <div> - needed to position the dropdown content */
-.dropdown
-  position: relative
-  display: inline-block
-
-/* Dropdown Content (Hidden by Default) */
-.dropdown-content
-  display: none
-  position: absolute
-  background-color: #f1f1f1
-  min-width: 160px
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2)
-  z-index: 1
-
-/* Links inside the dropdown */
-.dropdown-content
-  a
-    color: black
-    padding: 12px 16px
-    text-decoration: none
-    display: block
-    :hover
-      background-color: #ddd
-  :hover
-    .dropdown-content
-      display: block
-    .dropbtn
-      background-color: #3e8e41
+  gap: 1em
