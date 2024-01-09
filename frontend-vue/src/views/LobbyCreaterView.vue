@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useWebSocketStore } from '@/stores/webSocketStore'
+import { useRouter } from 'vue-router'
 import startButton from '@/components/startButton.vue'
 import toggleDiscription from '@/components/toggleDiscription.vue'
 import type { User } from '@/model/user'
 import type { Room } from '@/model/room'
+
+const router = useRouter()
 
 const store = useWebSocketStore()
 console.log(store.webSocket)
 let room = ref()
 let users = ref([] as User[])
 let you = ref()
-let selectedGame = ref()
+let selectedGame = ref('maumau')
 let local = ref()
 
-/*
 store.webSocket.send(JSON.stringify({ action: 'getRoomInfo' }));
 store.webSocket.addEventListener('message', (event : MessageEvent) => {
     const data = JSON.parse(event.data);
@@ -28,11 +30,10 @@ store.webSocket.addEventListener('message', (event : MessageEvent) => {
             break;
         }
         case 'started': {
-            // ToDo: route to game
+          router.push(`/${selectedGame.value}?roomId=${data.data.roomId}`)
         }
     }
 });
-*/
 </script>
 
 <template>

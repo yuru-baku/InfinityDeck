@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import LandingView from '@/views/LandingView.vue';
 import LobbyCreaterView from '@/views/LobbyCreaterView.vue';
+import GameView from '@/views/GameView.vue';
 import ArComponent from '@/components/ar-component/ArComponent.vue';
 
 const router = createRouter({
@@ -16,11 +17,15 @@ const router = createRouter({
       name: 'Lobby',
       component: LobbyCreaterView,
     }, {
-      path: '/test',
+      path: '/test/ar',
       name: 'AR-Test',
       component: ArComponent,
+    }, {
+      path: '/maumau',
+      name: 'MauMau',
+      component: GameView,
     }
   ]
-})
+});
 
-export default router
+export default router;
