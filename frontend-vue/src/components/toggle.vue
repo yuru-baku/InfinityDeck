@@ -12,6 +12,6 @@ function iAmClicked(){
 </script>
 
 <template>
-  <input class="toggle" type="checkbox" v-bind:checked="isOn" onclick="iAmClicked()" />
-  <label class="toggle-button"></label>
+  <input class="toggle" type="checkbox" v-bind:checked="isOn" @click="iAmClicked()" />
+  <label class="toggle-button" ></label>
 </template>
