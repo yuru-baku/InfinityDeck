@@ -10,5 +10,5 @@ export type Room = {
   users: User[]
   you: User
   isLocal: boolean
-  currentGame: Game
+  selectedGame: Game
 }

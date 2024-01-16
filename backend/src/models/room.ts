@@ -11,8 +11,8 @@ export class Room {
     game: MauMau;
     db: Db;
 
-    constructor(db: Db) {
-        this.id = 'room_' + (Math.random() + 1).toString(36).substring(7);
+    constructor(db: Db, id?: string) {
+        this.id = id || 'room_' + (Math.random() + 1).toString(36).substring(7);
         this.users = [];    // Users taking part in this game
         this.state = 'initialising';
         this.selectedGame = 'MauMau';
@@ -21,10 +21,29 @@ export class Room {
     }
 
     join(user: User) {
+        this.setUpUserConnection(user, 'joined');
+
+        // add user to game
+        this.users.push(user);
+
+        // make admin if first
+        if (this.users.length === 1) {
+            this.makeUserAdmin(user);
+        }
+    }
+
+    reconnect(user: User) {
+        clearTimeout(user.timeout);
+        this.setUpUserConnection(user, 'reconnected');
+    }
+
+    private setUpUserConnection(user: User, connectionAction: 'joined'|'reconnected') {
+        console.log(user.id, connectionAction, this.id);
+
         // notify users
         this.users.forEach(u => {
             u.ws.send(JSON.stringify({
-                action: 'joined',
+                action: connectionAction,
                 data: {
                     user: {
                         id: user.id,
@@ -33,13 +52,6 @@ export class Room {
                 }
             }));
         });
-        // add user to game
-        this.users.push(user);
-
-        // make admin if first
-        if (this.users.length === 1) {
-            this.makeUserAdmin(user);
-        }
 
         // listen for actions of normal players
         const availableActions = [
@@ -63,7 +75,7 @@ export class Room {
     }
 
     makeUserAdmin(user: User) {
-        user.isAdmin = true;
+        user.isOwner = true;
         // listen for actions of admin
         const availableGameActions = [
             'start',
@@ -86,34 +98,52 @@ export class Room {
     }
 
     leave(user: User) {
-        console.log('leaving room');
-        this.users = this.users.filter(u => u != user); // remove this user
-        // notify remaining
-        this.users.forEach(u => {
-            u.ws.send(JSON.stringify({
-                action: 'left',
-                data: {
-                    id: user.id,
-                    name: user.name
-                }
-            }));
-        });
-        return this.users.length;
+        console.log(user.id, 'left', this.id);
+        this.users
+            .filter(u => u != user)
+            .forEach(u => {
+                u.ws.send(JSON.stringify({
+                    action: 'disconnected',
+                    data: {
+                        id: user.id,
+                        name: user.name
+                    }
+                }));
+            });
+        user.timeout = setTimeout(() => {
+            console.log('triggered timeout')
+            this.users = this.users.filter(u => u != user); // remove this user
+            // notify remaining
+            this.users.forEach(u => {
+                u.ws.send(JSON.stringify({
+                    action: 'left',
+                    data: {
+                        id: user.id,
+                        name: user.name
+                    }
+                }));
+            });
+            // return this.users.length;
+        }, 5 * 60 * 1000);
     }
 
     getRoomInfo(user: User) {
         user.ws.send(JSON.stringify({
             action: 'gotRoomInfo',
             data: {
-                you: { name: user.name, isOwner: user.isAdmin, id: user.id },
+                you: { name: user.name, isOwner: user.isOwner, id: user.id },
                 isLocal: false,
-                selectedGame: this.selectGame,
-                users: this.users.map(user => { return { name: user.name, isOwner: user.isAdmin, id: user.id }})
+                selectedGame: this.selectedGame,
+                users: this.getUserInformations()
             }
         }))
     }
 
     selectGame() {
         // ToDo add multiple games
+    }
+
+    getUserInformations(): { name: string, isOwner: boolean, id: string }[] {
+        return this.users.map(user => { return { name: user.name, isOwner: user.isOwner, id: user.id }})
     }
 }

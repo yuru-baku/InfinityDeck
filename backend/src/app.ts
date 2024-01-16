@@ -18,18 +18,19 @@ async function main() {
         // on connection create new room or join an open room
         const room_id = req.url?.match(/(?<=roomId=)\w*/)?.at(0);
         const name = req.url?.match(/(?<=name=)\w*/)?.at(0);
-        let room: Room;
-        console.log(room_id, name)
-        if (room_id && room_id !== '' && room_id !== 'undefined') { // get open room
-            room = rooms.get(room_id);
-            if (!room) {
-                ws.send(JSON.stringify({ error: `Room with id ${room_id} could not be found...`}));
-                ws.close();
-                return;
-            }
-            console.log('User joined', room.id);
-        } else { // create new room
-            room = new Room(db);
+        const user_id = req.url?.match(/(?<=userId=)\w*/)?.at(0);
+        let room: Room|undefined = rooms.get(room_id);
+
+        // if (room_id && room_id !== '' && room_id !== 'undefined') { // get open room
+        //     room = rooms.get(room_id);
+        //     if (!room) {
+        //         ws.send(JSON.stringify({ error: `Room with id ${room_id} could not be found...`}));
+        //         ws.close();
+        //         return;
+        //     }
+        //     console.log('User joined', room.id);
+        if (!room) { // create new room
+            room = new Room(db, room_id);
             while (rooms.get(room.id)) {
                 console.log('Room was already taken!');
                 room = new Room(db);
@@ -38,16 +39,38 @@ async function main() {
             console.log('User created', room.id);
         }
         // find user and join
-        let user = new User(ws, undefined, name);
-        room.join(user);
-        ws.send(JSON.stringify({ action: 'connected', data: { roomId: room.id, users: room.users.map(user => { return { name: user.name, isOwner: user.isAdmin, id: user.id }}) }}));
+        let user: User;
+        // check if user tries to reconnect
+        const _user = room.users.find((user) => user.id === user_id && user.name === name && user.timeout);
+        if (_user) {
+            user = _user;
+            user.ws = ws;
+            room.reconnect(user);
+        } else {
+            user = new User(ws, undefined, name);
+            room.join(user);
+        }
+        ws.send(JSON.stringify({
+            action: 'connected',
+            data: {
+                roomId: room.id,
+                users: room.getUserInformations(),
+                you: {
+                    name: name,
+                    id: user.id,
+                    isOwner: user.isOwner
+                },
+                state: room.state,
+                selectedGame: room.selectedGame
+            }
+        }));
 
         ws.on('error', console.error);
         ws.on('close', data => {
-            let userCount = room.leave(user); // is he actually leaving?
-            if (userCount <= 0) {
-                rooms.delete(room.id);
-            }
+            let userCount = room!.leave(user); // is he actually leaving?
+            // if (userCount <= 0) {
+                // rooms.delete(room.id);
+            // }
         });
     });
 

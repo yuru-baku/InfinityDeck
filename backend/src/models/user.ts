@@ -7,7 +7,8 @@ export class User {
     name: string;
     handcards: string[];
     isLocal: boolean;
-    isAdmin: boolean;
+    isOwner: boolean;
+    timeout: NodeJS.Timeout|undefined;
 
     constructor(ws: WebSocket, id: string|undefined, name: string|undefined, isLocal: boolean = false) {
         this.ws = ws;
@@ -23,6 +24,6 @@ export class User {
         }
         this.handcards = [];
         this.isLocal = isLocal;
-        this.isAdmin = false;
+        this.isOwner = false;
     }
 }
