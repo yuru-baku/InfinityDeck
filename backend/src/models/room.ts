@@ -34,6 +34,7 @@ export class Room {
 
     reconnect(user: User) {
         clearTimeout(user.timeout);
+        user.timeout = undefined;
         this.setUpUserConnection(user, 'reconnected');
     }
 
@@ -41,7 +42,9 @@ export class Room {
         console.log(user.id, connectionAction, this.id);
 
         // notify users
-        this.users.forEach(u => {
+        this.users
+            .filter(u => u.id != user.id)
+            .forEach(u => {
             u.ws.send(JSON.stringify({
                 action: connectionAction,
                 data: {
@@ -143,7 +146,7 @@ export class Room {
         // ToDo add multiple games
     }
 
-    getUserInformations(): { name: string, isOwner: boolean, id: string }[] {
-        return this.users.map(user => { return { name: user.name, isOwner: user.isOwner, id: user.id }})
+    getUserInformations(): { name: string, isOwner: boolean, id: string, disconnected: boolean }[] {
+        return this.users.map(user => { return { name: user.name, isOwner: user.isOwner, id: user.id, disconnected: user.timeout !== undefined }})
     }
 }

@@ -1,3 +1,5 @@
+@use 'colors'
+
 .lobby
     display: flex
     flex-direction: row
@@ -16,6 +18,16 @@
             flex-wrap: nowrap
             flex-direction: row
             border: 2px solid black
+            background-color: colors.$frameBackgroundColor
+            &.online
+                svg path
+                    fill: colors.$greenPrimary
+            &.offline
+                opacity: .8
+                svg path
+                    fill: colors.$darkBlue
+            &.empty
+                opacity: .5
 
         button
             align-self: flex-end

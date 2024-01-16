@@ -32,7 +32,7 @@ function reconnect() {
   store.webSocket.addEventListener('message', (event: MessageEvent) => {
     const data = JSON.parse(event.data)
     console.log(data)
-    if (data.action === 'reconnected') {
+    if (data.action === 'connected') {
       init();
     } else {
       console.error('Could not join!');
@@ -50,20 +50,32 @@ function init() {
       const data = JSON.parse(event.data);
       console.log(data.action, data)
       switch (data.action) {
-          case 'gotRoomInfo': {
+          case 'gotRoomInfo':
               room.value = data.data;
-              you.value = data.data.value
+              you.value = data.data.you;
               break;
-          }
-          case 'joined': {
+          case 'joined':
               if (!room.value) return;
               room.value.users.push(data.data.user);
               break;
-          }
-          case 'started': {
+          case 'disconnected':
+            var user = room.value?.users.find(user => user.id === data.data.id);
+            if (user) {
+              user.disconnected = true;
+            }
+            break;
+          case 'reconnected':
+            var user = room.value?.users.find(user => user.id === data.data.user.id);
+            if (user) {
+              user.disconnected = false;
+              console.log(user)
+            }
+            break;
+          case 'started':
+          case 'dealCards':
             if (!room.value) return;
             router.push(`/${room.value.selectedGame}?roomId=${data.data.roomId}`)
-          }
+            break;
       }
   });
 }
@@ -83,16 +95,15 @@ function copyToClipboard() {
 </script>
 
 <template>
-  <main class="lobby" v-if="room">
+  <main class="lobby" v-if="room && you">
     <div id="playerList" class="frame">
-      <div class="playerStatus" v-for="(user, i) in room.users" :key="user.id">
-        <font-awesome-icon icon="circle" />
-        <div class="playerOnline"></div>
+      <div class="playerStatus" v-for="(user, i) in room.users" :key="user.id" :class="{ online: !user.disconnected, offline: user.disconnected }">
+        <font-awesome-icon icon="circle" v-if="user.id !== you.id" />
+        <font-awesome-icon icon="play" v-if="user.id === you.id" />
         {{ user.name }}
       </div>
-      <div class="playerStatus" v-for="i in 4 - room.users.length">
+      <div class="playerStatus empty" v-for="i in 4 - room.users.length">
         <font-awesome-icon icon="circle" />
-        <div class="playerOffline"></div>
         empty
       </div>
       <button id="invite" @click="copyToClipboard()">Copy Invite</button>
