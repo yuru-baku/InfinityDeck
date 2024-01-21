@@ -41,6 +41,9 @@ function reconnect() {
     abortController.abort();
   }, { signal: abortController.signal });
 }
+function startGame() {
+  store.webSocket.send(JSON.stringify({ action: 'start' }));
+}
 /**
  * Main stuff of setup
  */
@@ -53,6 +56,9 @@ function init() {
           case 'gotRoomInfo':
               room.value = data.data;
               you.value = data.data.you;
+              if (data.data.state === 'inGame') {
+                router.push(`/${data.data.selectedGame}?roomId=${data.data.roomId}`)
+              }
               break;
           case 'joined':
               if (!room.value) return;
@@ -115,13 +121,13 @@ function copyToClipboard() {
           <div class="frame" v-for="game in games" :class="{ selected: game === room.selectedGame.toString() }">{{ game }}</div>
         </div>
         <div class="frame gameConfig">
-          <toggleDiscription isOn></toggleDiscription>
+          <toggleDiscription header="Local" info="are you playing across the table or the ocean?" :isOn="room.isLocal" @click="room.isLocal = !room.isLocal;"></toggleDiscription>
           <toggleDiscription header="IsOn" info="Some info" :isOn="true"></toggleDiscription>
           <toggleDiscription header="IsOff" info="Click ME!" :isOn="false"></toggleDiscription>
           <toggleDiscription header="IsDefaultOff" info="I am friendly"></toggleDiscription>
         </div>
       </div>
-    <startButton></startButton>
+    <startButton @click="startGame()"></startButton>
     </div>
   </main>
 </template>

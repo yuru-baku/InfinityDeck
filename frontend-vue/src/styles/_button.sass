@@ -1,14 +1,17 @@
 @use 'colors'
 
 button
-    filter: drop-shadow(.1rem .1rem .05rem)
-    border-style: solid
-    border-color: colors.$primary
+    // filter: drop-shadow(.1rem .1rem .05rem)
+    border: .2rem solid colors.$primary
     text-decoration: none
     padding: .5rem 1rem
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px
+    color: colors.$textColor
     &:hover, &:focus-visible
         outline: none
         background-color: colors.$hoverColor
     &:active
         background-color: colors.$hoverColor
         filter: none
+    svg *
+        fill: colors.$textColor

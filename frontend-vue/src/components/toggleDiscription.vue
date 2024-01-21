@@ -18,8 +18,10 @@ const props = defineProps({
 
 <template>
   <div class="frame toggleDiscription">
-    <h4 class="toggleHeader">{{ header }}</h4>
-    <p class="toggleInfo">{{ info }}</p>
+    <div>
+      <h2 class="toggleHeader">{{ header }}</h2>
+      <p class="toggleInfo">{{ info }}</p>
+    </div>
     <toggle v-bind:isOn="isOn"></toggle>
   </div>
 </template>

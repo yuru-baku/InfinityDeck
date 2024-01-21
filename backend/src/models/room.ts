@@ -137,6 +137,7 @@ export class Room {
                 you: { name: user.name, isOwner: user.isOwner, id: user.id },
                 isLocal: false,
                 selectedGame: this.selectedGame,
+                state: this.state,
                 users: this.getUserInformations()
             }
         }))

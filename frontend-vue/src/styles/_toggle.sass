@@ -1,60 +1,51 @@
 @use 'colors'
 
-.toggle
-    display: none
+.toggle-button 
+    position: relative
+    display: inline-block
+    width: 4.6rem
+    height: 2.6rem
+    border: .2rem solid colors.$toggleBorder
+    background: colors.$secondary
+    border-radius: 1.3rem
 
-    // add default box-sizing for this scopes
-    &,
-    &:after,
-    &:before,
-    & *,
-    & *:after,
-    & *:before,
-    & + .toggle-button
-        box-sizing: border-box
-        &::selection
-            background: none
+input.toggle-input 
+    opacity: 0
+    width: 0
+    height: 0
+    &:checked + .toggle-slider 
+        // background-color: #2196F3
+    
+    &:focus + .toggle-slider 
+        box-shadow: 0 0 1px colors.$lightBlue
+    
+    &:checked + .toggle-slider:before 
+        -webkit-transform: translateX(1.8rem)
+        -ms-transform: translateX(1.8rem)
+        transform: translateX(1.8rem)
+    
 
-    + .toggle-button
-        outline: 0
-        display: block
-        width: 4em
-        height: 2em
-        position: relative
-        cursor: pointer
-        user-select: none
-        &:after,
-        &:before
-            position: relative
-            display: block
-            content: ""
-            width: 50%
-            height: 100%
-
-        &:after
-            left: 0
-
-        &:before
-            display: none
-
-    &:checked + .toggle-button:after
-        left: 50%
-
-.toggle
-    &+ .toggle-button
-        padding: 2px
-        transition: all .2s ease
-        background: #fff
-        border: 4px solid #f2f2f2
-        border-radius: 2em
-        &:after
-            transition: all .2s ease
-            background: #f2f2f2
-            content: ""
-            border-radius: 1em
-
-    &:checked + .toggle-button
-        border: 4px solid #7FC6A6
-    &:after
-        left: 50%
-        background: #7FC6A6
+.toggle-slider 
+    position: absolute
+    cursor: pointer
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    // background-color: #ccc
+    -webkit-transition: .4s
+    transition: .4s
+    &:before 
+        border-radius: 50%
+        position: absolute
+        content: ""
+        height: 2.0rem
+        width: 2.0rem
+        left: .2rem
+        bottom: .1rem
+        background-color: colors.$toggleBlue
+        -webkit-transition: .4s
+        transition: .4s
+    
+    
+  
