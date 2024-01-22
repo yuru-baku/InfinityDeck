@@ -1,6 +1,7 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
 
+
 //Multi Markers WebAR-AR.js and Aframe - Playing the Archive - Connected Environment CASA-UCL
 
 //Global Variable
@@ -19,20 +20,21 @@ AFRAME.registerComponent('markers_start', {
 
 		//list of the markers
 		for (var i = 1; i < 17; i++) {
-			var url = "./markers/pattern-Individual_Blocks-" + i + ".patt";
+			var url = "/markers/pattern-Individual_Blocks-" + i + ".patt";
 			markersURLArray.push(url);
 			markersNameArray.push('Marker_' + i);
 			//console.log(url);
-		}
-
+		}		
 		for (var k = 0; k < 16; k++) {
 			var markerEl = document.createElement('a-marker');
 			markerEl.setAttribute('type', 'pattern');
 			markerEl.setAttribute('url', markersURLArray[k]);
 			markerEl.setAttribute('id', markersNameArray[k]);
 
+
 			markerEl.setAttribute('registerevents', '');
 			sceneEl.appendChild(markerEl);
+			markerEl.style.zIndex = '1'; // Adjust the value as needed
 
 			//Adding text to each marker
 			var textEl = document.createElement('a-entity');
@@ -44,9 +46,8 @@ AFRAME.registerComponent('markers_start', {
 
 			markerEl.appendChild(textEl);
 
-
 			var ImageEl = document.createElement('a-image');
-			ImageEl.setAttribute('src', 'url(./cardImages/hearts_ace.svg)');
+			ImageEl.setAttribute('src', 'url(/cardImages/hearts_ace.svg)');
 			ImageEl.setAttribute('id', 'card');
 
 			ImageEl.object3D.position.set(0, 0.0, 0);
@@ -55,7 +56,7 @@ AFRAME.registerComponent('markers_start', {
 
 
 		}
-		handZone = new Zone("./markers/ZoneMarker1.patt", "./markers/ZoneMarker2.patt", sceneEl, "hand");
+		handZone = new Zone("/markers/ZoneMarker1.patt", "/markers/ZoneMarker2.patt", sceneEl, "hand");
 	}
 });
 
@@ -79,7 +80,7 @@ AFRAME.registerComponent('registerevents', {
 			console.log('Marker Lost: ', markerId);
 		});
 		function checkMarkerInZone() {
-			for (foundMarker of foundCardMarkers) {
+			for (let foundMarker of foundCardMarkers) {
 				if (handZone.markerInZone(foundMarker)) {
 					turnCard(foundMarker);
 				} else if (isCardBack(foundMarker)) {
@@ -135,19 +136,19 @@ function isCardBack(marker) {
 	if (!marker) return false;
 	const imageEl = marker.querySelector('#card');
 	if (!imageEl) return false;
-	return imageEl.getAttribute('src') === 'url(./cardImages/cardBackBlue.svg)';
+	return imageEl.getAttribute('src') === 'url(/resources/cardImages/cardBackBlue.svg)';
 }
 
 
 
 function turnCard(marker) {
 	const imageEl = marker.querySelector('#card');
-	imageEl.setAttribute('src', 'url(./cardImages/cardBackBlue.svg)');
+	imageEl.setAttribute('src', 'url(/resources/cardImages/cardBackBlue.svg)');
 }
 
 function showCard(marker) {
 	const imageEl = marker.querySelector('#card');
-	imageEl.setAttribute('src', 'url(./cardImages/hearts_ace.svg)');
+	imageEl.setAttribute('src', 'url(/resources/cardImages/hearts_ace.svg)');
 }
 
 
@@ -337,7 +338,7 @@ class Zone {
 <template>
     <a-scene markers_start vr-mode-ui="enabled: false" color-space="sRGB" renderer="gammaOutput: true"
             embedded arjs='debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best;'>
-        <a-entity id='userCamera' camera>
+        <a-entity id='userCamera'  camera>
             <a-cursor> </a-cursor>
         </a-entity>
     </a-scene>
