@@ -1,6 +1,7 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
 
+
 //Multi Markers WebAR-AR.js and Aframe - Playing the Archive - Connected Environment CASA-UCL
 
 //Global Variable
@@ -23,16 +24,17 @@ AFRAME.registerComponent('markers_start', {
 			markersURLArray.push(url);
 			markersNameArray.push('Marker_' + i);
 			//console.log(url);
-		}
-
+		}		
 		for (var k = 0; k < 16; k++) {
 			var markerEl = document.createElement('a-marker');
 			markerEl.setAttribute('type', 'pattern');
 			markerEl.setAttribute('url', markersURLArray[k]);
 			markerEl.setAttribute('id', markersNameArray[k]);
 
+
 			markerEl.setAttribute('registerevents', '');
 			sceneEl.appendChild(markerEl);
+			markerEl.style.zIndex = '1'; // Adjust the value as needed
 
 			//Adding text to each marker
 			var textEl = document.createElement('a-entity');
@@ -43,7 +45,6 @@ AFRAME.registerComponent('markers_start', {
 			textEl.object3D.rotation.set(-90, 0, 0);
 
 			markerEl.appendChild(textEl);
-
 
 			var ImageEl = document.createElement('a-image');
 			ImageEl.setAttribute('src', 'url(/cardImages/hearts_ace.svg)');
@@ -135,19 +136,19 @@ function isCardBack(marker) {
 	if (!marker) return false;
 	const imageEl = marker.querySelector('#card');
 	if (!imageEl) return false;
-	return imageEl.getAttribute('src') === 'url(./cardImages/cardBackBlue.svg)';
+	return imageEl.getAttribute('src') === 'url(/resources/cardImages/cardBackBlue.svg)';
 }
 
 
 
 function turnCard(marker) {
 	const imageEl = marker.querySelector('#card');
-	imageEl.setAttribute('src', 'url(./cardImages/cardBackBlue.svg)');
+	imageEl.setAttribute('src', 'url(/resources/cardImages/cardBackBlue.svg)');
 }
 
 function showCard(marker) {
 	const imageEl = marker.querySelector('#card');
-	imageEl.setAttribute('src', 'url(./cardImages/hearts_ace.svg)');
+	imageEl.setAttribute('src', 'url(/resources/cardImages/hearts_ace.svg)');
 }
 
 
