@@ -17,15 +17,15 @@ AFRAME.registerComponent('markers_start', {
 		console.log('Add markers to the scene');
 
 		var sceneEl = document.querySelector('a-scene');
-
+		var numberOfCards = 45
 		//list of the markers
-		for (var i = 1; i < 17; i++) {
-			var url = "/markers/pattern-Individual_Blocks-" + i + ".patt";
+		for (var i = 0; i < numberOfCards+1; i++) {
+			var url = "/markers/pattern-" + i + ".patt";
 			markersURLArray.push(url);
-			markersNameArray.push('Marker_' + i);
+			markersNameArray.push(i);
 			//console.log(url);
 		}		
-		for (var k = 0; k < 16; k++) {
+		for (var k = 0; k < numberOfCards+1; k++) {
 			var markerEl = document.createElement('a-marker');
 			markerEl.setAttribute('type', 'pattern');
 			markerEl.setAttribute('url', markersURLArray[k]);
@@ -47,7 +47,8 @@ AFRAME.registerComponent('markers_start', {
 			markerEl.appendChild(textEl);
 
 			var ImageEl = document.createElement('a-image');
-			ImageEl.setAttribute('src', 'url(/cardImages/hearts_ace.svg)');
+			var imageUrl = "/cardImages/cardFront" + k + ".svg";
+			ImageEl.setAttribute('src', 'url('+ imageUrl +')');
 			ImageEl.setAttribute('id', 'card');
 
 			ImageEl.object3D.position.set(0, 0.0, 0);
@@ -136,19 +137,20 @@ function isCardBack(marker) {
 	if (!marker) return false;
 	const imageEl = marker.querySelector('#card');
 	if (!imageEl) return false;
-	return imageEl.getAttribute('src') === 'url(/resources/cardImages/cardBackBlue.svg)';
+	return imageEl.getAttribute('src') === 'url(/cardImages/cardBackBlue.svg)';
 }
 
 
 
 function turnCard(marker) {
 	const imageEl = marker.querySelector('#card');
-	imageEl.setAttribute('src', 'url(/resources/cardImages/cardBackBlue.svg)');
+	imageEl.setAttribute('src', 'url(/cardImages/cardBackBlue.svg)');
 }
 
 function showCard(marker) {
 	const imageEl = marker.querySelector('#card');
-	imageEl.setAttribute('src', 'url(/resources/cardImages/hearts_ace.svg)');
+	let id = marker.getAttribute('id')
+	imageEl.setAttribute('src', 'url(/cardImages/cardFront' + id + '.svg)');
 }
 
 
