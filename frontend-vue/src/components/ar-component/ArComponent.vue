@@ -19,7 +19,7 @@ AFRAME.registerComponent('markers_start', {
 
 		//list of the markers
 		for (var i = 1; i < 17; i++) {
-			var url = "./markers/pattern-Individual_Blocks-" + i + ".patt";
+			var url = "/markers/pattern-Individual_Blocks-" + i + ".patt";
 			markersURLArray.push(url);
 			markersNameArray.push('Marker_' + i);
 			//console.log(url);
@@ -46,7 +46,7 @@ AFRAME.registerComponent('markers_start', {
 
 
 			var ImageEl = document.createElement('a-image');
-			ImageEl.setAttribute('src', 'url(./cardImages/hearts_ace.svg)');
+			ImageEl.setAttribute('src', 'url(/cardImages/hearts_ace.svg)');
 			ImageEl.setAttribute('id', 'card');
 
 			ImageEl.object3D.position.set(0, 0.0, 0);
@@ -55,7 +55,7 @@ AFRAME.registerComponent('markers_start', {
 
 
 		}
-		handZone = new Zone("./markers/ZoneMarker1.patt", "./markers/ZoneMarker2.patt", sceneEl, "hand");
+		handZone = new Zone("/markers/ZoneMarker1.patt", "/markers/ZoneMarker2.patt", sceneEl, "hand");
 	}
 });
 
@@ -79,7 +79,7 @@ AFRAME.registerComponent('registerevents', {
 			console.log('Marker Lost: ', markerId);
 		});
 		function checkMarkerInZone() {
-			for (foundMarker of foundCardMarkers) {
+			for (let foundMarker of foundCardMarkers) {
 				if (handZone.markerInZone(foundMarker)) {
 					turnCard(foundMarker);
 				} else if (isCardBack(foundMarker)) {
@@ -335,10 +335,10 @@ class Zone {
 </script>
 
 <template>
-    <a-scene markers_start vr-mode-ui="enabled: false" color-space="sRGB" renderer="gammaOutput: true"
-            embedded arjs='debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best;'>
+    <a-scene markers_start xr-mode-ui="enabled: false" color-space="sRGB" renderer="gammaOutput: true"
+            arjs='debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best;'>
         <a-entity id='userCamera' camera>
-            <a-cursor> </a-cursor>
+            <!-- <a-cursor> </a-cursor> -->
         </a-entity>
     </a-scene>
 </template>
