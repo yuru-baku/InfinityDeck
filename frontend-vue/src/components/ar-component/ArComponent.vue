@@ -242,8 +242,27 @@ class Zone {
 
 	drawZone() {
 		if (this.zoneMarker1 && this.zoneMarker2) {
-			var width = Math.abs(this.zoneMarker1.object3D.position.x - this.zoneMarker2.object3D.position.x);
-			var height = Math.abs(this.zoneMarker1.object3D.position.z - this.zoneMarker2.object3D.position.z);
+			const position1 = this.zoneMarker1.object3D.position.clone();
+        	const position2 = this.zoneMarker2.object3D.position.clone();
+
+			// Get the marker widths TODO maybe calculate this
+			const width1 = 1;
+			const width2 = 1;
+			const height1 = 3;
+			const height2 = 3;
+
+			// Adjust the positions based on the outer edges
+			position1.x -= width1 / 2;
+			position1.z -= height1 / 2;
+
+			position2.x += width2 / 2;
+			position2.z += height2 / 2;
+
+			const width = Math.abs(position2.x - position1.x);
+        	const height = Math.abs(position2.z - position1.z);
+
+			const midpoint = new THREE.Vector3().addVectors(position1, position2).multiplyScalar(0.5);
+
 
 			var geometry = new THREE.PlaneGeometry(width, height);
 			var material = new THREE.MeshBasicMaterial({ color: 0x00ff00, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
@@ -252,16 +271,15 @@ class Zone {
 			this.zoneEntity.setAttribute('geometry', { primitive: 'plane', width: width, height: height });
 			this.zoneEntity.setAttribute('material', { color: 0x00ff00, side: 'double', transparent: true, opacity: 0.5 });
 
+
 			// Set the position to the midpoint between markers
-			var midpoint = new THREE.Vector3();
-			midpoint.addVectors(this.zoneMarker1.object3D.position, this.zoneMarker2.object3D.position);
-			midpoint.divideScalar(2);
 			this.zoneEntity.object3D.position.copy(midpoint);
 
 			// Apply rotation to the zoneEntity
-			var direction = new THREE.Vector3().subVectors(this.zoneMarker2.object3D.position, this.zoneMarker1.object3D.position);
-			var angle = Math.atan2(direction.x, direction.z);
-			this.zoneEntity.object3D.rotation.set(0, 0, 0);
+			const direction = new THREE.Vector3().subVectors(position2, position1);
+        	const angle = Math.atan2(direction.x, direction.z);
+        	this.zoneEntity.object3D.rotation.set(0, 0, 0);  // Adjusted rotation
+
 
 			this.zoneEntity.setAttribute('id', 'zoneRectangle_' + this.name);
 
