@@ -15,7 +15,7 @@
     let userId = cookies.get('userId');
 
     cookies.set('username', name.value);
-    store.changeWebSocket(new WebSocket(`ws://localhost:8080?name=${name.value}&roomId=${roomId}&userId=${userId}`))
+    store.changeWebSocket(new WebSocket(`${import.meta.env.VITE_BACKEND_ENDPOINT}?name=${name.value}&roomId=${roomId}&userId=${userId}`))
     const abortController = new AbortController();
     store.webSocket.addEventListener('message', (event: MessageEvent) => {
       const data = JSON.parse(event.data)

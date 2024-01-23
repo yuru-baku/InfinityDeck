@@ -27,7 +27,7 @@ function reconnect() {
   let userId = cookies.get('userId');
   let name = cookies.get('username');
 
-  store.changeWebSocket(new WebSocket(`ws://localhost:8080?name=${name}&roomId=${roomId}&userId=${userId}`))
+  store.changeWebSocket(new WebSocket(`${import.meta.env.VITE_BACKEND_ENDPOINT}?name=${name}&roomId=${roomId}&userId=${userId}`))
   const abortController = new AbortController();
   store.webSocket.addEventListener('message', (event: MessageEvent) => {
     const data = JSON.parse(event.data)
