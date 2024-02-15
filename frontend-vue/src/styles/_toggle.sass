@@ -1,0 +1,51 @@
+@use 'colors'
+
+.toggle-button 
+    position: relative
+    display: inline-block
+    width: 4.6rem
+    height: 2.6rem
+    border: .2rem solid colors.$toggleBorder
+    background: colors.$secondary
+    border-radius: 1.3rem
+
+input.toggle-input 
+    opacity: 0
+    width: 0
+    height: 0
+    &:checked + .toggle-slider 
+        // background-color: #2196F3
+    
+    &:focus + .toggle-slider 
+        box-shadow: 0 0 1px colors.$lightBlue
+    
+    &:checked + .toggle-slider:before 
+        -webkit-transform: translateX(1.8rem)
+        -ms-transform: translateX(1.8rem)
+        transform: translateX(1.8rem)
+    
+
+.toggle-slider 
+    position: absolute
+    cursor: pointer
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    // background-color: #ccc
+    -webkit-transition: .4s
+    transition: .4s
+    &:before 
+        border-radius: 50%
+        position: absolute
+        content: ""
+        height: 2.0rem
+        width: 2.0rem
+        left: .2rem
+        bottom: .1rem
+        background-color: colors.$toggleBlue
+        -webkit-transition: .4s
+        transition: .4s
+    
+    
+  

@@ -16,35 +16,61 @@ async function main() {
     const wss = new WebSocketServer({ port: 8080 });
     wss.on('connection', function connection(ws: WebSocket, req) {
         // on connection create new room or join an open room
-        const room_id = req.url?.match(/(?<=room=)\w*/);
-        let room: Room;
-        if (room_id) { // get open room
-            room = rooms.get(room_id);
-            if (!room) {
-                ws.send(JSON.stringify({ error: `Room with id ${room_id} could not be found...`}));
-                ws.close();
-            }
-            console.log('User joined', room_id);
-        } else { // create new room
-            room = new Room(db);
+        const room_id = req.url?.match(/(?<=roomId=)\w*/)?.at(0);
+        const name = req.url?.match(/(?<=name=)\w*/)?.at(0);
+        const user_id = req.url?.match(/(?<=userId=)\w*/)?.at(0);
+        let room: Room|undefined = rooms.get(room_id);
+
+        // if (room_id && room_id !== '' && room_id !== 'undefined') { // get open room
+        //     room = rooms.get(room_id);
+        //     if (!room) {
+        //         ws.send(JSON.stringify({ error: `Room with id ${room_id} could not be found...`}));
+        //         ws.close();
+        //         return;
+        //     }
+        //     console.log('User joined', room.id);
+        if (!room) { // create new room
+            room = new Room(db, room_id);
             while (rooms.get(room.id)) {
                 console.log('Room was already taken!');
                 room = new Room(db);
             }
             rooms.set(room.id, room);
-            console.log('User created', room_id);
+            console.log('User created', room.id);
         }
         // find user and join
-        let user = new User(ws, '', 'Random')
-        room.join(user);
-        ws.send(JSON.stringify({ action: 'joined', data: { roomId: room.id }}));
+        let user: User;
+        // check if user tries to reconnect
+        const _user = room.users.find((user) => user.id === user_id && user.name === name && user.timeout);
+        if (_user) {
+            user = _user;
+            user.ws = ws;
+            room.reconnect(user);
+        } else {
+            user = new User(ws, undefined, name);
+            room.join(user);
+        }
+        ws.send(JSON.stringify({
+            action: 'connected',
+            data: {
+                roomId: room.id,
+                users: room.getUserInformations(),
+                you: {
+                    name: name,
+                    id: user.id,
+                    isOwner: user.isOwner
+                },
+                state: room.state,
+                selectedGame: room.selectedGame
+            }
+        }));
 
         ws.on('error', console.error);
         ws.on('close', data => {
-            let userCount = room.leave(user); // is he actually leaving?
-            if (userCount <= 0) {
-                rooms.delete(room.id);
-            }
+            let userCount = room!.leave(user); // is he actually leaving?
+            // if (userCount <= 0) {
+                // rooms.delete(room.id);
+            // }
         });
     });
 

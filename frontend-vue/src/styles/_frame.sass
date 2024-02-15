@@ -1,0 +1,13 @@
+@use 'colors'
+
+.frame
+    background-color: colors.$frameBackgroundColor
+    padding: 2.5em
+    border: none
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+
+.frame.selected
+    border: 2px solid colors.$greenPrimary
