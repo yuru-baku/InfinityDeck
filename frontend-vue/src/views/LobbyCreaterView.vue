@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useWebSocketStore } from '@/stores/webSocketStore'
-import { useRouter } from 'vue-router'
 import startButton from '@/components/startButton.vue'
 import toggleDiscription from '@/components/toggleDiscription.vue'
-import type { User } from '@/model/user'
-import type { Room } from '@/model/room'
 import { Game } from '@/model/room'
-import { useCookies } from '@vueuse/integrations/useCookies'
-import { you, room, testConnection, startGame } from '@/services/ConnectionService';
+import { you, room, testConnection, startGame, toggleLocal } from '@/services/ConnectionService';
 
 const games = Object.keys(Game).filter((key: any) => typeof Game[key] === 'number');
 
@@ -41,14 +35,10 @@ function copyToClipboard() {
           <div class="frame" v-for="game in games" :class="{ selected: game === room.selectedGame.toString() }">{{ game }}</div>
         </div>
         <div class="frame gameConfig">
-          <toggleDiscription header="Local" info="are you playing across the table or the ocean?" :isOn="room.isLocal" @click="room.isLocal = !room.isLocal;"></toggleDiscription>
-          <toggleDiscription header="IsOn" info="Some info" :isOn="true"></toggleDiscription>
-          <toggleDiscription header="IsOff" info="Click ME!" :isOn="false"></toggleDiscription>
-          <toggleDiscription header="IsDefaultOff" info="I am friendly"></toggleDiscription>
+          <toggleDiscription header="Local" info="are you playing across the table or the ocean?" :isOn="room.isLocal" :disabled="!you.isOwner" @toggle="toggleLocal()"></toggleDiscription>
         </div>
       </div>
     <startButton @click="startGame()"></startButton>
     </div>
   </main>
 </template>
-@/services/ConnectionService

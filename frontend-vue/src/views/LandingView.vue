@@ -2,8 +2,9 @@
   import { ref } from 'vue'
   import { useCookies } from '@vueuse/integrations/useCookies'
   import startButton from '@/components/startButton.vue'
-  import { connect } from '@/services/ConnectionService'
+  import { connect, setup } from '@/services/ConnectionService'
 
+  setup();
   const cookies = useCookies(['username'])
   let name = ref(cookies.get('username'))
   function joinRoom() {

@@ -3,6 +3,7 @@ import { useWebSocketStore } from '@/stores/webSocketStore';
 import { useRouter, type Router } from 'vue-router';
 import type { Room } from '@/model/room';
 import { useCookies } from '@vueuse/integrations/useCookies';
+import type { User } from '@/model/user';
 
 
 let router: Router;
@@ -10,7 +11,7 @@ let store: any;
 const cookies = useCookies(['username', 'roomId', 'userId']);
 
 export let room = ref<Room>();
-export let you = ref();
+export let you = ref<User>();
 
 
 /**
@@ -28,6 +29,10 @@ export function testConnection() {
         // wait with init function until websocket connection was confirmed
         init();
     }
+}
+export function setup() {
+    store = useWebSocketStore();
+    router = useRouter();
 }
 
 /**
@@ -70,6 +75,12 @@ export function startGame() {
   store.webSocket.send(JSON.stringify({ action: 'start' }));
 }
 
+export function toggleLocal() {
+    if (!room.value || !you.value?.isOwner) return;
+    console.log(!room.value.isLocal)
+    store.webSocket.send(JSON.stringify({ action: 'changeSettings', data: { isLocal: !room.value.isLocal } }));
+}
+
 /**
  * Main stuff of setup
  */
@@ -85,6 +96,10 @@ export function init() {
                 if (data.data.state === 'inGame') {
                     router.push(`/${data.data.selectedGame}?roomId=${data.data.roomId}`);
                 }
+                break;
+            case 'settingsChanged':
+                room.value!.isLocal = data.data.isLocal || false;
+                console.log(room.value?.isLocal)
                 break;
             case 'joined':
                 if (!room.value) return;
@@ -108,6 +123,8 @@ export function init() {
                 if (!room.value) return;
                 router.push(`/${room.value.selectedGame}?roomId=${data.data.roomId}`);
                 break;
+            default:
+                console.warn('Unhandeld action', data.action, data);
         }
     });
 }

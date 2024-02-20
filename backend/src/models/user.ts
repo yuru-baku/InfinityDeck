@@ -6,11 +6,10 @@ export class User {
     id: string;
     name: string;
     handcards: string[];
-    isLocal: boolean;
     isOwner: boolean;
     timeout: NodeJS.Timeout|undefined;
 
-    constructor(ws: WebSocket, id: string|undefined, name: string|undefined, isLocal: boolean = false) {
+    constructor(ws: WebSocket, id: string|undefined, name: string|undefined) {
         this.ws = ws;
         if (id) {
             this.id = id;
@@ -23,7 +22,6 @@ export class User {
             this.name = 'name_' + (Math.random() + 1).toString(36).substring(7);
         }
         this.handcards = [];
-        this.isLocal = isLocal;
         this.isOwner = false;
     }
 }

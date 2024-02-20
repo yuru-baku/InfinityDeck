@@ -10,6 +10,7 @@ export class Room {
     selectedGame: 'MauMau';
     game: MauMau;
     db: Db|undefined;
+    isLocal: boolean;
 
     constructor(db?: Db, id?: string) {
         this.id = id || 'room_' + (Math.random() + 1).toString(36).substring(7);
@@ -18,6 +19,7 @@ export class Room {
         this.selectedGame = 'MauMau';
         this.game = new MauMau(this);
         this.db = db;
+        this.isLocal = true;
     }
 
     join(user: User) {
@@ -87,6 +89,7 @@ export class Room {
         ];
         const availableRoomActions = [
             'selectGame',
+            'changeSettings'
         ];
         user.ws.on('message', (msg: string) => {
             const data: any = JSON.parse(msg);
@@ -145,6 +148,24 @@ export class Room {
 
     selectGame() {
         // ToDo add multiple games
+    }
+
+    changeSettings(user: User, data: { action: 'changeSettings', data: { isLocal: boolean }}) {
+        if (!user.isOwner) {
+            user.ws.send(JSON.stringify({ error: 'Only the owner of this room might perform this action!' }));
+            return;
+        }
+        console.log(data)
+        this.isLocal = data.data.isLocal || false;
+        this.users
+            .forEach(u => {
+                u.ws.send(JSON.stringify({
+                    action: 'settingsChanged',
+                    data: {
+                        isLocal: this.isLocal
+                    }
+                }));
+            });
     }
 
     getUserInformations(): { name: string, isOwner: boolean, id: string, disconnected: boolean }[] {
