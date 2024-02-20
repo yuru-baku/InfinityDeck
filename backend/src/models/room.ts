@@ -141,7 +141,9 @@ export class Room {
                 isLocal: false,
                 selectedGame: this.selectedGame,
                 state: this.state,
-                users: this.getUserInformations()
+                users: this.getUserInformations(),
+                id: this.id,
+                game: { ...this.game, room: undefined } 
             }
         }))
     }
@@ -155,7 +157,6 @@ export class Room {
             user.ws.send(JSON.stringify({ error: 'Only the owner of this room might perform this action!' }));
             return;
         }
-        console.log(data)
         this.isLocal = data.data.isLocal || false;
         this.users
             .forEach(u => {

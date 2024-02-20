@@ -1,11 +1,11 @@
 <script setup lang="ts">
     import ArComponent from '@/components/ar-component/ArComponent.vue';
+    import { testConnection, room, you } from '@/services/ConnectionService';
     import { ref } from 'vue';
 
     var showMenu = ref(false);
-    var lobby = ref('missing');
-    var userName = ref('mssing');
     
+    testConnection();
 </script>
 
 
@@ -14,16 +14,16 @@
     <div class="game-overlay">
         <div id="fixed-overlay-content">
             <div>
-                <h1 class="game-title">MauMau</h1>
-                <p class="quick-info" v-if="lobby && userName">{{ lobby }} - {{ userName }}</p>
+                <h1 class="game-title">{{ room?.selectedGame }}</h1>
+                <p class="quick-info" v-if="room?.id && you?.name">{{ room.id }} - {{ you.name }}</p>
             </div>
             <button type="button" class="settings-button" @click="showMenu = !showMenu">
                 <font-awesome-icon icon="gear" />
             </button>
             </div>
-        <div v-if="showMenu" id="menu">
-            {{ userName }}
-        </div>
+        <pre v-if="showMenu && you" id="menu">
+            {{ '\n' + JSON.stringify(room, null, 2) }}
+        </pre>
     </div>
 </template>
 
@@ -37,6 +37,10 @@
         top: 10px;
         right: 10px;
         width: auto;
+        background-color: rgba(255, 255, 255, .4);
+        padding: 1rem;
+        max-height: 80%;
+        overflow: auto;
         
         #fixed-overlay-content {
             display: flex;

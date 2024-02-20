@@ -37,6 +37,7 @@ export class MauMau {
             return;
         }
         this.startTime = new Date();
+        this.room.state = 'inGame';
         this.drawPile = [...this.deck]; // copy array
         this.shuffleArray(this.drawPile);
         // give users some handcards

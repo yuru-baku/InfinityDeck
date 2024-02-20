@@ -27,7 +27,7 @@ export function testConnection() {
         connect();
     } else {
         // wait with init function until websocket connection was confirmed
-        init();
+        addListeners();
     }
 }
 export function setup() {
@@ -56,7 +56,7 @@ export function connect() {
                 // navigate to lobby
                 router.push(`/lobby?roomId=${data.data.roomId}`)
             } else {
-                init();
+                addListeners();
             }
         } else {
             console.error('Could not join!');
@@ -84,7 +84,7 @@ export function toggleLocal() {
 /**
  * Main stuff of setup
  */
-export function init() {
+export function addListeners() {
     store.webSocket.send(JSON.stringify({ action: 'getRoomInfo' }));
     store.webSocket.addEventListener('message', (event : MessageEvent) => {
         const data = JSON.parse(event.data);
