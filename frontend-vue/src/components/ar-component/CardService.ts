@@ -19,6 +19,7 @@ export class CardService {
         this.cardCallbacks = new Map<string, Function>();
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection(() => this.numberOfCards = 40); // Todo: Marker Anzahl?!
+        conService.onCardDrawed((markerId, cardName) => this.registerMarker(markerId, cardName));
     }
 
     private getCardUrl(cardName: string) {

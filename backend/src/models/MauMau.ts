@@ -95,7 +95,7 @@ export class MauMau {
             action: 'drawCard',
             data: {
                 card: card,
-                markerId: data.data.markerid,
+                markerId: data.data.markerId,
                 handcards: user.handcards,
                 nextActions: [ 'endTurn', 'playCard' ]
             }

@@ -153,15 +153,23 @@ function isCardBack(marker) {
 
 function turnCard(marker) {
 	const imageEl = marker.querySelector('#card');
-	imageEl.setAttribute('src', props.cardService.cardBack);
+	const cardState = imageEl.getAttribute('data-state');
+	if (cardState !== 'back') {
+		imageEl.setAttribute('data-state', 'back');
+		imageEl.setAttribute('src', props.cardService.cardBack);
+	}
 }
 
 function showCard(marker) {
 	const imageEl = marker.querySelector('#card');
+	const cardState = imageEl.getAttribute('data-state');
 	let id = marker.getAttribute('id');
-	props.cardService.getCardByMarker(id).then((card) => {
-		imageEl.setAttribute('src', card.url);
-	});
+	if (cardState !== 'front') {
+		imageEl.setAttribute('data-state', 'front');
+		props.cardService.getCardByMarker(id).then((card) => {
+			imageEl.setAttribute('src', card.url);
+		});
+	}
 }
 
 function addFoundMarker(marker, markerList) {

@@ -13,6 +13,7 @@ export class ConnectionService {
     store: any;
     cookies = useCookies(['username', 'roomId', 'userId']);
     connectionCallbacks: (() => void)[] = [ ];
+    drawCardCallbacks: ((markerId: string, cardName: string) => void)[] = [ ];
 
     public room = ref<Room>();
     public game = ref<Game>();
@@ -108,7 +109,7 @@ export class ConnectionService {
                     this.router.push(`/${this.room.value.selectedGame}?roomId=${data.data.roomId}`);
                     break;
                 case 'drawCard':
-                    // registerMarker(data.data.markerId, data.data.card);
+                    this.drawCardCallbacks.forEach((callback) => callback(data.data.markerId, data.data.card))
                     break;
                 default:
                     console.warn('Unhandled action', data.action, data);
@@ -140,5 +141,9 @@ export class ConnectionService {
             callback();
         }
         this.connectionCallbacks.push(callback);
+    }
+
+    public onCardDrawed(callback: (markerId: string, cardName: string) => void) {
+        this.drawCardCallbacks.push(callback);
     }
 }
