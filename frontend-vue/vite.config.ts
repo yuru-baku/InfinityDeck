@@ -9,7 +9,7 @@ export default defineConfig({
     vue({
       template: {
         compilerOptions: {
-          isCustomElement: () => true
+          isCustomElement: (tag) => tag.includes('a-')
         },
       },
     }),

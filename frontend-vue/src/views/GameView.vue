@@ -1,29 +1,32 @@
 <script setup lang="ts">
     import ArComponent from '@/components/ar-component/ArComponent.vue';
+    import { CardService } from '@/components/ar-component/CardService';
+    import { ConnectionService } from '@/services/ConnectionService';
     import { ref } from 'vue';
 
     var showMenu = ref(false);
-    var lobby = ref('missing');
-    var userName = ref('mssing');
     
+    const conService = new ConnectionService();
+    const cardService = new CardService(conService);
 </script>
 
 
 <template>
-    <ArComponent></ArComponent>
+    <ArComponent :card-service="cardService" :con-service="conService"></ArComponent>
     <div class="game-overlay">
         <div id="fixed-overlay-content">
             <div>
-                <h1 class="game-title">MauMau</h1>
-                <p class="quick-info" v-if="lobby && userName">{{ lobby }} - {{ userName }}</p>
+                <h1 class="game-title">{{ conService.room.value?.selectedGame }}</h1>
+                <p class="quick-info" v-if="conService.room.value?.id && conService.you.value?.name">{{ conService.room.value.id }} - {{ conService.you.value.name }}</p>
             </div>
             <button type="button" class="settings-button" @click="showMenu = !showMenu">
                 <font-awesome-icon icon="gear" />
             </button>
             </div>
-        <div v-if="showMenu" id="menu">
-            {{ userName }}
-        </div>
+        <pre v-if="showMenu && conService.you" id="menu">
+            {{ '\n' + JSON.stringify(conService.you.value, null, 2) }}
+            {{ '\n' + JSON.stringify(conService.game.value, null, 2) }}
+        </pre>
     </div>
 </template>
 
@@ -37,6 +40,10 @@
         top: 10px;
         right: 10px;
         width: auto;
+        background-color: rgba(255, 255, 255, .4);
+        padding: 1rem;
+        max-height: 80%;
+        overflow: auto;
         
         #fixed-overlay-content {
             display: flex;

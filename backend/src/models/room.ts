@@ -2,6 +2,11 @@ import { Db } from "mongodb";
 import { MauMau } from "./MauMau";
 import { User } from "./user";
 
+export type WsMessage = {
+    action: string,
+    data: any
+}
+
 export class Room {
 
     id: string;
@@ -9,15 +14,17 @@ export class Room {
     state: 'initialising'|'inGame';
     selectedGame: 'MauMau';
     game: MauMau;
-    db: Db;
+    db: Db|undefined;
+    isLocal: boolean;
 
-    constructor(db: Db, id?: string) {
+    constructor(db?: Db, id?: string) {
         this.id = id || 'room_' + (Math.random() + 1).toString(36).substring(7);
         this.users = [];    // Users taking part in this game
         this.state = 'initialising';
         this.selectedGame = 'MauMau';
         this.game = new MauMau(this);
         this.db = db;
+        this.isLocal = true;
     }
 
     join(user: User) {
@@ -66,13 +73,13 @@ export class Room {
             'getRoomInfo',
         ];
         user.ws.on('message', (msg: string) => {
-            const data: any = JSON.parse(msg);
-            if (availableActions.includes(data.action)) {
+            const message: any = JSON.parse(msg);
+            if (availableActions.includes(message.action)) {
                 // @ts-ignore
-                this.game[data.action](user, data);
-            } else if (availableRoomActions.includes(data.action)){
+                this.game[message.action](user, message);
+            } else if (availableRoomActions.includes(message.action)){
                 // @ts-ignore
-                this[data.action](user, data);
+                this[message.action](user, message);
             }
         });
     }
@@ -87,15 +94,16 @@ export class Room {
         ];
         const availableRoomActions = [
             'selectGame',
+            'changeSettings'
         ];
         user.ws.on('message', (msg: string) => {
-            const data: any = JSON.parse(msg);
-            if (availableGameActions.includes(data.action)) {
+            const message: any = JSON.parse(msg);
+            if (availableGameActions.includes(message.action)) {
                 // @ts-ignore
-                this.game[data.action](user, data);
-            } else if (availableRoomActions.includes(data.action)){
+                this.game[message.action](user, message);
+            } else if (availableRoomActions.includes(message.action)){
                 // @ts-ignore
-                this[data.action](user, data);
+                this[message.action](user, message);
             }
         });
     }
@@ -134,17 +142,38 @@ export class Room {
         user.ws.send(JSON.stringify({
             action: 'gotRoomInfo',
             data: {
-                you: { name: user.name, isOwner: user.isOwner, id: user.id },
-                isLocal: false,
-                selectedGame: this.selectedGame,
-                state: this.state,
-                users: this.getUserInformations()
+                you: { name: user.name, isOwner: user.isOwner, id: user.id, handcards: user.handcards },
+                room: {
+                    isLocal: false,
+                    selectedGame: this.selectedGame,
+                    state: this.state,
+                    users: this.getUserInformations(),
+                    id: this.id,
+                },
+                game: { ...this.game, room: undefined } 
             }
         }))
     }
 
     selectGame() {
         // ToDo add multiple games
+    }
+
+    changeSettings(user: User, message: { action: 'changeSettings', data: { isLocal: boolean }}) {
+        if (!user.isOwner) {
+            user.ws.send(JSON.stringify({ error: 'Only the owner of this room might perform this action!' }));
+            return;
+        }
+        this.isLocal = message.data.isLocal || false;
+        this.users
+            .forEach(u => {
+                u.ws.send(JSON.stringify({
+                    action: 'settingsChanged',
+                    data: {
+                        isLocal: this.isLocal
+                    }
+                }));
+            });
     }
 
     getUserInformations(): { name: string, isOwner: boolean, id: string, disconnected: boolean }[] {

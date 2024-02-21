@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { Db, MongoClient } from 'mongodb';
 import { WebSocket, WebSocketServer } from 'ws';
 import { Room } from './models/room.js';
 import { User } from './models/user.js';
@@ -8,9 +8,10 @@ const dbName = 'InfinityDeck';
 
 async function main() {
     // Use connect method to connect to the server
-    await client.connect();
-    console.log('Connected successfully to database...');
-    const db = client.db(dbName);
+    // await client.connect();
+    // console.log('Connected successfully to database...');
+    // const db = client.db(dbName);
+    const db = undefined;
 
     const rooms = new Map();
     const wss = new WebSocketServer({ port: 8080 });

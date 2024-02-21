@@ -12,8 +12,13 @@ const props = defineProps({
   isOn: {
     type: Boolean,
     default: false
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
+const emit = defineEmits([ 'toggle' ])
 </script>
 
 <template>
@@ -22,6 +27,6 @@ const props = defineProps({
       <h2 class="toggleHeader">{{ header }}</h2>
       <p class="toggleInfo">{{ info }}</p>
     </div>
-    <toggle v-bind:isOn="isOn"></toggle>
+    <toggle :isOn="isOn" :disabled="disabled" @clicks="(event) => {console.log(event); $emit('toggle', event)}"></toggle>
   </div>
 </template>
