@@ -24,8 +24,8 @@
             </button>
             </div>
         <pre v-if="showMenu && conService.you" id="menu">
-            {{ '\n' + JSON.stringify(conService.you, null, 2) }}
-            {{ '\n' + JSON.stringify(conService.game, null, 2) }}
+            {{ '\n' + JSON.stringify(conService.you.value, null, 2) }}
+            {{ '\n' + JSON.stringify(conService.game.value, null, 2) }}
         </pre>
     </div>
 </template>

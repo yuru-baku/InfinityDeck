@@ -45,9 +45,9 @@ export class ConnectionService {
             const inLandingPage = this.router.currentRoute.value.name === 'landing-page';
             const data = JSON.parse(event.data);
             if (data.action === 'connected') {
+                this.cookies.set('userId', data.data.you.id);
+                this.cookies.set('roomId', data.data.roomId);
                 if (inLandingPage) {
-                    this.cookies.set('userId', data.data.you.id);
-                    this.cookies.set('roomId', data.data.roomId);
                     // navigate to lobby
                     this.router.push(`/lobby?roomId=${data.data.roomId}`)
                 } else {
@@ -79,7 +79,7 @@ export class ConnectionService {
                     if (data.data.state === 'inGame') {
                         this.router.push(`/${data.data.selectedGame}?roomId=${data.data.roomId}`);
                     }
-                    this.connectionCallbacks.forEach((callback) => { console.log('calling', callback); callback()});
+                    this.connectionCallbacks.forEach((callback) => callback());
                     this.connectionCallbacks = [ ];
                     break;
                 case 'settingsChanged':
@@ -106,7 +106,8 @@ export class ConnectionService {
                 case 'started':
                 case 'dealCards':
                     if (!this.room.value) return;
-                    this.router.push(`/${this.room.value.selectedGame}?roomId=${data.data.roomId}`);
+                    console.log(data.data)
+                    this.router.push(`/${this.room.value.selectedGame}?roomId=${this.room.value.id}`);
                     break;
                 case 'drawCard':
                     this.drawCardCallbacks.forEach((callback) => callback(data.data.markerId, data.data.card))
