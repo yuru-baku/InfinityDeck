@@ -43,20 +43,20 @@ export class ConnectionService {
         const abortController = new AbortController();
         this.store.webSocket.addEventListener('message', (event: MessageEvent) => {
             const inLandingPage = this.router.currentRoute.value.name === 'landing-page';
-            const data = JSON.parse(event.data);
-            if (data.action === 'connected') {
-                this.cookies.set('userId', data.data.you.id);
-                this.cookies.set('roomId', data.data.roomId);
+            const message = JSON.parse(event.data);
+            if (message.action === 'connected') {
+                this.cookies.set('userId', message.data.you.id);
+                this.cookies.set('roomId', message.data.roomId);
                 if (inLandingPage) {
                     // navigate to lobby
-                    this.router.push(`/lobby?roomId=${data.data.roomId}`)
+                    this.router.push(`/lobby?roomId=${message.data.roomId}`)
                 } else {
                     this.addListeners();
                 }
             } else {
                 console.error('Could not join!');
                 if (!inLandingPage) { // redirect if we are not already there
-                    this.router.push(`/?roomId=${data.data.roomId}`);
+                    this.router.push(`/?roomId=${message.data.roomId}`);
                 }
             }
             abortController.abort();
@@ -67,37 +67,36 @@ export class ConnectionService {
      * Main stuff of setup
      */
     public addListeners() {
-        this.store.webSocket.send(JSON.stringify({ action: 'getRoomInfo' }));
+        this.sendMessage('getRoomInfo', undefined);
         this.store.webSocket.addEventListener('message', (event : MessageEvent) => {
-            const data = JSON.parse(event.data);
-            console.log(data.action, data);
-            switch (data.action) {
+            const message = JSON.parse(event.data);
+            console.log(message.action, message.data);
+            switch (message.action) {
                 case 'gotRoomInfo':
-                    this.room.value = data.data.room;
-                    this.game.value = data.data.game;
-                    this.you.value = data.data.you;
-                    if (data.data.state === 'inGame') {
-                        this.router.push(`/${data.data.selectedGame}?roomId=${data.data.roomId}`);
+                    this.room.value = message.data.room;
+                    this.game.value = message.data.game;
+                    this.you.value = message.data.you;
+                    if (message.data.state === 'inGame') {
+                        this.router.push(`/${message.data.selectedGame}?roomId=${message.data.roomId}`);
                     }
                     this.connectionCallbacks.forEach((callback) => callback());
                     this.connectionCallbacks = [ ];
                     break;
                 case 'settingsChanged':
-                    this.room.value!.isLocal = data.data.isLocal || false;
-                    console.log(this.room.value?.isLocal)
+                    this.room.value!.isLocal = message.data.isLocal || false;
                     break;
                 case 'joined':
                     if (!this.room.value) return;
-                    this.room.value.users.push(data.data.user);
+                    this.room.value.users.push(message.data.user);
                     break;
                 case 'disconnected':
-                    var user = this.room.value?.users.find(user => user.id === data.data.id);
+                    var user = this.room.value?.users.find(user => user.id === message.data.id);
                     if (user) {
                         user.disconnected = true;
                     }
                     break;
                 case 'reconnected':
-                    var user = this.room.value?.users.find(user => user.id === data.data.user.id);
+                    var user = this.room.value?.users.find(user => user.id === message.data.user.id);
                     if (user) {
                         user.disconnected = false;
                         console.log(user);
@@ -106,14 +105,13 @@ export class ConnectionService {
                 case 'started':
                 case 'dealCards':
                     if (!this.room.value) return;
-                    console.log(data.data)
                     this.router.push(`/${this.room.value.selectedGame}?roomId=${this.room.value.id}`);
                     break;
                 case 'drawCard':
-                    this.drawCardCallbacks.forEach((callback) => callback(data.data.markerId, data.data.card))
+                    this.drawCardCallbacks.forEach((callback) => callback(message.data.markerId, message.data.card))
                     break;
                 default:
-                    console.warn('Unhandled action', data.action, data);
+                    console.warn('Unhandled action', message.action, message.data);
             }
         });
     }
@@ -124,17 +122,17 @@ export class ConnectionService {
      * Starts the game, should only be callable if we are an admin.
      */
     public startGame() {
-        this.store.webSocket.send(JSON.stringify({ action: 'start' }));
+        this.sendMessage('start', undefined);
     }
 
     public toggleLocal() {
         if (!this.room.value || !this.you.value?.isOwner) return;
         console.log(!this.room.value.isLocal)
-        this.store.webSocket.send(JSON.stringify({ action: 'changeSettings', data: { isLocal: !this.room.value.isLocal } }));
+        this.sendMessage('changeSettings', { isLocal: !this.room.value.isLocal });
     }
 
     public drawNewCard(markerId: string) {
-        this.store.webSocket.send(JSON.stringify({ action: 'drawCard', data: { markerId: markerId } }));
+        this.sendMessage('drawCard', { markerId: markerId });
     }
 
     public onConnection(callback: () => void) {
@@ -146,5 +144,9 @@ export class ConnectionService {
 
     public onCardDrawed(callback: (markerId: string, cardName: string) => void) {
         this.drawCardCallbacks.push(callback);
+    }
+
+    private sendMessage(action: string, data: any) {
+        this.store.webSocket.send(JSON.stringify({ action: action, data: data }));
     }
 }

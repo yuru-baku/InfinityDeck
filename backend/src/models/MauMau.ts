@@ -1,4 +1,4 @@
-import { Room } from "./room";
+import { Room, WsMessage } from "./room";
 import { User } from "./user";
 
 export class MauMau {
@@ -79,7 +79,7 @@ export class MauMau {
         // });
     }
 
-    drawCard(user: User, data: any) {
+    drawCard(user: User, message: WsMessage) {
         // check if it is the users turn
         if (this.room.users[this.turn] !== user) {
             user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
@@ -95,7 +95,7 @@ export class MauMau {
             action: 'drawCard',
             data: {
                 card: card,
-                markerId: data.data.markerId,
+                markerId: message.data.markerId,
                 handcards: user.handcards,
                 nextActions: [ 'endTurn', 'playCard' ]
             }
@@ -104,14 +104,14 @@ export class MauMau {
         // do not hand to next user now, wait if he can play now
     }
 
-    playCard(user: User, data: any) {
+    playCard(user: User, message: WsMessage) {
         // check if it is the users turn
         if (this.room.users[this.turn] !== user) {
             user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
             return;
         }
         // check if user has this card in his hand
-        const cardIndex = user.handcards.findIndex(card => card === data.card);
+        const cardIndex = user.handcards.findIndex(card => card === message.data.card);
         if (cardIndex < 0) {
             user.ws.send(JSON.stringify({ error: 'The Server did not know you own this card. Please play another one' }));
             return;
@@ -128,10 +128,10 @@ export class MauMau {
             this.history.unshift(`${user.id}:finished`)
         }
         // hand to next user
-        this.endTurn(user, data);
+        this.endTurn(user, message);
     }
 
-    endTurn(user: User, _: any) {
+    endTurn(user: User, _: WsMessage) {
         // check if it is the users turn
         if (this.room.users[this.turn] !== user) {
             user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));

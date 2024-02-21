@@ -2,6 +2,11 @@ import { Db } from "mongodb";
 import { MauMau } from "./MauMau";
 import { User } from "./user";
 
+export type WsMessage = {
+    action: string,
+    data: any
+}
+
 export class Room {
 
     id: string;
@@ -68,13 +73,13 @@ export class Room {
             'getRoomInfo',
         ];
         user.ws.on('message', (msg: string) => {
-            const data: any = JSON.parse(msg);
-            if (availableActions.includes(data.action)) {
+            const message: any = JSON.parse(msg);
+            if (availableActions.includes(message.action)) {
                 // @ts-ignore
-                this.game[data.action](user, data);
-            } else if (availableRoomActions.includes(data.action)){
+                this.game[message.action](user, message);
+            } else if (availableRoomActions.includes(message.action)){
                 // @ts-ignore
-                this[data.action](user, data);
+                this[message.action](user, message);
             }
         });
     }
@@ -92,13 +97,13 @@ export class Room {
             'changeSettings'
         ];
         user.ws.on('message', (msg: string) => {
-            const data: any = JSON.parse(msg);
-            if (availableGameActions.includes(data.action)) {
+            const message: any = JSON.parse(msg);
+            if (availableGameActions.includes(message.action)) {
                 // @ts-ignore
-                this.game[data.action](user, data);
-            } else if (availableRoomActions.includes(data.action)){
+                this.game[message.action](user, message);
+            } else if (availableRoomActions.includes(message.action)){
                 // @ts-ignore
-                this[data.action](user, data);
+                this[message.action](user, message);
             }
         });
     }
@@ -154,12 +159,12 @@ export class Room {
         // ToDo add multiple games
     }
 
-    changeSettings(user: User, data: { action: 'changeSettings', data: { isLocal: boolean }}) {
+    changeSettings(user: User, message: { action: 'changeSettings', data: { isLocal: boolean }}) {
         if (!user.isOwner) {
             user.ws.send(JSON.stringify({ error: 'Only the owner of this room might perform this action!' }));
             return;
         }
-        this.isLocal = data.data.isLocal || false;
+        this.isLocal = message.data.isLocal || false;
         this.users
             .forEach(u => {
                 u.ws.send(JSON.stringify({
