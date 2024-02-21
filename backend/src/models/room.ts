@@ -137,12 +137,14 @@ export class Room {
         user.ws.send(JSON.stringify({
             action: 'gotRoomInfo',
             data: {
-                you: { name: user.name, isOwner: user.isOwner, id: user.id },
-                isLocal: false,
-                selectedGame: this.selectedGame,
-                state: this.state,
-                users: this.getUserInformations(),
-                id: this.id,
+                you: { name: user.name, isOwner: user.isOwner, id: user.id, handcards: user.handcards },
+                room: {
+                    isLocal: false,
+                    selectedGame: this.selectedGame,
+                    state: this.state,
+                    users: this.getUserInformations(),
+                    id: this.id,
+                },
                 game: { ...this.game, room: undefined } 
             }
         }))

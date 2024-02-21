@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import startButton from '@/components/startButton.vue'
 import toggleDiscription from '@/components/toggleDiscription.vue'
-import { Game } from '@/model/room'
-import { you, room, testConnection, startGame, toggleLocal } from '@/services/ConnectionService';
+import { GameOption } from '@/model/room'
+import { ConnectionService } from '@/services/ConnectionService';
 
-const games = Object.keys(Game).filter((key: any) => typeof Game[key] === 'number');
+const games = Object.keys(GameOption).filter((key: any) => typeof GameOption[key] === 'number');
 
-testConnection();
+const conService = new ConnectionService();
 
 function copyToClipboard() {
   navigator.clipboard.writeText(window.location.origin + window.location.search);
@@ -15,14 +15,14 @@ function copyToClipboard() {
 </script>
 
 <template>
-  <main class="lobby" v-if="room && you">
+  <main class="lobby" v-if="conService.room && conService.you">
     <div id="playerList" class="frame">
-      <div class="playerStatus" v-for="(user, i) in room.users" :key="user.id" :class="{ online: !user.disconnected, offline: user.disconnected }">
-        <font-awesome-icon icon="circle" v-if="user.id !== you.id" />
-        <font-awesome-icon icon="play" v-if="user.id === you.id" />
+      <div class="playerStatus" v-for="(user, i) in conService.room.value?.users" :key="user.id" :class="{ online: !user.disconnected, offline: user.disconnected }">
+        <font-awesome-icon icon="circle" v-if="user.id !== conService.you.value?.id" />
+        <font-awesome-icon icon="play" v-if="user.id === conService.you.value?.id" />
         {{ user.name }}
       </div>
-      <div class="playerStatus empty" v-for="i in 4 - room.users.length">
+      <div class="playerStatus empty" v-for="i in 4 - (conService.room.value?.users.length || 0)">
         <font-awesome-icon icon="circle" />
         empty
       </div>
@@ -32,13 +32,13 @@ function copyToClipboard() {
     <div class="column">
       <div id="gameSettings" class="frame">
         <div id="chooseGame" class="frame">
-          <div class="frame" v-for="game in games" :class="{ selected: game === room.selectedGame.toString() }">{{ game }}</div>
+          <div class="frame" v-for="game in games" :class="{ selected: game === conService.room.value?.selectedGame.toString() }">{{ game }}</div>
         </div>
         <div class="frame gameConfig">
-          <toggleDiscription header="Local" info="are you playing across the table or the ocean?" :isOn="room.isLocal" :disabled="!you.isOwner" @toggle="toggleLocal()"></toggleDiscription>
+          <toggleDiscription header="Local" info="are you playing across the table or the ocean?" :isOn="conService.room.value?.isLocal" :disabled="!conService.you.value?.isOwner" @toggle="conService.toggleLocal()"></toggleDiscription>
         </div>
       </div>
-    <startButton @click="startGame()"></startButton>
+    <startButton @click="conService.startGame()"></startButton>
     </div>
   </main>
 </template>

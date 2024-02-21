@@ -1,28 +1,31 @@
 <script setup lang="ts">
     import ArComponent from '@/components/ar-component/ArComponent.vue';
-    import { testConnection, room, you } from '@/services/ConnectionService';
+    import { CardService } from '@/components/ar-component/CardService';
+    import { ConnectionService } from '@/services/ConnectionService';
     import { ref } from 'vue';
 
     var showMenu = ref(false);
     
-    testConnection();
+    const conService = new ConnectionService();
+    const cardService = new CardService(conService);
 </script>
 
 
 <template>
-    <ArComponent></ArComponent>
+    <ArComponent :card-service="cardService" :con-service="conService"></ArComponent>
     <div class="game-overlay">
         <div id="fixed-overlay-content">
             <div>
-                <h1 class="game-title">{{ room?.selectedGame }}</h1>
-                <p class="quick-info" v-if="room?.id && you?.name">{{ room.id }} - {{ you.name }}</p>
+                <h1 class="game-title">{{ conService.room.value?.selectedGame }}</h1>
+                <p class="quick-info" v-if="conService.room.value?.id && conService.you.value?.name">{{ conService.room.value.id }} - {{ conService.you.value.name }}</p>
             </div>
             <button type="button" class="settings-button" @click="showMenu = !showMenu">
                 <font-awesome-icon icon="gear" />
             </button>
             </div>
-        <pre v-if="showMenu && you" id="menu">
-            {{ '\n' + JSON.stringify(room, null, 2) }}
+        <pre v-if="showMenu && conService.you" id="menu">
+            {{ '\n' + JSON.stringify(conService.you, null, 2) }}
+            {{ '\n' + JSON.stringify(conService.game, null, 2) }}
         </pre>
     </div>
 </template>

@@ -79,7 +79,7 @@ export class MauMau {
         // });
     }
 
-    drawCard(user: User, _: any) {
+    drawCard(user: User, data: any) {
         // check if it is the users turn
         if (this.room.users[this.turn] !== user) {
             user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
@@ -89,17 +89,18 @@ export class MauMau {
         if (this.drawPile.length <= 0) {
             this.shuffleDrawPile();
         }
-        const newCard = this.drawPile.pop()!;
-        user.handcards.unshift(newCard);
+        const card = this.drawPile.pop()!;
+        user.handcards.unshift(card);
         user.ws.send(JSON.stringify({
             action: 'drawCard',
             data: {
-                newCard: newCard,
+                card: card,
+                markerId: data.data.markerid,
                 handcards: user.handcards,
                 nextActions: [ 'endTurn', 'playCard' ]
             }
         }));
-        this.history.unshift(`+${user.id}:${newCard}`);
+        this.history.unshift(`+${user.id}:${card}`);
         // do not hand to next user now, wait if he can play now
     }
 
