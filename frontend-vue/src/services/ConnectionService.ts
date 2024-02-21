@@ -79,6 +79,9 @@ export class ConnectionService {
                     if (message.data.state === 'inGame') {
                         this.router.push(`/${message.data.selectedGame}?roomId=${message.data.roomId}`);
                     }
+                    if (message.data.state === 'initialising') {
+                        this.router.push(`/lobby?roomId=${message.data.roomId}`);
+                    }
                     this.connectionCallbacks.forEach((callback) => callback());
                     this.connectionCallbacks = [ ];
                     break;
