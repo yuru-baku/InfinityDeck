@@ -1,13 +1,13 @@
-import type { User } from './user.ts'
+import type { User } from './user.ts';
 
 export enum GameOption {
-  MauMau,
-  Uno
+    MauMau,
+    Uno
 }
 
 export type Room = {
-  id: string
-  users: User[]
-  isLocal: boolean
-  selectedGame: GameOption
-}
+    id: string;
+    users: User[];
+    isLocal: boolean;
+    selectedGame: GameOption;
+};

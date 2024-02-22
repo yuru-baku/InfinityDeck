@@ -68,7 +68,6 @@ const cardService = new CardService(conService);
         display: flex;
         flex-direction: column;
         height: 100%;
-        border: 1px solid orangered;
         align-items: end;
 
         .game-title,
@@ -82,7 +81,6 @@ const cardService = new CardService(conService);
             flex-direction: row;
         }
         .buttons {
-            border: 1px solid orange;
             display: flex;
             flex-direction: column;
             height: 100%;
