@@ -90,14 +90,14 @@ const cardService = new CardService(conService);
                 aspect-ratio: 1;
                 justify-content: center;
                 align-items: center;
-                background: none;
-                border: 1px solid black;
+                border: none;
+                background-color: rgba(255, 255, 255, 0.2);
                 cursor: pointer;
                 filter: none;
                 padding: 0;
                 margin: 0;
                 svg {
-                    padding: 4px;
+                    padding: 8px;
                     font-size: 32px;
                 }
                 &:last-child {
