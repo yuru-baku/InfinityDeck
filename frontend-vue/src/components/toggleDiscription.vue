@@ -18,7 +18,7 @@ const props = defineProps({
     default: false
   }
 })
-const emit = defineEmits([ 'toggle' ])
+const emit = defineEmits(['toggle'])
 </script>
 
 <template>
@@ -27,6 +27,15 @@ const emit = defineEmits([ 'toggle' ])
       <h2 class="toggleHeader">{{ header }}</h2>
       <p class="toggleInfo">{{ info }}</p>
     </div>
-    <toggle :isOn="isOn" :disabled="disabled" @clicks="(event) => {console.log(event); $emit('toggle', event)}"></toggle>
+    <toggle
+      :isOn="isOn"
+      :disabled="disabled"
+      @clicks="
+        (event) => {
+          console.log(event)
+          $emit('toggle', event)
+        }
+      "
+    ></toggle>
   </div>
 </template>
