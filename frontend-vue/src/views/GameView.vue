@@ -5,6 +5,7 @@ import { ConnectionService } from '@/services/ConnectionService';
 import { ref } from 'vue';
 
 var showMenu = ref(false);
+var showUsers = ref(false);
 
 const conService = new ConnectionService();
 const cardService = new CardService(conService);
@@ -32,7 +33,7 @@ const cardService = new CardService(conService);
                     <button type="button" @click="showMenu = !showMenu">
                         <font-awesome-icon :icon="['fas', 'gear']" />
                     </button>
-                    <button type="button">
+                    <button type="button" @click="showUsers = !showUsers">
                         <font-awesome-icon :icon="['fas', 'users']" />
                     </button>
                     <button type="button">
@@ -41,7 +42,7 @@ const cardService = new CardService(conService);
                     <button type="button">
                         <font-awesome-icon :icon="['fas', 'dice-d20']" />
                     </button>
-                    <button type="button">
+                    <button type="button" @click="$router.go(-1)">
                         <font-awesome-icon :icon="['fas', 'door-closed']" />
                     </button>
                 </div>
