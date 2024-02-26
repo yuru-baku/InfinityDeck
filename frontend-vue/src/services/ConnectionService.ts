@@ -8,12 +8,11 @@ import type { Game } from '@/model/game';
 import type { Room } from '@/model/room';
 
 export class ConnectionService {
-
     router: Router;
     store: any;
     cookies = useCookies(['username', 'roomId', 'userId']);
-    connectionCallbacks: (() => void)[] = [ ];
-    drawCardCallbacks: ((markerId: string, cardName: string) => void)[] = [ ];
+    connectionCallbacks: (() => void)[] = [];
+    drawCardCallbacks: ((markerId: string, cardName: string) => void)[] = [];
 
     public room = ref<Room>();
     public game = ref<Game>();
@@ -35,32 +34,43 @@ export class ConnectionService {
      * Handles a connection or reconnection
      */
     public connect() {
-        let roomId = this.router.currentRoute.value.query.roomId || this.cookies.get('roomId');
-        let userId = this.cookies.get('userId');
-        let name = this.cookies.get('username');
+        const roomId = this.router.currentRoute.value.query.roomId || this.cookies.get('roomId');
+        const userId = this.cookies.get('userId');
+        const name = this.cookies.get('username');
 
-        this.store.changeWebSocket(new WebSocket(`${import.meta.env.VITE_BACKEND_ENDPOINT}?name=${name}&roomId=${roomId}&userId=${userId}`));
+        this.store.changeWebSocket(
+            new WebSocket(
+                `${
+                    import.meta.env.VITE_BACKEND_ENDPOINT
+                }?name=${name}&roomId=${roomId}&userId=${userId}`
+            )
+        );
         const abortController = new AbortController();
-        this.store.webSocket.addEventListener('message', (event: MessageEvent) => {
-            const inLandingPage = this.router.currentRoute.value.name === 'landing-page';
-            const message = JSON.parse(event.data);
-            if (message.action === 'connected') {
-                this.cookies.set('userId', message.data.you.id);
-                this.cookies.set('roomId', message.data.roomId);
-                if (inLandingPage) {
-                    // navigate to lobby
-                    this.router.push(`/lobby?roomId=${message.data.roomId}`)
+        this.store.webSocket.addEventListener(
+            'message',
+            (event: MessageEvent) => {
+                const inLandingPage = this.router.currentRoute.value.name === 'landing-page';
+                const message = JSON.parse(event.data);
+                if (message.action === 'connected') {
+                    this.cookies.set('userId', message.data.you.id);
+                    this.cookies.set('roomId', message.data.roomId);
+                    if (inLandingPage) {
+                        // navigate to lobby
+                        this.router.push(`/lobby?roomId=${message.data.roomId}`);
+                    } else {
+                        this.addListeners();
+                    }
                 } else {
-                    this.addListeners();
+                    console.error('Could not join!');
+                    if (!inLandingPage) {
+                        // redirect if we are not already there
+                        this.router.push(`/?roomId=${message.data.roomId}`);
+                    }
                 }
-            } else {
-                console.error('Could not join!');
-                if (!inLandingPage) { // redirect if we are not already there
-                    this.router.push(`/?roomId=${message.data.roomId}`);
-                }
-            }
-            abortController.abort();
-        }, { signal: abortController.signal });
+                abortController.abort();
+            },
+            { signal: abortController.signal }
+        );
     }
 
     /**
@@ -68,7 +78,7 @@ export class ConnectionService {
      */
     public addListeners() {
         this.sendMessage('getRoomInfo', undefined);
-        this.store.webSocket.addEventListener('message', (event : MessageEvent) => {
+        this.store.webSocket.addEventListener('message', (event: MessageEvent) => {
             const message = JSON.parse(event.data);
             console.log(message.action, message.data);
             switch (message.action) {
@@ -77,13 +87,15 @@ export class ConnectionService {
                     this.game.value = message.data.game;
                     this.you.value = message.data.you;
                     if (message.data.state === 'inGame') {
-                        this.router.push(`/${message.data.selectedGame}?roomId=${message.data.roomId}`);
+                        this.router.push(
+                            `/${message.data.selectedGame}?roomId=${message.data.roomId}`
+                        );
                     }
                     if (message.data.state === 'initialising') {
                         this.router.push(`/lobby?roomId=${message.data.roomId}`);
                     }
                     this.connectionCallbacks.forEach((callback) => callback());
-                    this.connectionCallbacks = [ ];
+                    this.connectionCallbacks = [];
                     break;
                 case 'settingsChanged':
                     this.room.value!.isLocal = message.data.isLocal || false;
@@ -93,13 +105,15 @@ export class ConnectionService {
                     this.room.value.users.push(message.data.user);
                     break;
                 case 'disconnected':
-                    var user = this.room.value?.users.find(user => user.id === message.data.id);
+                    var user = this.room.value?.users.find((user) => user.id === message.data.id);
                     if (user) {
                         user.disconnected = true;
                     }
                     break;
                 case 'reconnected':
-                    var user = this.room.value?.users.find(user => user.id === message.data.user.id);
+                    var user = this.room.value?.users.find(
+                        (user) => user.id === message.data.user.id
+                    );
                     if (user) {
                         user.disconnected = false;
                         console.log(user);
@@ -108,10 +122,14 @@ export class ConnectionService {
                 case 'started':
                 case 'dealCards':
                     if (!this.room.value) return;
-                    this.router.push(`/${this.room.value.selectedGame}?roomId=${this.room.value.id}`);
+                    this.router.push(
+                        `/${this.room.value.selectedGame}?roomId=${this.room.value.id}`
+                    );
                     break;
                 case 'drawCard':
-                    this.drawCardCallbacks.forEach((callback) => callback(message.data.markerId, message.data.card))
+                    this.drawCardCallbacks.forEach((callback) =>
+                        callback(message.data.markerId, message.data.card)
+                    );
                     break;
                 default:
                     console.warn('Unhandled action', message.action, message.data);
@@ -130,7 +148,7 @@ export class ConnectionService {
 
     public toggleLocal() {
         if (!this.room.value || !this.you.value?.isOwner) return;
-        console.log(!this.room.value.isLocal)
+        console.log(!this.room.value.isLocal);
         this.sendMessage('changeSettings', { isLocal: !this.room.value.isLocal });
     }
 

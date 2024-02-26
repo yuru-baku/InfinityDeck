@@ -1,9 +1,8 @@
 import { ConnectionService } from '@/services/ConnectionService';
 
-export type Card = { name: string, url: string };
+export type Card = { name: string; url: string };
 
 export class CardService {
-
     private conSerivce: ConnectionService;
 
     public cardBack: string;
@@ -18,7 +17,7 @@ export class CardService {
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
-        conService.onConnection(() => this.numberOfCards = 40); // Todo: Marker Anzahl?!
+        conService.onConnection(() => (this.numberOfCards = 40)); // Todo: Marker Anzahl?!
         conService.onCardDrawed((markerId, cardName) => this.registerMarker(markerId, cardName));
     }
 
@@ -31,7 +30,7 @@ export class CardService {
     /**
      * Checks if the card is known. If it is it will be returned immediately.
      * Otherwise it will be returned when the server responded.
-     * @param markerId 
+     * @param markerId
      * @returns a promise which will be resolved as soon as the card is available
      */
     public getCardByMarker(markerId: string): Promise<Card> {
@@ -51,11 +50,11 @@ export class CardService {
     /**
      * Registers a new marker and card combination.
      * If there is a callback waiting it will be called.
-     * @param markerId 
-     * @param cardName 
+     * @param markerId
+     * @param cardName
      */
     public registerMarker(markerId: string, cardName: string) {
-        const card = { name: cardName, url: this.getCardUrl(cardName) }
+        const card = { name: cardName, url: this.getCardUrl(cardName) };
         if (this.markerMap.get(markerId)) {
             console.warn('Marker was already known, but was registered twice!');
         }
@@ -67,5 +66,5 @@ export class CardService {
         // if there was no callback someone else drew this card locally
     }
 
-    public reloadMarkerMap() { }
+    public reloadMarkerMap() {}
 }

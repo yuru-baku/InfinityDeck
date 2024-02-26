@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import startButton from '@/components/startButton.vue'
-import toggleDiscription from '@/components/toggleDiscription.vue'
-import { GameOption } from '@/model/room'
+import startButton from '@/components/startButton.vue';
+import toggleDiscription from '@/components/toggleDiscription.vue';
+import { GameOption } from '@/model/room';
 import { ConnectionService } from '@/services/ConnectionService';
 
 const games = Object.keys(GameOption).filter((key: any) => typeof GameOption[key] === 'number');
@@ -9,36 +9,57 @@ const games = Object.keys(GameOption).filter((key: any) => typeof GameOption[key
 const conService = new ConnectionService();
 
 function copyToClipboard() {
-  navigator.clipboard.writeText(window.location.origin + window.location.search);
+    navigator.clipboard.writeText(window.location.origin + window.location.search);
 }
-
 </script>
 
 <template>
-  <main class="lobby" v-if="conService.room && conService.you">
-    <div id="playerList" class="frame">
-      <div class="playerStatus" v-for="(user, i) in conService.room.value?.users" :key="user.id" :class="{ online: !user.disconnected, offline: user.disconnected }">
-        <font-awesome-icon icon="circle" v-if="user.id !== conService.you.value?.id" />
-        <font-awesome-icon icon="play" v-if="user.id === conService.you.value?.id" />
-        {{ user.name }}
-      </div>
-      <div class="playerStatus empty" v-for="i in 4 - (conService.room.value?.users.length || 0)">
-        <font-awesome-icon icon="circle" />
-        empty
-      </div>
-      <button id="invite" @click="copyToClipboard()">Copy Invite</button>
-    </div>
+    <main class="lobby" v-if="conService.room && conService.you">
+        <div id="playerList" class="frame">
+            <div
+                class="playerStatus"
+                v-for="(user, i) in conService.room.value?.users"
+                :key="user.id"
+                :class="{ online: !user.disconnected, offline: user.disconnected }"
+            >
+                <font-awesome-icon icon="circle" v-if="user.id !== conService.you.value?.id" />
+                <font-awesome-icon icon="play" v-if="user.id === conService.you.value?.id" />
+                {{ user.name }}
+            </div>
+            <div
+                class="playerStatus empty"
+                v-for="i in 4 - (conService.room.value?.users.length || 0)"
+            >
+                <font-awesome-icon :icon="circle" />
+                empty
+            </div>
+            <button id="invite" @click="copyToClipboard()">Copy Invite</button>
+        </div>
 
-    <div class="column">
-      <div id="gameSettings" class="frame">
-        <div id="chooseGame" class="frame">
-          <div class="frame" v-for="game in games" :class="{ selected: game === conService.room.value?.selectedGame.toString() }">{{ game }}</div>
+        <div class="column">
+            <div id="gameSettings" class="frame">
+                <div id="chooseGame" class="frame">
+                    <div
+                        class="frame"
+                        v-for="game in games"
+                        :class="{
+                            selected: game === conService.room.value?.selectedGame.toString()
+                        }"
+                    >
+                        {{ game }}
+                    </div>
+                </div>
+                <div class="frame gameConfig">
+                    <toggleDiscription
+                        header="Local"
+                        info="are you playing across the table or the ocean?"
+                        :isOn="conService.room.value?.isLocal"
+                        :disabled="!conService.you.value?.isOwner"
+                        @toggle="conService.toggleLocal()"
+                    ></toggleDiscription>
+                </div>
+            </div>
+            <startButton @click="conService.startGame()"></startButton>
         </div>
-        <div class="frame gameConfig">
-          <toggleDiscription header="Local" info="are you playing across the table or the ocean?" :isOn="conService.room.value?.isLocal" :disabled="!conService.you.value?.isOwner" @toggle="conService.toggleLocal()"></toggleDiscription>
-        </div>
-      </div>
-    <startButton @click="conService.startGame()"></startButton>
-    </div>
-  </main>
+    </main>
 </template>
