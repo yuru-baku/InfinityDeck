@@ -44,6 +44,9 @@ export class MauMau {
     }
 
     end() {
+        if (this.room.state !== 'inGame') {
+            return;
+        }
         this.room.state = 'done';
         this.endTime = new Date();
 
