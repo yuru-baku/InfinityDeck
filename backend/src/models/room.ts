@@ -11,7 +11,7 @@ export class Room {
 
     id: string;
     users: User[];
-    state: 'initialising'|'inGame';
+    state: 'initialising'|'inGame'|'done';
     selectedGame: 'MauMau';
     game: MauMau;
     db: Db|undefined;
@@ -104,7 +104,11 @@ export class Room {
             this.users = this.users.filter(u => u != user); // remove this user
             // notify remaining
             this.sendMessageToUsers('left', { id: user.id, name: user.name });
-            // return this.users.length;
+            // close game if we were the last one and game hasn't finished
+            if (this.users.length === 0) {
+                // all left :(
+                this.game.end();
+            }
         }, 5 * 60 * 1000);
     }
 

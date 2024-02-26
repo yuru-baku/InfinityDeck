@@ -44,6 +44,7 @@ export class MauMau {
     }
 
     end() {
+        this.room.state = 'done';
         this.endTime = new Date();
 
         const leaderboard: string[] = [ ];
