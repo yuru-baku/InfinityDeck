@@ -11,7 +11,6 @@ export class MauMau {
     history: string[];
     startTime: Date|undefined;
     endTime: Date|undefined;
-    turn: number;
 
 
     constructor (room: Room) {
@@ -25,7 +24,6 @@ export class MauMau {
         this.playedCards = [ ];
         this.drawPile = [ ];        // "Nachziehstapel"
         this.history = [ ];
-        this.turn = 0;
     }
 
     start() {
@@ -40,23 +38,9 @@ export class MauMau {
         this.room.state = 'inGame';
         this.drawPile = [...this.deck]; // copy array
         this.shuffleArray(this.drawPile);
-        // give users some handcards
-        for (let i = 0; i < 7; i++) {
-            for (let user of this.room.users) {
-                user.handcards.unshift(this.drawPile.pop()!);
-            }
-        }
-        // propagate handcards?
-        for (let user of this.room.users) {
-            user.ws.send(JSON.stringify({
-                action: 'dealCards',
-                data: {
-                    handcards: user.handcards
-                }
-            }));
-            let historyEntry = [ 'dealCards', user.id, user.handcards.join(',')].join(':');
-            this.history.unshift(historyEntry);
-        }
+        this.room.sendMessageToUsers('dealCards', { });
+        let historyEntry = 'dealCards';
+        this.history.unshift(historyEntry);
     }
 
     end() {
@@ -64,7 +48,7 @@ export class MauMau {
 
         const leaderboard: string[] = [ ];
 
-        this.notifyUsers('end', {
+        this.room.sendMessageToUsers('end', {
             startTime: this.startTime,
             endTime: this.endTime,
             leaderboard: leaderboard
@@ -80,71 +64,28 @@ export class MauMau {
     }
 
     drawCard(user: User, message: WsMessage) {
-        // check if it is the users turn
-        if (this.room.users[this.turn] !== user) {
-            user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
-            return;
-        }
-        // check if we need to shuffle deck
-        if (this.drawPile.length <= 0) {
-            this.shuffleDrawPile();
-        }
-        const card = this.drawPile.pop()!;
-        user.handcards.unshift(card);
-        user.ws.send(JSON.stringify({
-            action: 'drawCard',
-            data: {
-                card: card,
-                markerId: message.data.markerId,
-                handcards: user.handcards,
-                nextActions: [ 'endTurn', 'playCard' ]
+        const markerId = message.data.markerId;
+        let card = user.markerMap.get(markerId)
+        // check if this card is already known
+        if (!card) {
+            // check if we need to shuffle deck
+            if (this.drawPile.length <= 0) {
+                this.shuffleDrawPile();
             }
-        }));
+            card = this.drawPile.pop()!;
+            this.room.addDataToMarker(markerId, card, user);
+        }
+        this.room.sendMessageToUsers('drawCard', { card: card, markerId: markerId });
+        // it might happen that we draw a card again, since we can shuffle
         this.history.unshift(`+${user.id}:${card}`);
-        // do not hand to next user now, wait if he can play now
     }
 
     playCard(user: User, message: WsMessage) {
-        // check if it is the users turn
-        if (this.room.users[this.turn] !== user) {
-            user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
-            return;
-        }
         // check if user has this card in his hand
-        const cardIndex = user.handcards.findIndex(card => card === message.data.card);
-        if (cardIndex < 0) {
-            user.ws.send(JSON.stringify({ error: 'The Server did not know you own this card. Please play another one' }));
-            return;
-        }
-        // play card
-        const playedCard = user.handcards.splice(cardIndex, 1)[0];
-        this.playedCards.unshift(playedCard);
-        this.history.unshift(`-${user.id}:${playedCard}`)
-        // check if it was the last card
-        const wasLast = user.handcards.length <= 0;
-        this.notifyUsers('playCard', { card: playedCard, wasLast: wasLast });
-        if (wasLast) {
-            // we do not check here if he needs to pull another card he can do so if he wants to :)
-            this.history.unshift(`${user.id}:finished`)
-        }
-        // hand to next user
-        this.endTurn(user, message);
-    }
-
-    endTurn(user: User, _: WsMessage) {
-        // check if it is the users turn
-        if (this.room.users[this.turn] !== user) {
-            user.ws.send(JSON.stringify({ error: 'It is not your turn!' }));
-            return;
-        }
-        // just hand to next user
-        this.turn = (this.turn) + 1 % this.room.users.length;
-        this.room.users[this.turn].ws.send(JSON.stringify({
-            action: 'yourTurn',
-            data: {
-                nextActions: [ 'drawCard', 'playCard' ]
-            }
-        }));
+        let card = message.data.card;
+        this.playedCards.push(card);
+        this.room.sendMessageToUsers('playedCard', { card: card });
+        this.history.unshift(`-${user.id}:${card}`);
     }
 
     shuffleDrawPile() {
@@ -152,9 +93,10 @@ export class MauMau {
         this.drawPile = this.shuffleArray(this.drawPile);
         this.playedCards = [ ];
         // notify users
-        this.notifyUsers('shuffled', { })
+        this.room.sendMessageToUsers('shuffled', { })
         this.history.unshift('shuffle');
     }
+
 
     shuffleArray(array: any[]) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -164,13 +106,5 @@ export class MauMau {
             array[j] = tmp;
         } 
         return array;
-    }
-    notifyUsers(action: string, data: any) {
-        for (let user of this.room.users) {
-            user.ws.send(JSON.stringify({
-                action: action,
-                data: data
-            }));
-        }
     }
 }

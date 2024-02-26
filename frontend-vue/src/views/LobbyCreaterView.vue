@@ -30,7 +30,7 @@ function copyToClipboard() {
                 class="playerStatus empty"
                 v-for="i in 4 - (conService.room.value?.users.length || 0)"
             >
-                <font-awesome-icon :icon="circle" />
+                <font-awesome-icon icon="circle" />
                 empty
             </div>
             <button id="invite" @click="copyToClipboard()">Copy Invite</button>
