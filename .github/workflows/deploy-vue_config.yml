@@ -7,31 +7,32 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    env:
+      working-directory: frontend-vue
+     
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set working directory
-        working-directory: frontend-vue
-
+      
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:
-          path: node_modules
+          path: ${{env.working-directory}}/node_modules
           key: ${{ runner.os }}-build-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-build-
 
       - name: Install dependencies (on cache miss)
+        working-directory: ${{env.working-directory}}
         if: steps.cache-dependencies.outputs.cache-hit == false
         run: npm install 
 
-      - name: Use Node.js 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
       - name: Build the Vue app
+        working-directory: ${{env.working-directory}}
         run: npm run build
 
       - name: Deploy to GitHub Pages (using GH Pages action)
@@ -40,4 +41,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           clean: true
-          build-dir: ./dist  # Relative Pfad zum Build-Verzeichnis
+          build-dir: ${{env.working-directory}}/./dist  # Relative Pfad zum Build-Verzeichnis
