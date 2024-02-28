@@ -44,4 +44,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           clean: true
-          build-dir: ${{env.working-directory}}/./dist  # Relative Pfad zum Build-Verzeichnis
+          build-dir: ${{env.working-directory}}/dist  # Relative Pfad zum Build-Verzeichnis
