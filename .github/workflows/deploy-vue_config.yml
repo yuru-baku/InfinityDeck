@@ -10,14 +10,21 @@ jobs:
         username: 'yuru-baku'
         reponame: 'InfintyDeck'
         token: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
+        gitemail: 'ci@example.com'
+        gitname:  'CI'
+        gitmsg: 'deploy'
+        cname: 'none'
     - name: npm install, build and deploy
       run: |
             cd frontend-vue
             npm install
             npm run build
             cd dist
-            ls -s index.html
+            ln -s index.html 404.html
+            if [ "none" !=  ${{ cname }} ]; then echo '${{ cname }}' > CNAME; fi
+            git config --global user.email "${{ gitemail }}"
+            git config --global user.name "${{ gitname }}"
             git init 
             git add -A
-            git commit -m '${{ inputs.gitmsg }}'
-            git push -f https://${{ inputs.username }}:${{ inputs.token }}@github.com/${{ inputs.username }}/${{ inputs.reponame }}.git master:gh-pages
+            git commit -m '${{ gitmsg }}'
+            git push -f https://${{ username }}:${{ token }}@github.com/${{ username }}/${{ reponame }}.git master:gh-pages
