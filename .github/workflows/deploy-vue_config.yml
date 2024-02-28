@@ -1,8 +1,6 @@
 name: Build and Deploy Vue App
 
-on:
-  push:
-    branches: [ autodeploy ]  # Optional: Filter branches (e.g., only "main")
+on: [push]
 
 jobs:
   build-and-deploy:
