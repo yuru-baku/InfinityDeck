@@ -14,10 +14,10 @@ jobs:
       working-directory: frontend-vue
      
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.0.4
       
       - name: Use Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.0.4
         with:
           node-version: 20
       
@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies (on cache miss)
         working-directory: ${{env.working-directory}}
         if: steps.cache-dependencies.outputs.cache-hit == false
-        run: npm ci 
+        run: npm ci
 
       - name: Build the Vue app
         working-directory: ${{env.working-directory}}
@@ -44,10 +44,10 @@ jobs:
           done
           
       - name: Create Artefact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.0.4
         with:
           name: github-pages  # Replace with your desired name
           path: ${{env.working-directory}}/dist  # Replace with the path to your build output
       
       - name: Deploy to GH-Pages 
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4.0.4
