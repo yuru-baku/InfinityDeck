@@ -1,23 +1,42 @@
-name: Build Vue
-on:  [push]
+name: Build and Deploy Vue App
+
+on:
+  push:
+    branches: [ main ]  # Optional: Filter branches (e.g., only "main")
+
 jobs:
-  deploy-vue:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    name: deploy vue to pages
+
     steps:
-    - uses: actions/checkout@v4.1.1
-    - name: npm install, build and deploy
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-            cd frontend-vue
-            npm install
-            npm run build
-            cd dist
-            ln -s index.html 404.html
-            git config --global user.email "ci@example"
-            git config --global user.name "ci"
-            git init 
-            git add -A
-            git commit -m 'deploy'
-            git push -f https://yuru-baku:@github.com/yuru-baku/InfintyDeck.git master:gh-pages
+      - uses: actions/checkout@v3
+
+      - name: Set working directory
+        working-directory: frontend-vue
+
+      - name: Install dependencies
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies (if cache miss)
+        run: npm install, if: steps.cache.outputs == ''
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Build the Vue app
+        run: npm run build
+
+      - name: Deploy to GitHub Pages (using GH Pages action)
+        uses: actions/deploy-pages@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          clean: true
+          build-dir: ./dist  # Relative Pfad zum Build-Verzeichnis
