@@ -36,12 +36,15 @@ jobs:
 
       - name: Build the Vue app
         working-directory: ${{env.working-directory}}
-        run: npm run build
+        run: npm run build     
 
       - name: Deploy to GitHub Pages (using GH Pages action)
-        uses: actions/deploy-pages@v1
+      - uses: actions/upload-artifact@v3
+        with:
+          name: github-pages  # Replace with your desired name
+          path: ${{env.working-directory}}/dist  # Replace with the path to your build output
+      - uses: actions/deploy-pages@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           clean: true
-          build-dir: ${{env.working-directory}}/dist  # Relative Pfad zum Build-Verzeichnis
