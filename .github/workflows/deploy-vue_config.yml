@@ -22,8 +22,8 @@ jobs:
             cd dist
             ln -s index.html 404.html
             if [ "none" !=  ${{ inputs.cname }} ]; then echo '${{ inputs.cname }}' > CNAME; fi
-            git config --global user.email "${{ gitemail }}"
-            git config --global user.name "${{ gitname }}"
+            git config --global user.email "${{ inputs.gitemail }}"
+            git config --global user.name "${{ inputs.gitname }}"
             git init 
             git add -A
             git commit -m '${{ inputs.gitmsg }}'
