@@ -38,12 +38,14 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: npm run build     
 
-      - name: Deploy to GitHub Pages (using GH Pages action)
-      - uses: actions/upload-artifact@v3
+      - name: Create Artefact
+        uses: actions/upload-artifact@v3
         with:
           name: github-pages  # Replace with your desired name
           path: ${{env.working-directory}}/dist  # Replace with the path to your build output
-      - uses: actions/deploy-pages@v1
+      
+      - name: Post to GH-Pages 
+        uses: actions/deploy-pages@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
