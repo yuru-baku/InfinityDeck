@@ -6,14 +6,6 @@ jobs:
     name: deploy vue to pages
     steps:
     - uses: actions/checkout@v4.1.1
-      with:
-        username: 'yuru-baku'
-        reponame: 'InfintyDeck'
-        token: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
-        gitemail: 'ci@example.com'
-        gitname:  'CI'
-        gitmsg: 'deploy'
-        cname: 'none'
     - name: npm install, build and deploy
       run: |
             cd frontend-vue
@@ -26,4 +18,4 @@ jobs:
             git init 
             git add -A
             git commit -m 'deploy'
-            git push -f https://yuru-baku:${{ inputs.token }}@github.com/yuru-baku/InfintyDeck.git master:gh-pages
+            git push -f https://yuru-baku:${{ secrets.GITHUB_TOKEN }}@github.com/yuru-baku/InfintyDeck.git master:gh-pages
