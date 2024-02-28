@@ -48,3 +48,5 @@ jobs:
         uses: actions/upload-pages-artifact@v3.0.1
         with:
           path: ${{env.working-directory}}/dist
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4.0.4
