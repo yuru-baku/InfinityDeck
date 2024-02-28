@@ -21,10 +21,9 @@ jobs:
             npm run build
             cd dist
             ln -s index.html 404.html
-            if [ "none" !=  ${{ inputs.cname }} ]; then echo '${{ inputs.cname }}' > CNAME; fi
-            git config --global user.email "${{ inputs.gitemail }}"
-            git config --global user.name "${{ inputs.gitname }}"
+            git config --global user.email "ci@example"
+            git config --global user.name "ci"
             git init 
             git add -A
-            git commit -m '${{ inputs.gitmsg }}'
-            git push -f https://${{ inputs.username }}:${{ inputs.token }}@github.com/${{ inputs.username }}/${{ inputs.reponame }}.git master:gh-pages
+            git commit -m 'deploy'
+            git push -f https://yuru-baku:${{ inputs.token }}@github.com/yuru-baku/InfintyDeck.git master:gh-pages
