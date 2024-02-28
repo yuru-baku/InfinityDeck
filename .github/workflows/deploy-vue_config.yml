@@ -44,9 +44,5 @@ jobs:
           name: github-pages  # Replace with your desired name
           path: ${{env.working-directory}}/dist  # Replace with the path to your build output
       
-      - name: Post to GH-Pages 
+      - name: Deploy to GH-Pages 
         uses: actions/deploy-pages@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
-          clean: true
