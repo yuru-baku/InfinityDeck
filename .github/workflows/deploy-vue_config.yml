@@ -10,6 +10,7 @@ jobs:
         username: 'yuru-baku'
         reponame: 'InfintyDeck'
         token: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
+    - name: npm install, build and deploy
       run: |
             cd frontend-vue
             npm install
