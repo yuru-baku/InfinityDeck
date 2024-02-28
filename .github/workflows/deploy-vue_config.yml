@@ -12,4 +12,3 @@ jobs:
         username: 'yuru-baku'
         reponame: 'InfintyDeck'
         token: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
-      run:
