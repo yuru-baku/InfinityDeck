@@ -32,12 +32,17 @@ jobs:
       - name: Install dependencies (on cache miss)
         working-directory: ${{env.working-directory}}
         if: steps.cache-dependencies.outputs.cache-hit == false
-        run: npm install 
+        run: npm ci 
 
       - name: Build the Vue app
         working-directory: ${{env.working-directory}}
         run: npm run build     
-
+      - name: Fix permissions
+        run: |
+          chmod -c -R +rX "${{env.working-directory}}/dist" | while read line; do
+          echo "::warning title=Invalid file permissions automatically fixed::$line"
+          done
+          
       - name: Create Artefact
         uses: actions/upload-artifact@v3
         with:
@@ -45,4 +50,4 @@ jobs:
           path: ${{env.working-directory}}/dist  # Replace with the path to your build output
       
       - name: Deploy to GH-Pages 
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v4
