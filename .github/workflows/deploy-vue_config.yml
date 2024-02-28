@@ -44,7 +44,7 @@ jobs:
           done
           
       - name: Create Artefact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: github-pages  # Replace with your desired name
           path: ${{env.working-directory}}/dist  # Replace with the path to your build output
