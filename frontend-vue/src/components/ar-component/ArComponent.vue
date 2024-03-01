@@ -61,15 +61,15 @@ props.conService.onConnection(() => {
                 markerEl.appendChild(textEl);
 
                 // Add the card Image
-                var ImageEl = document.createElement('a-image');
-                ImageEl.setAttribute('src', props.cardService.cardBack);
-                ImageEl.setAttribute('id', 'card');
+                var imageEl = document.createElement('a-image');
+                imageEl.setAttribute('src', props.cardService.cardBack);
+                imageEl.setAttribute('id', 'card');
                 imageEl.setAttribute('data-state', 'back');
 
                 imageEl.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
                 imageEl.object3D.position.set(0, 0.5, 0);
                 imageEl.object3D.rotation.set(Math.PI / 2, 0, 0);
-                markerEl.appendChild(ImageEl);
+                markerEl.appendChild(imageEl);
             }
             handZone = new Zone(
                 '/markers/ZoneMarker1.patt',
