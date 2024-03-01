@@ -64,9 +64,11 @@ props.conService.onConnection(() => {
                 var ImageEl = document.createElement('a-image');
                 ImageEl.setAttribute('src', props.cardService.cardBack);
                 ImageEl.setAttribute('id', 'card');
+                imageEl.setAttribute('data-state', 'back');
 
-                ImageEl.object3D.position.set(0, 0.0, 0);
-                ImageEl.object3D.rotation.set(-90, 0, 0);
+                imageEl.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
+                imageEl.object3D.position.set(0, 0.5, 0);
+                imageEl.object3D.rotation.set(Math.PI / 2, 0, 0);
                 markerEl.appendChild(ImageEl);
             }
             handZone = new Zone(
