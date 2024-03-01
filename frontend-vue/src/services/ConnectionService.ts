@@ -40,8 +40,7 @@ export class ConnectionService {
 
         this.store.changeWebSocket(
             new WebSocket(
-                `${
-                    import.meta.env.VITE_BACKEND_ENDPOINT
+                `${import.meta.env.BACKEND
                 }?name=${name}&roomId=${roomId}&userId=${userId}`
             )
         );
