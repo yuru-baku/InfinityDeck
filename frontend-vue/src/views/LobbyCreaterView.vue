@@ -22,15 +22,21 @@ function copyToClipboard() {
                 :key="user.id"
                 :class="{ online: !user.disconnected, offline: user.disconnected }"
             >
-                <font-awesome-icon icon="circle" v-if="user.id !== conService.you.value?.id" />
-                <font-awesome-icon icon="play" v-if="user.id === conService.you.value?.id" />
+                <font-awesome-icon
+                    :icon="['fas', 'circle']"
+                    v-if="user.id !== conService.you.value?.id"
+                />
+                <font-awesome-icon
+                    :icon="['fas', 'play']"
+                    v-if="user.id === conService.you.value?.id"
+                />
                 {{ user.name }}
             </div>
             <div
                 class="playerStatus empty"
                 v-for="i in 4 - (conService.room.value?.users.length || 0)"
             >
-                <font-awesome-icon icon="circle" />
+                <font-awesome-icon :icon="['fas', 'circle']" />
                 empty
             </div>
             <button id="invite" @click="copyToClipboard()">Copy Invite</button>
