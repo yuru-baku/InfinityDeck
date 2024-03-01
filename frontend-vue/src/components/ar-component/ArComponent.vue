@@ -216,9 +216,7 @@ function isMarkerIdFound(markerId, list) {
             renderer="gammaOutput: true"
             arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best;"
         >
-            <a-entity id="userCamera" camera>
-                <!-- <a-cursor> </a-cursor> -->
-            </a-entity>
+            <a-entity id="userCamera" camera> </a-entity>
         </a-scene>
     </div>
 </template>

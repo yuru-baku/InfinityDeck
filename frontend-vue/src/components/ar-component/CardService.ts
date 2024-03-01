@@ -18,12 +18,17 @@ export class CardService {
         this.cardCallbacks = new Map<string, Function>();
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection((data) => {
-            this.numberOfCards = 40; // Todo: Marker Anzahl?! 
+            this.numberOfCards = 40; // Todo: Marker Anzahl?!
             if (data.markerMap) {
-                this.markerMap = new Map(Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [key, { name: value, url: this.getCardUrl(value) }]));
-                console.log('recovered markerMap')
+                this.markerMap = new Map(
+                    Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [
+                        key,
+                        { name: value, url: this.getCardUrl(value) }
+                    ])
+                );
+                console.log('recovered markerMap');
             }
-        }); 
+        });
         conService.onCardDrawed((markerId, cardName) => this.registerMarker(markerId, cardName));
     }
 
@@ -56,8 +61,6 @@ export class CardService {
     /**
      * Registers a new marker and card combination.
      * If there is a callback waiting it will be called.
-     * @param markerId
-     * @param cardName
      */
     public registerMarker(markerId: string, cardName: string) {
         const card = { name: cardName, url: this.getCardUrl(cardName) };

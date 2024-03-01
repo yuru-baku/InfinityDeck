@@ -39,7 +39,9 @@ export class ConnectionService {
         const name = this.cookies.get('username');
 
         this.store.changeWebSocket(
-            new WebSocket(`${import.meta.env.VITE_BACKEND_ENDPOINT}?name=${name}&roomId=${roomId}&userId=${userId}`)
+            new WebSocket(
+                `${import.meta.env.VITE_BACKEND_ENDPOINT}?name=${name}&roomId=${roomId}&userId=${userId}`
+            )
         );
         const abortController = new AbortController();
         this.store.webSocket.addEventListener(
