@@ -1,0 +1,55 @@
+name: Build and Deploy Vue App
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      working-directory: frontend-vue
+     
+    steps:
+      - uses: actions/checkout@v4.1.1
+      
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 20
+      
+      - name: Cache Dependencies
+        uses: actions/cache@v4.0.0
+        with:
+          path: ${{env.working-directory}}/node_modules
+          key: ${{ runner.os }}-build-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Install dependencies (on cache miss)
+        working-directory: ${{env.working-directory}}
+        if: steps.cache-dependencies.outputs.cache-hit == false
+        run: npm ci
+
+      - name: Build the Vue app
+        working-directory: ${{env.working-directory}}
+        run: npm run build     
+        
+      - name: Fix permissions
+        run: |
+          chmod -c -R +rX "${{env.working-directory}}/dist" | while read line; do
+          echo "::warning title=Invalid file permissions automatically fixed::$line"
+          done
+      
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          path: ${{env.working-directory}}/dist
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4.0.4
