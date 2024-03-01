@@ -4,7 +4,8 @@
   "description": "Backend for InfinityDeck-app.",
   "main": "app.js",
   "scripts": {
-    "start": "npm run build && node --env-file=.env ./dist/app.js",
+    "start": "node ./dist/app.js",
+    "dev": "npm run build && node --env-file=.env ./dist/app.js",
     "build": "npx tsc"
   },
   "author": "",
