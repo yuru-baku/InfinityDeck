@@ -11,7 +11,7 @@ export class ConnectionService {
     router: Router;
     store: any;
     cookies = useCookies(['username', 'roomId', 'userId']);
-    connectionCallbacks: (() => void)[] = [];
+    connectionCallbacks: ((data: any) => void)[] = [];
     drawCardCallbacks: ((markerId: string, cardName: string) => void)[] = [];
 
     public room = ref<Room>();
@@ -51,6 +51,7 @@ export class ConnectionService {
             (event: MessageEvent) => {
                 const inLandingPage = this.router.currentRoute.value.name === 'landing-page';
                 const message = JSON.parse(event.data);
+                console.log(message.action, message.data);
                 if (message.action === 'connected') {
                     this.cookies.set('userId', message.data.you.id);
                     this.cookies.set('roomId', message.data.roomId);
@@ -94,7 +95,7 @@ export class ConnectionService {
                     if (message.data.state === 'initialising') {
                         this.router.push(`/lobby?roomId=${message.data.roomId}`);
                     }
-                    this.connectionCallbacks.forEach((callback) => callback());
+                    this.connectionCallbacks.forEach((callback) => callback(message.data));
                     this.connectionCallbacks = [];
                     break;
                 case 'settingsChanged':
@@ -156,9 +157,9 @@ export class ConnectionService {
         this.sendMessage('drawCard', { markerId: markerId });
     }
 
-    public onConnection(callback: () => void) {
+    public onConnection(callback: (data: any) => void) {
         if (this.game.value && this.room.value && this.you.value) {
-            callback();
+            callback(undefined);
         }
         this.connectionCallbacks.push(callback);
     }

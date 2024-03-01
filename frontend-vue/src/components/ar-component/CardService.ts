@@ -17,7 +17,13 @@ export class CardService {
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
-        conService.onConnection(() => (this.numberOfCards = 40)); // Todo: Marker Anzahl?!
+        conService.onConnection((data) => {
+            this.numberOfCards = 40; // Todo: Marker Anzahl?! 
+            if (data.markerMap) {
+                this.markerMap = new Map(Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [key, { name: value, url: this.getCardUrl(value) }]));
+                console.log('recovered markerMap')
+            }
+        }); 
         conService.onCardDrawed((markerId, cardName) => this.registerMarker(markerId, cardName));
     }
 
@@ -55,15 +61,21 @@ export class CardService {
      */
     public registerMarker(markerId: string, cardName: string) {
         const card = { name: cardName, url: this.getCardUrl(cardName) };
-        if (this.markerMap.get(markerId)) {
-            console.warn('Marker was already known, but was registered twice!');
+        // if it is a local game, update markerMap and check for waiting callbacks
+        if (this.conSerivce.room.value?.isLocal) {
+            if (this.markerMap.get(markerId)) {
+                console.warn('Marker was already known, but was registered twice!');
+            }
+            this.markerMap.set(markerId, card);
+            const callback = this.cardCallbacks.get(markerId);
+            // if there was no callback someone else drew this card locally
+            if (callback) {
+                callback(card);
+            }
+        } else {
+            // ToDo: What are we doing with not local games?
+            console.warn('This is not a local Game!');
         }
-        this.markerMap.set(markerId, card);
-        const callback = this.cardCallbacks.get(markerId);
-        if (callback) {
-            callback(card);
-        }
-        // if there was no callback someone else drew this card locally
     }
 
     public reloadMarkerMap() {}

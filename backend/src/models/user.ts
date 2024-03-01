@@ -5,9 +5,9 @@ export class User {
     ws: WebSocket;
     id: string;
     name: string;
-    handcards: string[];
     isOwner: boolean;
     timeout: NodeJS.Timeout|undefined;
+    markerMap: Map<string, any>;
 
     constructor(ws: WebSocket, id: string|undefined, name: string|undefined) {
         this.ws = ws;
@@ -21,7 +21,7 @@ export class User {
         } else {
             this.name = 'name_' + (Math.random() + 1).toString(36).substring(7);
         }
-        this.handcards = [];
         this.isOwner = false;
+        this.markerMap = new Map();
     }
 }
