@@ -31,7 +31,7 @@ props.conService.onConnection(() => {
             var sceneEl = document.querySelector('a-scene');
             //list of the markers
             for (var i = 0; i < props.cardService.numberOfCards + 1; i++) {
-                var url = '/markers/pattern-' + i + '.patt';
+                var url = './markers/pattern-' + i + '.patt';
                 markersURLArray.push(url);
                 markersNameArray.push(i);
             }
@@ -72,8 +72,8 @@ props.conService.onConnection(() => {
                 markerEl.appendChild(imageEl);
             }
             handZone = new Zone(
-                '/markers/ZoneMarker1.patt',
-                '/markers/ZoneMarker2.patt',
+                './markers/ZoneMarker1.patt',
+                './markers/ZoneMarker2.patt',
                 sceneEl,
                 'hand',
                 foundZoneMarkers
