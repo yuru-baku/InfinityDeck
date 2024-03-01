@@ -12,7 +12,7 @@ export class CardService {
 
     constructor(conService: ConnectionService) {
         this.conSerivce = conService;
-        this.cardBack = 'url(/cardImages/french-suited-cards/card-back-blue.svg)';
+        this.cardBack = 'url(./cardImages/french-suited-cards/card-back-blue.svg)';
         this.numberOfCards = 0;
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
@@ -28,7 +28,7 @@ export class CardService {
     }
 
     private getCardUrl(cardName: string) {
-        const basePath = '/cardImages/french-suited-cards';
+        const basePath = './cardImages/french-suited-cards';
         const fileType = 'svg';
         return `url(${basePath}/${cardName}.${fileType})`;
     }
