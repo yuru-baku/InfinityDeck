@@ -3,7 +3,13 @@ import { WebSocket, WebSocketServer } from 'ws';
 import { Room } from './models/room.js';
 import { User } from './models/user.js';
 
-const client = new MongoClient('mongodb://127.0.0.1:27017');
+if (!process.env.MONGO_URI) {
+    throw new Error('No MONGO_URI was defined!');
+}
+if (!process.env.PORT) {
+    throw new Error('No MONGO_URI was defined!');
+}
+const client = new MongoClient(process.env.MONGO_URI);
 const dbName = 'InfinityDeck';
 
 async function main() {
@@ -14,7 +20,7 @@ async function main() {
     const db = undefined;
 
     const rooms = new Map();
-    const wss = new WebSocketServer({ port: 8080 });
+    const wss = new WebSocketServer({ port: Number(process.env.PORT) });
     wss.on('connection', function connection(ws: WebSocket, req) {
         // on connection create new room or join an open room
         const room_id = req.url?.match(/(?<=roomId=)\w*/)?.at(0);
