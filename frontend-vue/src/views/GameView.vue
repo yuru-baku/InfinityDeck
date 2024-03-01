@@ -114,13 +114,20 @@ body {
 }
 
 video {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100% !important;
-    height: 100% !important;
-    margin: 0 !important;
+    // position: absolute;
+    // left: 0;
+    // top: 0;
+    // width: 100% !important;
+    // height: 100% !important;
+    // margin: 0 !important;
     border-radius: 0;
     object-fit: cover;
+}
+.a-canvas {
+    position: fixed !important;
+}
+html.a-fullscreen .a-canvas {
+    width: auto !important;
+    height: auto !important;
 }
 </style>

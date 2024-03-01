@@ -15,6 +15,17 @@ const props = defineProps({
 });
 const connected = ref(false);
 
+window.addEventListener('resize', (event) => {
+    let video = document.getElementById('arjs-video');
+    let canvas = document.getElementsByClassName('a-canvas');
+    if (!video) return;
+    let style = window.getComputedStyle(video);
+    canvas.item(0).style.marginTop = style.marginTop;
+    canvas.item(0).style.marginLeft = style.marginLeft;
+    canvas.item(0).height = style.height;
+    canvas.item(0).width = style.width;
+})
+
 //Global Variable
 var markersURLArray = [];
 var markersNameArray = [];
