@@ -18,11 +18,15 @@ export class ConnectionService {
     public game = ref<Game>();
     public you = ref<User>();
 
-    constructor() {
+    constructor(tryToConnect = true) {
         this.store = useWebSocketStore();
         this.router = useRouter();
+        if (!tryToConnect) {
+            return;
+        }
         // maybe we need to reconnect
         if (!this.store.webSocket || this.store.webSocket === null) {
+            console.log('connecting')
             this.connect();
         } else {
             // wait with init function until websocket connection was confirmed
