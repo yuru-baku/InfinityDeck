@@ -49,7 +49,7 @@ export class Room {
         console.log(user.id, connectionAction, this.id);
 
         // notify users
-        this.sendMessageToUsers(connectionAction, { id: user.id, name: user.name }, this.users.filter(u => u.id != user.id));
+        this.sendMessageToUsers(connectionAction, { id: user.id, name: user.name, isOwner: user.isOwner }, this.users.filter(u => u.id != user.id));
 
         // listen for actions of normal players
         const availableActions = [
@@ -175,5 +175,9 @@ export class Room {
         for (let user of users) {
             user.ws.send(JSON.stringify({ action, data }));
         }
+    }
+
+    public isJoinable(): boolean {
+        return this.users.length < this.game.maxUsers && this.state === 'initialising';
     }
 }

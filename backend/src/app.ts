@@ -54,6 +54,15 @@ async function main() {
             user.ws = ws;
             room.reconnect(user);
         } else {
+            if (room.isJoinable()) {
+                ws.send(JSON.stringify({
+                    action: 'error',
+                    data: {
+                        message: 'The Room is already full or in a running game!'
+                    }
+                }));
+                return;
+            }
             user = new User(ws, undefined, name);
             room.join(user);
         }

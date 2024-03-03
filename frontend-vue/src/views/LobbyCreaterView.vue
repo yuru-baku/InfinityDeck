@@ -14,21 +14,21 @@ function copyToClipboard() {
 </script>
 
 <template>
-    <main class="lobby" v-if="conService.room && conService.you">
+    <main class="lobby" v-if="conService.room.value && conService.you.value">
         <div id="playerList" class="frame">
             <div
                 class="playerStatus"
-                v-for="(user, i) in conService.room.value?.users"
+                v-for="(user, i) in (conService.room.value?.users || [])"
                 :key="user.id"
-                :class="{ online: !user.disconnected, offline: user.disconnected }"
+                :class="{ online: !user?.disconnected, offline: user.disconnected, selected: user.id === conService.you.value?.id }"
             >
                 <font-awesome-icon
                     :icon="['fas', 'circle']"
-                    v-if="user.id !== conService.you.value?.id"
+                    v-if="!user.isOwner"
                 />
                 <font-awesome-icon
-                    :icon="['fas', 'play']"
-                    v-if="user.id === conService.you.value?.id"
+                    :icon="['fas', 'crown']"
+                    v-if="user.isOwner"
                 />
                 {{ user.name }}
             </div>
@@ -65,7 +65,7 @@ function copyToClipboard() {
                     ></toggleDiscription>
                 </div>
             </div>
-            <startButton @click="conService.startGame()"></startButton>
+            <startButton @click="conService.startGame()" :disabled="!conService.you.value?.isOwner"></startButton>
         </div>
     </main>
 </template>

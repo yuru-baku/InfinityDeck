@@ -103,13 +103,17 @@ export class ConnectionService {
                     break;
                 case 'joined':
                     if (!this.room.value) return;
-                    this.room.value.users.push(message.data.user);
+                    this.room.value.users.push({ ...message.data });
                     break;
                 case 'disconnected':
                     var user = this.room.value?.users.find((user) => user.id === message.data.id);
                     if (user) {
                         user.disconnected = true;
                     }
+                    break;
+                case 'left':
+                    if (!this.room.value) return;
+                    this.room.value.users = this.room.value.users.filter((user => user.id === message.data.id));
                     break;
                 case 'reconnected':
                     var user = this.room.value?.users.find(
@@ -132,6 +136,8 @@ export class ConnectionService {
                         callback(message.data.markerId, message.data.card)
                     );
                     break;
+                case 'error':
+                    console.error('Error:', message.message);
                 default:
                     console.warn('Unhandled action', message.action, message.data);
             }
