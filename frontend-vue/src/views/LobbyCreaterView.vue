@@ -3,14 +3,20 @@ import startButton from '@/components/startButton.vue';
 import toggleDiscription from '@/components/toggleDiscription.vue';
 import { GameOption } from '@/model/room';
 import { ConnectionService } from '@/services/ConnectionService';
+import { onUnmounted } from 'vue';
 
 const games = Object.keys(GameOption).filter((key: any) => typeof GameOption[key] === 'number');
 
-const conService = new ConnectionService();
+let conService = new ConnectionService();
 
 function copyToClipboard() {
     navigator.clipboard.writeText(window.location.origin + window.location.search);
 }
+
+onUnmounted(() => {
+    conService.killConnection();
+    conService = undefined;
+});
 </script>
 
 <template>
@@ -65,7 +71,8 @@ function copyToClipboard() {
                     ></toggleDiscription>
                 </div>
             </div>
-            <startButton @click="conService.startGame()" :disabled="!conService.you.value?.isOwner"></startButton>
+            <startButton v-if="conService.room.value.state === 'inLobby'" @click="conService.startGame()" :disabled="!conService.you.value?.isOwner"></startButton>
+            <startButton v-if="conService.room.value.state === 'inGame'" @click="conService.navigateToGame()" label="Back to Game"></startButton>
         </div>
     </main>
 </template>

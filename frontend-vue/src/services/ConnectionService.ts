@@ -13,6 +13,7 @@ export class ConnectionService {
     cookies = useCookies(['username', 'roomId', 'userId']);
     connectionCallbacks: ((data: any) => void)[] = [];
     drawCardCallbacks: ((markerId: string, cardName: string) => void)[] = [];
+    controller = new AbortController();
 
     public room = ref<Room>();
     public game = ref<Game>();
@@ -92,7 +93,7 @@ export class ConnectionService {
                             `/${message.data.selectedGame}?roomId=${message.data.roomId}`
                         );
                     }
-                    if (message.data.state === 'initialising') {
+                    if (message.data.state === 'inLobby') {
                         this.router.push(`/lobby?roomId=${message.data.roomId}`);
                     }
                     this.connectionCallbacks.forEach((callback) => callback(message.data));
@@ -141,7 +142,7 @@ export class ConnectionService {
                 default:
                     console.warn('Unhandled action', message.action, message.data);
             }
-        });
+        }, { signal: this.controller.signal });
     }
 
     // actions ======================================================================================================
@@ -176,5 +177,19 @@ export class ConnectionService {
 
     private sendMessage(action: string, data: any) {
         this.store.webSocket.send(JSON.stringify({ action: action, data: data }));
+    }
+
+    public navigateToGame() {
+        if (this.room.value) {
+            this.router.push(
+                `/${this.room.value.selectedGame}?roomId=${this.room.value.id}`
+            );
+        }
+    }
+
+    public killConnection() {
+        this.controller.abort();
+        this.connectionCallbacks.forEach((callback) => callback(undefined))
+        this.drawCardCallbacks.forEach((callback) => callback('', ''))
     }
 }

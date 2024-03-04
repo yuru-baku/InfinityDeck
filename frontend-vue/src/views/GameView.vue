@@ -2,20 +2,26 @@
 import ArComponent from '@/components/ar-component/ArComponent.vue';
 import { CardService } from '@/components/ar-component/CardService';
 import { ConnectionService } from '@/services/ConnectionService';
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 
 var showMenu = ref(false);
 var showUsers = ref(false);
 
-const conService = new ConnectionService();
-const cardService = new CardService(conService);
+let conService = new ConnectionService();
+let cardService = new CardService(conService);
+
+onUnmounted(() => {
+    conService.killConnection();
+    conService = undefined;
+    cardService = undefined;
+});
 </script>
 
 <template>
     <ArComponent :card-service="cardService" :con-service="conService"></ArComponent>
     <div class="game-overlay">
         <div id="fixed-overlay-content">
-            <div>
+            <div class="quick-info-container">
                 <h1 class="game-title">{{ conService.room.value?.selectedGame }}</h1>
                 <p class="quick-info" v-if="conService.room.value?.id">
                     RoomID: {{ conService.room.value.id }}
@@ -25,25 +31,22 @@ const cardService = new CardService(conService);
                 </p>
             </div>
             <div class="preAndButtonsRow">
-                <pre v-if="showMenu && conService.you" id="menu">
-                {{ '\n' + JSON.stringify(conService.you.value, null, 2) }}
-                {{ '\n' + JSON.stringify(conService.game.value, null, 2) }}
-                </pre>
                 <div class="buttons">
                     <button type="button" @click="showMenu = !showMenu">
-                        <font-awesome-icon :icon="['fas', 'gear']" />
+                        <font-awesome-icon :icon="['fas', 'bars']" />
                     </button>
-                    <button type="button" @click="showUsers = !showUsers">
+                    <button type="button" @click="showUsers = !showUsers" v-if="showMenu">
                         <font-awesome-icon :icon="['fas', 'users']" />
                     </button>
-                    <button type="button">
+                    <button type="button" v-if="showMenu">
                         <font-awesome-icon :icon="['fas', 'comments']" />
                     </button>
-                    <button type="button">
+                    <button type="button" v-if="showMenu">
                         <font-awesome-icon :icon="['fas', 'dice-d20']" />
                     </button>
-                    <button type="button" @click="$router.go(-1)">
-                        <font-awesome-icon :icon="['fas', 'door-closed']" />
+                    <div class="spacer" v-if="showMenu"></div>
+                    <button type="button" @click="$router.go(-1)" v-if="showMenu">
+                        <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" />
                     </button>
                 </div>
             </div>
@@ -59,17 +62,18 @@ const cardService = new CardService(conService);
     position: absolute;
     top: 1vh;
     right: 1vh;
-    height: 98vh;
+    max-height: 98vh;
+    height: auto;
     width: auto;
     background-color: rgba(255, 255, 255, 0.4);
     padding: 8pt;
     overflow: auto;
 
     #fixed-overlay-content {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: auto auto;
         height: 100%;
-        align-items: end;
+        align-items: start;
 
         .game-title,
         .quick-info {
@@ -85,25 +89,31 @@ const cardService = new CardService(conService);
             display: flex;
             flex-direction: column;
             height: 100%;
-            gap: 1rem;
+            // gap: 1rem;
+            .spacer {
+                flex-grow: 2;
+                height: 100%;
+            }
+        }
 
-            button {
-                aspect-ratio: 1;
-                justify-content: center;
-                align-items: center;
-                border: none;
-                background-color: rgba(255, 255, 255, 0.2);
-                cursor: pointer;
-                filter: none;
-                padding: 0;
-                margin: 0;
-                svg {
-                    padding: 8px;
-                    font-size: 32px;
-                }
-                &:last-child {
-                    margin-top: auto;
-                }
+        button {
+            aspect-ratio: 1;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            filter: none;
+            padding: 0;
+            margin: 0;
+            svg {
+                padding: 8px;
+                font-size: 32px;
+                width: 32px;
+                height: 32px;
+            }
+            &:last-child:not(:first-child) {
+                margin-top: auto;
             }
         }
     }

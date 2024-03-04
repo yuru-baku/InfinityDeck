@@ -11,7 +11,7 @@ export class Room {
 
     id: string;
     users: User[];
-    state: 'initialising'|'inGame'|'done';
+    state: 'inLobby'|'inGame'|'finished';
     selectedGame: 'MauMau';
     game: MauMau;
     db: Db|undefined;
@@ -20,7 +20,7 @@ export class Room {
     constructor(db?: Db, id?: string) {
         this.id = id || 'room_' + (Math.random() + 1).toString(36).substring(7);
         this.users = [];    // Users taking part in this game
-        this.state = 'initialising';
+        this.state = 'inLobby';
         this.selectedGame = 'MauMau';
         this.game = new MauMau(this);
         this.db = db;
@@ -178,6 +178,6 @@ export class Room {
     }
 
     public isJoinable(): boolean {
-        return this.users.length < this.game.maxUsers && this.state === 'initialising';
+        return this.users.length < this.game.maxUsers && this.state === 'inLobby';
     }
 }
