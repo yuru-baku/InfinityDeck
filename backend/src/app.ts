@@ -54,7 +54,7 @@ async function main() {
             user.ws = ws;
             room.reconnect(user);
         } else {
-            if (room.isJoinable()) {
+            if (!room.isJoinable()) {
                 ws.send(JSON.stringify({
                     action: 'error',
                     data: {
