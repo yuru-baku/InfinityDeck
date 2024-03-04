@@ -7,7 +7,7 @@ export enum Zone {
 
 export type Card = {
     markerId: string;
-    cardName: string;
+    cardFace: string;
     owner: User;
     zone: Zone;
 };

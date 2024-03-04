@@ -45,7 +45,9 @@ export class ConnectionService {
 
         this.store.changeWebSocket(
             new WebSocket(
-                `${import.meta.env.VITE_BACKEND_ENDPOINT}?name=${name}&roomId=${roomId}&userId=${userId}`
+                `${
+                    import.meta.env.VITE_BACKEND_ENDPOINT
+                }?name=${name}&roomId=${roomId}&userId=${userId}`
             )
         );
         const abortController = new AbortController();

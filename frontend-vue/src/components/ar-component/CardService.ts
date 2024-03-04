@@ -32,7 +32,7 @@ export class CardService {
         conService.onCardDrawed((markerId, cardName) => this.registerMarker(markerId, cardName));
     }
 
-    private getCardUrl(cardName: string) {
+    private getCardUrl(cardName: string): string {
         const basePath = './cardImages/french-suited-cards';
         const fileType = 'svg';
         return `url(${basePath}/${cardName}.${fileType})`;
@@ -81,5 +81,5 @@ export class CardService {
         }
     }
 
-    public reloadMarkerMap() {}
+    public reloadMarkerMap() { }
 }
