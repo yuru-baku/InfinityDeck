@@ -11,16 +11,16 @@ export class Room {
 
     id: string;
     users: User[];
-    state: 'initialising'|'inGame'|'done';
+    state: 'inLobby'|'inGame'|'finished';
     selectedGame: 'MauMau';
     game: MauMau;
-    db: Db|undefined;
+    db: Db;
     isLocal: boolean;
 
-    constructor(db?: Db, id?: string) {
+    constructor(db: Db, id?: string) {
         this.id = id || 'room_' + (Math.random() + 1).toString(36).substring(7);
         this.users = [];    // Users taking part in this game
-        this.state = 'initialising';
+        this.state = 'inLobby';
         this.selectedGame = 'MauMau';
         this.game = new MauMau(this);
         this.db = db;
@@ -49,7 +49,7 @@ export class Room {
         console.log(user.id, connectionAction, this.id);
 
         // notify users
-        this.sendMessageToUsers(connectionAction, { id: user.id, name: user.name }, this.users.filter(u => u.id != user.id));
+        this.sendMessageToUsers(connectionAction, { id: user.id, name: user.name, isOwner: user.isOwner }, this.users.filter(u => u.id != user.id));
 
         // listen for actions of normal players
         const availableActions = [
@@ -175,5 +175,9 @@ export class Room {
         for (let user of users) {
             user.ws.send(JSON.stringify({ action, data }));
         }
+    }
+
+    public isJoinable(): boolean {
+        return this.users.length < this.game.maxUsers && this.state === 'inLobby';
     }
 }
