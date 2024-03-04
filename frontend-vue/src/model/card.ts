@@ -5,7 +5,7 @@ export enum Zone {
     private
 }
 
-export type card = {
+export type Card = {
     markerId: string;
     cardName: string;
     owner: User;
