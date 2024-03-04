@@ -27,7 +27,7 @@ export class ConnectionService {
         }
         // maybe we need to reconnect
         if (!this.store.webSocket || this.store.webSocket === null) {
-            console.log('connecting')
+            console.log('connecting');
             this.connect();
         } else {
             // wait with init function until websocket connection was confirmed
@@ -82,69 +82,77 @@ export class ConnectionService {
      */
     public addListeners() {
         this.sendMessage('getRoomInfo', undefined);
-        this.store.webSocket.addEventListener('message', (event: MessageEvent) => {
-            const message = JSON.parse(event.data);
-            console.log(message.action, message.data);
-            switch (message.action) {
-                case 'gotRoomInfo':
-                    this.room.value = message.data.room;
-                    this.game.value = message.data.game;
-                    this.you.value = message.data.you;
-                    if (message.data.state === 'inGame') {
-                        this.router.push(
-                            `/${message.data.selectedGame}?roomId=${message.data.roomId}`
+        this.store.webSocket.addEventListener(
+            'message',
+            (event: MessageEvent) => {
+                const message = JSON.parse(event.data);
+                console.log(message.action, message.data);
+                switch (message.action) {
+                    case 'gotRoomInfo':
+                        this.room.value = message.data.room;
+                        this.game.value = message.data.game;
+                        this.you.value = message.data.you;
+                        if (message.data.state === 'inGame') {
+                            this.router.push(
+                                `/${message.data.selectedGame}?roomId=${message.data.roomId}`
+                            );
+                        }
+                        if (message.data.state === 'inLobby') {
+                            this.router.push(`/lobby?roomId=${message.data.roomId}`);
+                        }
+                        this.connectionCallbacks.forEach((callback) => callback(message.data));
+                        this.connectionCallbacks = [];
+                        break;
+                    case 'settingsChanged':
+                        this.room.value!.isLocal = message.data.isLocal || false;
+                        break;
+                    case 'joined':
+                        if (!this.room.value) return;
+                        this.room.value.users.push({ ...message.data });
+                        break;
+                    case 'disconnected':
+                        var user = this.room.value?.users.find(
+                            (user) => user.id === message.data.id
                         );
-                    }
-                    if (message.data.state === 'inLobby') {
-                        this.router.push(`/lobby?roomId=${message.data.roomId}`);
-                    }
-                    this.connectionCallbacks.forEach((callback) => callback(message.data));
-                    this.connectionCallbacks = [];
-                    break;
-                case 'settingsChanged':
-                    this.room.value!.isLocal = message.data.isLocal || false;
-                    break;
-                case 'joined':
-                    if (!this.room.value) return;
-                    this.room.value.users.push({ ...message.data });
-                    break;
-                case 'disconnected':
-                    var user = this.room.value?.users.find((user) => user.id === message.data.id);
-                    if (user) {
-                        user.disconnected = true;
-                    }
-                    break;
-                case 'left':
-                    if (!this.room.value) return;
-                    this.room.value.users = this.room.value.users.filter((user => user.id === message.data.id));
-                    break;
-                case 'reconnected':
-                    var user = this.room.value?.users.find(
-                        (user) => user.id === message.data.user.id
-                    );
-                    if (user) {
-                        user.disconnected = false;
-                        console.log(user);
-                    }
-                    break;
-                case 'started':
-                case 'dealCards':
-                    if (!this.room.value) return;
-                    this.router.push(
-                        `/${this.room.value.selectedGame}?roomId=${this.room.value.id}`
-                    );
-                    break;
-                case 'drawCard':
-                    this.drawCardCallbacks.forEach((callback) =>
-                        callback(message.data.markerId, message.data.card)
-                    );
-                    break;
-                case 'error':
-                    console.error('Error:', message.message);
-                default:
-                    console.warn('Unhandled action', message.action, message.data);
-            }
-        }, { signal: this.controller.signal });
+                        if (user) {
+                            user.disconnected = true;
+                        }
+                        break;
+                    case 'left':
+                        if (!this.room.value) return;
+                        this.room.value.users = this.room.value.users.filter(
+                            (user) => user.id === message.data.id
+                        );
+                        break;
+                    case 'reconnected':
+                        var user = this.room.value?.users.find(
+                            (user) => user.id === message.data.user.id
+                        );
+                        if (user) {
+                            user.disconnected = false;
+                            console.log(user);
+                        }
+                        break;
+                    case 'started':
+                    case 'dealCards':
+                        if (!this.room.value) return;
+                        this.router.push(
+                            `/${this.room.value.selectedGame}?roomId=${this.room.value.id}`
+                        );
+                        break;
+                    case 'drawCard':
+                        this.drawCardCallbacks.forEach((callback) =>
+                            callback(message.data.markerId, message.data.card)
+                        );
+                        break;
+                    case 'error':
+                        console.error('Error:', message.message);
+                    default:
+                        console.warn('Unhandled action', message.action, message.data);
+                }
+            },
+            { signal: this.controller.signal }
+        );
     }
 
     // actions ======================================================================================================
@@ -183,15 +191,13 @@ export class ConnectionService {
 
     public navigateToGame() {
         if (this.room.value) {
-            this.router.push(
-                `/${this.room.value.selectedGame}?roomId=${this.room.value.id}`
-            );
+            this.router.push(`/${this.room.value.selectedGame}?roomId=${this.room.value.id}`);
         }
     }
 
     public killConnection() {
         this.controller.abort();
-        this.connectionCallbacks.forEach((callback) => callback(undefined))
-        this.drawCardCallbacks.forEach((callback) => callback('', ''))
+        this.connectionCallbacks.forEach((callback) => callback(undefined));
+        this.drawCardCallbacks.forEach((callback) => callback('', ''));
     }
 }

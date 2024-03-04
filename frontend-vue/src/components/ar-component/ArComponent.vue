@@ -16,14 +16,23 @@ const props = defineProps({
 const connected = ref(false);
 
 const resizeController = new AbortController();
-window.addEventListener('resize', (event) => {
-    let video = document.getElementById('arjs-video');
-    let canvas = document.getElementsByClassName('a-canvas');
-    if (!video) return;
-    let style = window.getComputedStyle(video);
-    canvas.item(0).setAttribute('style', `width: ${style.width} !important; height: ${style.height} !important; margin-top: ${style.marginTop}; margin-left: ${style.marginLeft};`);
-}, { signal: resizeController.signal });
-console.log(AFRAME)
+window.addEventListener(
+    'resize',
+    (event) => {
+        let video = document.getElementById('arjs-video');
+        let canvas = document.getElementsByClassName('a-canvas');
+        if (!video) return;
+        let style = window.getComputedStyle(video);
+        canvas
+            .item(0)
+            .setAttribute(
+                'style',
+                `width: ${style.width} !important; height: ${style.height} !important; margin-top: ${style.marginTop}; margin-left: ${style.marginLeft};`
+            );
+    },
+    { signal: resizeController.signal }
+);
+console.log(AFRAME);
 AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
 // AFRAME.AScene.removeFullScreenStyles();
 
@@ -236,7 +245,7 @@ onUnmounted(() => {
     }
 
     // remove custom components
-    const componentsToRemove = [ 'markers_start', 'registerevents', 'registerevents_zone' ];
+    const componentsToRemove = ['markers_start', 'registerevents', 'registerevents_zone'];
     for (let component of componentsToRemove) {
         delete AFRAME.components[component];
     }
