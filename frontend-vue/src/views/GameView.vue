@@ -12,8 +12,6 @@ let cardService = new CardService(conService);
 
 onUnmounted(() => {
     conService.killConnection();
-    conService = undefined;
-    cardService = undefined;
 });
 </script>
 
