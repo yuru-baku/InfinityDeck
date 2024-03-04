@@ -1,8 +1,8 @@
 import type { Card } from '@/model/card.ts';
 import type { User } from '@/model/user.ts';
 
-function syncFound() {}
+function syncFound(card: Card) { }
 
-function syncMissed() {}
+function syncLoss(card: Card) { }
 
-function updateCard() {}
+function updateCard(card: Card) { }
