@@ -10,4 +10,5 @@ export type Room = {
     users: User[];
     isLocal: boolean;
     selectedGame: GameOption;
+    state: 'inLobby'|'inGame'|'finished';
 };

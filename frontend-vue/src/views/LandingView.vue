@@ -4,13 +4,14 @@ import { useCookies } from '@vueuse/integrations/useCookies';
 import startButton from '@/components/startButton.vue';
 import { ConnectionService } from '@/services/ConnectionService';
 
-const conService = new ConnectionService();
+const conService = new ConnectionService(false);
 const cookies = useCookies(['username']);
-let name = ref(cookies.get('username'));
+let name = ref(cookies.get('username') || '');
 function joinRoom() {
     cookies.set('username', name.value);
     conService.connect();
 }
+// s
 </script>
 
 <template>

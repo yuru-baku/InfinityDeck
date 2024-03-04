@@ -3,7 +3,7 @@ import '@ar-js-org/ar.js';
 import { Zone } from './Zone';
 import { CardService } from './CardService';
 import { ConnectionService } from '@/services/ConnectionService';
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 const props = defineProps({
     cardService: {
@@ -15,6 +15,18 @@ const props = defineProps({
 });
 const connected = ref(false);
 
+const resizeController = new AbortController();
+window.addEventListener('resize', (event) => {
+    let video = document.getElementById('arjs-video');
+    let canvas = document.getElementsByClassName('a-canvas');
+    if (!video) return;
+    let style = window.getComputedStyle(video);
+    canvas.item(0).setAttribute('style', `width: ${style.width} !important; height: ${style.height} !important; margin-top: ${style.marginTop}; margin-left: ${style.marginLeft};`);
+}, { signal: resizeController.signal });
+console.log(AFRAME)
+AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
+// AFRAME.AScene.removeFullScreenStyles();
+
 //Global Variable
 var markersURLArray = [];
 var markersNameArray = [];
@@ -24,138 +36,144 @@ var foundZoneMarkers = [];
 var handZone;
 
 props.conService.onConnection(() => {
-    AFRAME.registerComponent('markers_start', {
-        init: function () {
-            console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
+    if (!AFRAME.components['markers_start']) {
+        AFRAME.registerComponent('markers_start', {
+            init: function () {
+                console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
 
-            var sceneEl = document.querySelector('a-scene');
-            //list of the markers
-            for (var i = 0; i < props.cardService.numberOfCards + 1; i++) {
-                var url = './markers/pattern-' + i + '.patt';
-                markersURLArray.push(url);
-                markersNameArray.push(i);
+                var sceneEl = document.querySelector('a-scene');
+                //list of the markers
+                for (var i = 0; i < props.cardService.numberOfCards + 1; i++) {
+                    var url = './markers/pattern-' + i + '.patt';
+                    markersURLArray.push(url);
+                    markersNameArray.push(i);
+                }
+                for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
+                    var markerEl = document.createElement('a-marker');
+                    markerEl.setAttribute('type', 'pattern');
+                    markerEl.setAttribute('url', markersURLArray[k]);
+                    markerEl.setAttribute('id', markersNameArray[k]);
+
+                    markerEl.setAttribute('registerevents', '');
+                    sceneEl.appendChild(markerEl);
+                    markerEl.style.zIndex = '1'; // Adjust the value as needed
+
+                    // Add text to each marker
+                    var textEl = document.createElement('a-entity');
+
+                    textEl.setAttribute('id', 'text');
+                    textEl.setAttribute('text', {
+                        color: 'red',
+                        align: 'center',
+                        value: markersNameArray[k],
+                        width: '5.5'
+                    });
+                    textEl.object3D.position.set(0, 0.7, 0);
+                    textEl.object3D.rotation.set(-90, 0, 0);
+
+                    markerEl.appendChild(textEl);
+
+                    // Add the card Image
+                    var imageEl = document.createElement('a-image');
+                    imageEl.setAttribute('src', props.cardService.cardBack);
+                    imageEl.setAttribute('id', 'card');
+                    imageEl.setAttribute('data-state', 'back');
+
+                    imageEl.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
+                    imageEl.object3D.position.set(0, 0, 0);
+                    imageEl.object3D.rotation.set(Math.PI / 2, 0, 0);
+                    markerEl.appendChild(imageEl);
+                }
+                handZone = new Zone(
+                    './markers/ZoneMarker1.patt',
+                    './markers/ZoneMarker2.patt',
+                    sceneEl,
+                    'hand',
+                    foundZoneMarkers
+                );
             }
-            for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
-                var markerEl = document.createElement('a-marker');
-                markerEl.setAttribute('type', 'pattern');
-                markerEl.setAttribute('url', markersURLArray[k]);
-                markerEl.setAttribute('id', markersNameArray[k]);
-
-                markerEl.setAttribute('registerevents', '');
-                sceneEl.appendChild(markerEl);
-                markerEl.style.zIndex = '1'; // Adjust the value as needed
-
-                // Add text to each marker
-                var textEl = document.createElement('a-entity');
-
-                textEl.setAttribute('id', 'text');
-                textEl.setAttribute('text', {
-                    color: 'red',
-                    align: 'center',
-                    value: markersNameArray[k],
-                    width: '5.5'
-                });
-                textEl.object3D.position.set(0, 0.7, 0);
-                textEl.object3D.rotation.set(-90, 0, 0);
-
-                markerEl.appendChild(textEl);
-
-                // Add the card Image
-                var imageEl = document.createElement('a-image');
-                imageEl.setAttribute('src', props.cardService.cardBack);
-                imageEl.setAttribute('id', 'card');
-                imageEl.setAttribute('data-state', 'back');
-
-                imageEl.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
-                imageEl.object3D.position.set(0, 0.5, 0);
-                imageEl.object3D.rotation.set(Math.PI / 2, 0, 0);
-                markerEl.appendChild(imageEl);
-            }
-            handZone = new Zone(
-                './markers/ZoneMarker1.patt',
-                './markers/ZoneMarker2.patt',
-                sceneEl,
-                'hand',
-                foundZoneMarkers
-            );
-        }
-    });
+        });
+    }
 
     //Detect marker found and lost
-    AFRAME.registerComponent('registerevents', {
-        init: function () {
-            const marker = this.el;
+    if (!AFRAME.components['registerevents']) {
+        AFRAME.registerComponent('registerevents', {
+            init: function () {
+                const marker = this.el;
 
-            marker.addEventListener('markerFound', () => {
-                var markerId = marker.id;
-                addFoundMarker(marker, foundCardMarkers);
-                if (handZone.markerInZone(marker)) {
-                    turnCard(marker);
-                }
-                console.log('Marker Found: ', markerId, 'at ', marker.object3D.position);
-            });
-
-            marker.addEventListener('markerLost', () => {
-                var markerId = marker.id;
-                removeFoundMarker(marker, foundCardMarkers);
-                console.log('Marker Lost: ', markerId);
-            });
-            function checkMarkerInZone() {
-                for (let foundMarker of foundCardMarkers) {
-                    if (handZone.markerInZone(foundMarker)) {
-                        turnCard(foundMarker);
-                    } else if (isCardBack(foundMarker)) {
-                        showCard(foundMarker);
+                marker.addEventListener('markerFound', () => {
+                    var markerId = marker.id;
+                    addFoundMarker(marker, foundCardMarkers);
+                    if (handZone.markerInZone(marker)) {
+                        turnCard(marker);
                     }
+                    console.log('Marker Found: ', markerId, 'at ', marker.object3D.position);
+                });
+
+                marker.addEventListener('markerLost', () => {
+                    var markerId = marker.id;
+                    removeFoundMarker(marker, foundCardMarkers);
+                    console.log('Marker Lost: ', markerId);
+                });
+                function checkMarkerInZone() {
+                    for (let foundMarker of foundCardMarkers) {
+                        if (handZone.markerInZone(foundMarker)) {
+                            turnCard(foundMarker);
+                        } else if (isCardBack(foundMarker)) {
+                            showCard(foundMarker);
+                        }
+                    }
+                    setTimeout(checkMarkerInZone, 100);
                 }
-                setTimeout(checkMarkerInZone, 100);
+                checkMarkerInZone();
             }
-            checkMarkerInZone();
-        }
-    });
+        });
+    }
 
-    AFRAME.registerComponent('registerevents_zone', {
-        init: function () {
-            const marker = this.el;
-            var lastPosition1;
-            var lastPosition2;
-            marker.addEventListener('markerFound', () => {
-                var markerId = marker.id;
-                var image = marker.querySelector('#text');
-                var position = marker.object3D.position;
+    if (!AFRAME.components['registerevents_zone']) {
+        AFRAME.registerComponent('registerevents_zone', {
+            init: function () {
+                const marker = this.el;
+                var lastPosition1;
+                var lastPosition2;
+                marker.addEventListener('markerFound', () => {
+                    var markerId = marker.id;
+                    var image = marker.querySelector('#text');
+                    var position = marker.object3D.position;
 
-                addFoundMarker(marker, foundZoneMarkers);
-                //add for loop here with zoneArray if we have multiple
-                if (
-                    isMarkerIdFound(handZone.getMarker1Id(), foundZoneMarkers) &&
-                    isMarkerIdFound(handZone.getMarker2Id(), foundZoneMarkers)
-                ) {
-                    lastPosition1 = handZone.getZoneMarker1().object3D.position.clone();
-                    lastPosition2 = handZone.getZoneMarker2().object3D.position.clone();
-                    handZone.drawZone();
-                }
+                    addFoundMarker(marker, foundZoneMarkers);
+                    //add for loop here with zoneArray if we have multiple
+                    if (
+                        isMarkerIdFound(handZone.getMarker1Id(), foundZoneMarkers) &&
+                        isMarkerIdFound(handZone.getMarker2Id(), foundZoneMarkers)
+                    ) {
+                        lastPosition1 = handZone.getZoneMarker1().object3D.position.clone();
+                        lastPosition2 = handZone.getZoneMarker2().object3D.position.clone();
+                        handZone.drawZone();
+                    }
 
-                console.log('Zone Marker Found: ', markerId, 'at ', marker.object3D.position);
-            });
+                    console.log('Zone Marker Found: ', markerId, 'at ', marker.object3D.position);
+                });
 
-            marker.addEventListener('markerLost', () => {
-                var markerId = marker.id;
+                marker.addEventListener('markerLost', () => {
+                    var markerId = marker.id;
 
-                //add for loop here with zoneArray if we have multiple
-                if (
-                    marker.id === handZone.getMarker1Id() ||
-                    marker.id === handZone.getMarker2Id()
-                ) {
-                    handZone.removeZone();
-                }
+                    //add for loop here with zoneArray if we have multiple
+                    if (
+                        marker.id === handZone.getMarker1Id() ||
+                        marker.id === handZone.getMarker2Id()
+                    ) {
+                        handZone.removeZone();
+                    }
 
-                removeFoundMarker(marker, foundZoneMarkers);
-                console.log('Zone Marker Lost: ', markerId);
-            });
+                    removeFoundMarker(marker, foundZoneMarkers);
+                    console.log('Zone Marker Lost: ', markerId);
+                });
 
-            handZone.redrawZoneEnable();
-        }
-    });
+                handZone.redrawZoneEnable();
+            }
+        });
+    }
     connected.value = true;
 });
 
@@ -205,6 +223,27 @@ function removeFoundMarker(marker, markerList) {
 function isMarkerIdFound(markerId, list) {
     return list.some((marker) => marker.id === markerId);
 }
+
+// is called to remove all remainings of AFRAME as far as possible
+onUnmounted(() => {
+    // stop resizing and reset
+    resizeController.abort();
+
+    // remove VideoEl
+    let videoEl = document.getElementById('arjs-video');
+    if (videoEl) {
+        videoEl.remove();
+    }
+
+    // remove custom components
+    const componentsToRemove = [ 'markers_start', 'registerevents', 'registerevents_zone' ];
+    for (let component of componentsToRemove) {
+        delete AFRAME.components[component];
+    }
+
+    console.log('finished umount');
+    console.log(AFRAME);
+});
 </script>
 
 <template>

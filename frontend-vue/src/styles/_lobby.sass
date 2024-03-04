@@ -9,7 +9,7 @@
 
     
     #playerList
-        justify-content: start
+        justify-content: space-between
         align-items: stretch
         
         .playerStatus
@@ -28,6 +28,9 @@
                     fill: colors.$darkBlue
             &.empty
                 opacity: .5
+
+            &.selected
+                border: 2px solid colors.$greenPrimary
 
         button
             align-self: flex-end

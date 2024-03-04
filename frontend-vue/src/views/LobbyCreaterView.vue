@@ -3,32 +3,38 @@ import startButton from '@/components/startButton.vue';
 import toggleDiscription from '@/components/toggleDiscription.vue';
 import { GameOption } from '@/model/room';
 import { ConnectionService } from '@/services/ConnectionService';
+import { onUnmounted } from 'vue';
 
 const games = Object.keys(GameOption).filter((key: any) => typeof GameOption[key] === 'number');
 
-const conService = new ConnectionService();
+let conService = new ConnectionService();
 
 function copyToClipboard() {
     navigator.clipboard.writeText(window.location.origin + window.location.search);
 }
+
+onUnmounted(() => {
+    conService.killConnection();
+    conService = undefined;
+});
 </script>
 
 <template>
-    <main class="lobby" v-if="conService.room && conService.you">
+    <main class="lobby" v-if="conService.room.value && conService.you.value">
         <div id="playerList" class="frame">
             <div
                 class="playerStatus"
-                v-for="(user, i) in conService.room.value?.users"
+                v-for="(user, i) in (conService.room.value?.users || [])"
                 :key="user.id"
-                :class="{ online: !user.disconnected, offline: user.disconnected }"
+                :class="{ online: !user?.disconnected, offline: user.disconnected, selected: user.id === conService.you.value?.id }"
             >
                 <font-awesome-icon
                     :icon="['fas', 'circle']"
-                    v-if="user.id !== conService.you.value?.id"
+                    v-if="!user.isOwner"
                 />
                 <font-awesome-icon
-                    :icon="['fas', 'play']"
-                    v-if="user.id === conService.you.value?.id"
+                    :icon="['fas', 'crown']"
+                    v-if="user.isOwner"
                 />
                 {{ user.name }}
             </div>
@@ -65,7 +71,8 @@ function copyToClipboard() {
                     ></toggleDiscription>
                 </div>
             </div>
-            <startButton @click="conService.startGame()"></startButton>
+            <startButton v-if="conService.room.value.state === 'inLobby'" @click="conService.startGame()" :disabled="!conService.you.value?.isOwner"></startButton>
+            <startButton v-if="conService.room.value.state === 'inGame'" @click="conService.navigateToGame()" label="Back to Game"></startButton>
         </div>
     </main>
 </template>
