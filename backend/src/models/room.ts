@@ -14,10 +14,10 @@ export class Room {
     state: 'inLobby'|'inGame'|'finished';
     selectedGame: 'MauMau';
     game: MauMau;
-    db: Db|undefined;
+    db: Db;
     isLocal: boolean;
 
-    constructor(db?: Db, id?: string) {
+    constructor(db: Db, id?: string) {
         this.id = id || 'room_' + (Math.random() + 1).toString(36).substring(7);
         this.users = [];    // Users taking part in this game
         this.state = 'inLobby';

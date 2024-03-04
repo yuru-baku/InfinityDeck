@@ -14,10 +14,10 @@ const dbName = 'InfinityDeck';
 
 async function main() {
     // Use connect method to connect to the server
-    // await client.connect();
-    // console.log('Connected successfully to database...');
-    // const db = client.db(dbName);
-    const db = undefined;
+    await client.connect();
+    console.log('Connected successfully to database...');
+    const db = client.db(dbName);
+    // const db = undefined;
 
     const rooms = new Map();
     const wss = new WebSocketServer({ port: Number(process.env.PORT) });

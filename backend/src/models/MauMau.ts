@@ -58,13 +58,13 @@ export class MauMau {
             leaderboard: leaderboard
         });
         // finally persist and close
-        // this.room.db.collection('MauMau-Games').insertOne({
-        //     leaderboard: leaderboard,
-        //     history: this.history,
-        //     startTiem: this.startTime,
-        //     endTime: this.endTime,
-        //     users: this.room.users.map(user => { return { name: user.name, id: user.id, handcards: user.handcards }})
-        // });
+        this.room.db.collection('MauMau-Games').insertOne({
+            leaderboard: leaderboard,
+            history: this.history,
+            startTiem: this.startTime,
+            endTime: this.endTime,
+            users: this.room.users.map(user => { return { name: user.name, id: user.id, handcards: [ ] }})
+        });
     }
 
     drawCard(user: User, message: WsMessage) {
