@@ -242,7 +242,7 @@ onUnmounted(() => {
     }
 
     console.log('finished umount');
-    console.log(AFRAME);
+    location.reload();
 });
 </script>
 

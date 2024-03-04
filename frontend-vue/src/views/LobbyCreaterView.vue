@@ -15,7 +15,6 @@ function copyToClipboard() {
 
 onUnmounted(() => {
     conService.killConnection();
-    conService = undefined;
 });
 </script>
 
