@@ -36,7 +36,7 @@ console.log(AFRAME);
 AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
 // AFRAME.AScene.removeFullScreenStyles();
 
-//Global Variable
+//Global Variables
 var markersURLArray = [];
 var markersNameArray = [];
 
@@ -124,6 +124,7 @@ props.conService.onConnection(() => {
                     removeFoundMarker(marker, foundCardMarkers);
                     console.log('Marker Lost: ', markerId);
                 });
+
                 function checkMarkerInZone() {
                     for (let foundMarker of foundCardMarkers) {
                         if (handZone.markerInZone(foundMarker)) {
@@ -187,10 +188,7 @@ props.conService.onConnection(() => {
 });
 
 function isCardBack(marker) {
-    if (!marker) return false;
-    const imageEl = marker.querySelector('#card');
-    if (!imageEl) return false;
-    return imageEl.getAttribute('src') === props.cardService.cardBack;
+    return marker?.querySelector('#card')?.getAttribute('src') === props.cardService.cardBack;
 }
 
 function turnCard(marker) {
