@@ -9,13 +9,13 @@ if (!process.env.MONGO_URI) {
 if (!process.env.PORT) {
     throw new Error('No MONGO_URI was defined!');
 }
-const client = new MongoClient(process.env.MONGO_URI);
+let client = new MongoClient(process.env.MONGO_URI);
 const dbName = 'InfinityDeck';
 
 async function main() {
     // Use connect method to connect to the server
-    await client.connect();
-    console.log('Connected successfully to database...');
+    client = await client.connect();
+    console.log(' > Successfully connected to database'); 
     const db = client.db(dbName);
     // const db = undefined;
 
@@ -90,7 +90,7 @@ async function main() {
         });
     });
 
-    return 'done.';
+    return ` > Started with port ${process.env.PORT}`;
 }
 
 main()
