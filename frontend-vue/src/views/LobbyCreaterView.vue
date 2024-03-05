@@ -51,15 +51,17 @@ onUnmounted(() => {
         <div class="column">
             <div id="gameSettings" class="frame">
                 <div id="chooseGame" class="frame">
-                    <div
-                        class="frame"
+                    <button
+                        class="game-option frame"
                         v-for="game in games"
                         :class="{
-                            selected: game === conService.room.value?.selectedGame.toString()
+                            selected: game === conService.room.value?.selectedGame.toString(),
+                            disabled: !conService.you.value.isOwner
                         }"
+                        v-on:click="() => conService.changeGame(game)"
                     >
                         {{ game }}
-                    </div>
+                    </button>
                 </div>
                 <div class="frame gameConfig">
                     <toggleDiscription

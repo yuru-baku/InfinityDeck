@@ -1,10 +1,17 @@
 import { Db } from "mongodb";
-import { MauMau } from "./MauMau";
+import { MauMau } from "./games/MauMau";
 import { User } from "./user";
+import { Game } from "./Game";
+import { Uno } from "./games/Uno";
 
 export type WsMessage = {
     action: string,
     data: any
+}
+
+const Games = {
+    Uno: Uno,
+    MauMau: MauMau
 }
 
 export class Room {
@@ -12,8 +19,8 @@ export class Room {
     id: string;
     users: User[];
     state: 'inLobby'|'inGame'|'finished';
-    selectedGame: 'MauMau';
-    game: MauMau;
+    selectedGame: keyof typeof Games;
+    game: Game;
     db: Db;
     isLocal: boolean;
 
@@ -85,7 +92,7 @@ export class Room {
             'shuffleDrawPile'
         ];
         const availableRoomActions = [
-            'selectGame',
+            'changeGame',
             'changeSettings'
         ];
         user.ws.on('message', (msg: string) => {
@@ -132,8 +139,19 @@ export class Room {
             }, [user]);
     }
 
-    selectGame() {
-        // ToDo add multiple games
+    changeGame(user: User, message: WsMessage) {
+        if (!user.isOwner) {
+            user.ws.send(JSON.stringify({ error: 'Only the owner of this room might perform this action!' }));
+            return;
+        }
+        let selection = message.data.selectedGame;
+        if (!Object.keys(Games).includes(selection)) {
+            user.ws.send(JSON.stringify({ error: `${selection} is not a known game!` }));
+            return;
+        }
+        this.selectedGame = selection;
+        this.game = new Games[this.selectedGame](this);
+        this.sendMessageToUsers('gameChanged', { selectedGame: this.selectedGame, game: { ...this.game, room: undefined } })
     }
 
     changeSettings(user: User, message: { action: 'changeSettings', data: { isLocal: boolean }}) {

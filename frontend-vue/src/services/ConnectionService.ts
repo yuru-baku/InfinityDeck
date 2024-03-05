@@ -107,6 +107,10 @@ export class ConnectionService {
                 case 'settingsChanged':
                     this.room.value!.isLocal = message.data.isLocal || false;
                     break;
+                case 'gameChanged':
+                    this.room.value!.selectedGame = message.data.selectedGame;
+                    this.game.value! = message.data.game;
+                    break;
                 case 'joined':
                     if (!this.room.value) return;
                     this.room.value.users.push({ ...message.data });
@@ -156,6 +160,7 @@ export class ConnectionService {
      * Starts the game, should only be callable if we are an admin.
      */
     public startGame() {
+        if (!this.room.value || !this.you.value?.isOwner) return;
         this.sendMessage('start', undefined);
     }
 
@@ -163,6 +168,11 @@ export class ConnectionService {
         if (!this.room.value || !this.you.value?.isOwner) return;
         console.log(!this.room.value.isLocal);
         this.sendMessage('changeSettings', { isLocal: !this.room.value.isLocal });
+    }
+
+    public changeGame(game: string) {
+        if (!this.room.value || !this.you.value?.isOwner) return;
+        this.sendMessage('changeGame', { selectedGame: game });
     }
 
     public drawNewCard(markerId: string) {
