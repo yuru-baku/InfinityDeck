@@ -18,7 +18,11 @@ export class Room {
     isLocal: boolean;
 
     constructor(db: Db, id?: string) {
-        this.id = id || 'room_' + (Math.random() + 1).toString(36).substring(7);
+        if (id === undefined || id === null || id === 'undefined' || id === 'null') {
+            this.id = 'room_' + (Math.random() + 1).toString(36).substring(7);
+        } else {
+            this.id = id;
+        }
         this.users = [];    // Users taking part in this game
         this.state = 'inLobby';
         this.selectedGame = 'MauMau';

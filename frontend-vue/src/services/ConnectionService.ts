@@ -191,5 +191,6 @@ export class ConnectionService {
         this.controller.abort();
         this.connectionCallbacks.forEach((callback) => callback(undefined))
         this.drawCardCallbacks.forEach((callback) => callback('', ''))
+        this.store.webSocket.close();
     }
 }

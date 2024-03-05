@@ -49,6 +49,7 @@ async function main() {
         let user: User;
         // check if user tries to reconnect
         const _user = room.users.find((user) => user.id === user_id && user.name === name && user.timeout);
+        console.log(_user, user_id, room.users)
         if (_user) {
             user = _user;
             user.ws = ws;
