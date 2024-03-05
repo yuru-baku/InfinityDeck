@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import startButton from '@/components/startButton.vue';
 import { ConnectionService } from '@/services/ConnectionService';
@@ -9,9 +9,11 @@ const cookies = useCookies(['username']);
 let name = ref(cookies.get('username') || '');
 function joinRoom() {
     cookies.set('username', name.value);
-    conService.connect();
+    conService.tryConnection();
 }
-// s
+onUnmounted(() => {
+    conService.killConnection();
+});
 </script>
 
 <template>

@@ -26,8 +26,12 @@ export class ConnectionService {
             return;
         }
         // maybe we need to reconnect
-        if (!this.store.webSocket || this.store.webSocket === null) {
-            console.log('connecting')
+        this.tryConnection();
+    }
+
+    public tryConnection() {
+        if (!this.isConnected()) {
+            console.log('connecting...')
             this.connect();
         } else {
             // wait with init function until websocket connection was confirmed
@@ -38,7 +42,8 @@ export class ConnectionService {
     /**
      * Handles a connection or reconnection
      */
-    public connect() {
+    private connect() {
+        // check for open connection
         const roomId = this.router.currentRoute.value.query.roomId || this.cookies.get('roomId');
         const userId = this.cookies.get('userId');
         const name = this.cookies.get('username');
@@ -88,13 +93,13 @@ export class ConnectionService {
                     this.room.value = message.data.room;
                     this.game.value = message.data.game;
                     this.you.value = message.data.you;
-                    if (message.data.state === 'inGame') {
+                    if (message.data.room.state === 'inGame') {
                         this.router.push(
-                            `/${message.data.selectedGame}?roomId=${message.data.roomId}`
+                            `/${message.data.room.selectedGame}?roomId=${message.data.room.id}`
                         );
                     }
-                    if (message.data.state === 'inLobby') {
-                        this.router.push(`/lobby?roomId=${message.data.roomId}`);
+                    if (message.data.room.state === 'inLobby') {
+                        this.router.push(`/lobby?roomId=${message.data.room.id}`);
                     }
                     this.connectionCallbacks.forEach((callback) => callback(message.data));
                     this.connectionCallbacks = [];
@@ -187,10 +192,14 @@ export class ConnectionService {
         }
     }
 
+    private isConnected() {
+        const webSocket = this.store.webSocket;
+        return webSocket && webSocket !== null && (webSocket.readyState === 1 || webSocket.readyState === 0) /* OPEN */
+    }
+
     public killConnection() {
         this.controller.abort();
         this.connectionCallbacks.forEach((callback) => callback(undefined))
         this.drawCardCallbacks.forEach((callback) => callback('', ''))
-        this.store.webSocket.close();
     }
 }

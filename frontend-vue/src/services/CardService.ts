@@ -19,7 +19,7 @@ export class CardService {
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection((data) => {
             this.numberOfCards = 40; // Todo: Marker Anzahl?! 
-            if (data.markerMap) {
+            if (data?.markerMap) {
                 this.markerMap = new Map(Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [key, { name: value, url: this.getCardUrl(value) }]));
                 console.log('recovered markerMap')
             }

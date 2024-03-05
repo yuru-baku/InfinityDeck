@@ -1,7 +1,7 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
 import { Zone } from './Zone';
-import { CardService } from './CardService';
+import { CardService } from '@/services/CardService';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
 
