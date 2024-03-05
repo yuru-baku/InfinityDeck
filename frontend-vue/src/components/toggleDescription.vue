@@ -22,7 +22,7 @@ const emit = defineEmits(['toggle']);
 </script>
 
 <template>
-    <div class="frame toggleDiscription">
+    <div class="frame toggleDescription">
         <div>
             <h2 class="toggleHeader">{{ header }}</h2>
             <p class="toggleInfo">{{ info }}</p>

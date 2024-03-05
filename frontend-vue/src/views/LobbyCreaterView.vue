@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import startButton from '@/components/startButton.vue';
-import toggleDiscription from '@/components/toggleDiscription.vue';
+import toggleDescription from '@/components/toggleDescription.vue';
 import { GameOption } from '@/model/room';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted } from 'vue';
@@ -50,7 +50,7 @@ onUnmounted(() => {
 
         <div class="column">
             <div id="gameSettings" class="frame">
-                <div id="chooseGame" class="frame">
+                <div id="chooseGame">
                     <button
                         class="game-option frame"
                         v-for="game in games"
@@ -60,17 +60,18 @@ onUnmounted(() => {
                         }"
                         v-on:click="() => conService.changeGame(game)"
                     >
+                        <img src="/InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg"></img>
                         {{ game }}
                     </button>
                 </div>
                 <div class="frame gameConfig">
-                    <toggleDiscription
+                    <toggleDescription
                         header="Local"
                         info="are you playing across the table or the ocean?"
                         :isOn="conService.room.value?.isLocal"
                         :disabled="!conService.you.value?.isOwner"
                         @toggle="conService.toggleLocal()"
-                    ></toggleDiscription>
+                    ></toggleDescription>
                 </div>
             </div>
             <startButton v-if="conService.room.value.state === 'inLobby'" @click="conService.startGame()" :disabled="!conService.you.value?.isOwner"></startButton>
