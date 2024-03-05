@@ -9,8 +9,9 @@ const games = Object.keys(GameOption).filter((key: any) => typeof GameOption[key
 
 let conService = new ConnectionService();
 
-function copyToClipboard() {
-    navigator.clipboard.writeText(window.location.origin + window.location.search);
+function copyInviteToClipboard() {
+    const inviteURL = window.location.origin + window.location.hash.replace('lobby', '');
+    navigator.clipboard.writeText(inviteURL);
 }
 
 onUnmounted(() => {
@@ -44,7 +45,7 @@ onUnmounted(() => {
                 <font-awesome-icon :icon="['fas', 'circle']" />
                 empty
             </div>
-            <button id="invite" @click="copyToClipboard()">Copy Invite</button>
+            <button id="invite" @click="copyInviteToClipboard()">Copy Invite</button>
         </div>
 
         <div class="column">
