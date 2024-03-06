@@ -4,13 +4,13 @@ import type { CardService } from './CardService';
 import type { ConnectionService } from '@/services/ConnectionService';
 
 export class CardSync {
-    constructor()
+    constructor();
     public found(marker: string): Card {
         this.cardService.drawCard();
     }
-    public lost(marker: string): Card { }
-    public setShared(marker: string): Card { }
-    public setPrivate(marker: string): Card { }
+    public lost(marker: string): Card {}
+    public setShared(marker: string): Card {}
+    public setPrivate(marker: string): Card {}
 
     private cardService: CardService;
     private conService: ConnectionService;

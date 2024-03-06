@@ -81,5 +81,5 @@ export class CardService {
         }
     }
 
-    public reloadMarkerMap() { }
+    public reloadMarkerMap() {}
 }

@@ -1,9 +1,5 @@
 import type { User } from './user';
 
-// note these types exist both in the back and frontend
-// if performance issues arrise due to synchronisation we can simplify these types in transport
-// this would however would rise the calculcation needs on both ends.
-
 /**
  * Enum discripbing position of card on the table
  * position may influence rendering
