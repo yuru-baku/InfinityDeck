@@ -1,29 +1,75 @@
-import { Room, WsMessage } from "./room";
-import { User } from "./user";
+import { Room, WsMessage } from './room';
+import { User } from './user';
 
 export class MauMau {
-
     room: Room;
     deck: string[];
     playedCards: string[];
     drawPile: string[];
     maxUsers: number = 4;
     history: string[];
-    startTime: Date|undefined;
-    endTime: Date|undefined;
+    startTime: Date | undefined;
+    endTime: Date | undefined;
 
-
-    constructor (room: Room) {
+    constructor(room: Room) {
         this.room = room;
         this.deck = [
-            'clubs-2', 'clubs-3', 'clubs-4', 'clubs-5', 'clubs-6', 'clubs-7', 'clubs-8', 'clubs-9', 'clubs-10', 'clubs-jack', 'clubs-queen', 'clubs-king', 'clubs-ace',
-            'diamonds-2', 'diamonds-3', 'diamonds-4', 'diamonds-5', 'diamonds-6', 'diamonds-7', 'diamonds-8', 'diamonds-9', 'diamonds-10', 'diamonds-jack', 'diamonds-queen', 'diamonds-king', 'diamonds-ace',
-            'hearts-2', 'hearts-3', 'hearts-4', 'hearts-5', 'hearts-6', 'hearts-7', 'hearts-8', 'hearts-9', 'hearts-10', 'hearts-jack', 'hearts-queen', 'hearts-king', 'hearts-ace',
-            'spades-2', 'spades-3', 'spades-4', 'spades-5', 'spades-6', 'spades-7', 'spades-8', 'spades-9', 'spades-10', 'spades-jack', 'spades-queen', 'spades-king', 'spades-ace',
-        ]; // All cards of this deck 
-        this.playedCards = [ ];
-        this.drawPile = [ ];        // "Nachziehstapel"
-        this.history = [ ];
+            'clubs-2',
+            'clubs-3',
+            'clubs-4',
+            'clubs-5',
+            'clubs-6',
+            'clubs-7',
+            'clubs-8',
+            'clubs-9',
+            'clubs-10',
+            'clubs-jack',
+            'clubs-queen',
+            'clubs-king',
+            'clubs-ace',
+            'diamonds-2',
+            'diamonds-3',
+            'diamonds-4',
+            'diamonds-5',
+            'diamonds-6',
+            'diamonds-7',
+            'diamonds-8',
+            'diamonds-9',
+            'diamonds-10',
+            'diamonds-jack',
+            'diamonds-queen',
+            'diamonds-king',
+            'diamonds-ace',
+            'hearts-2',
+            'hearts-3',
+            'hearts-4',
+            'hearts-5',
+            'hearts-6',
+            'hearts-7',
+            'hearts-8',
+            'hearts-9',
+            'hearts-10',
+            'hearts-jack',
+            'hearts-queen',
+            'hearts-king',
+            'hearts-ace',
+            'spades-2',
+            'spades-3',
+            'spades-4',
+            'spades-5',
+            'spades-6',
+            'spades-7',
+            'spades-8',
+            'spades-9',
+            'spades-10',
+            'spades-jack',
+            'spades-queen',
+            'spades-king',
+            'spades-ace'
+        ]; // All cards of this deck
+        this.playedCards = [];
+        this.drawPile = []; // "Nachziehstapel"
+        this.history = [];
     }
 
     start() {
@@ -38,7 +84,7 @@ export class MauMau {
         this.room.state = 'inGame';
         this.drawPile = [...this.deck]; // copy array
         this.shuffleArray(this.drawPile);
-        this.room.sendMessageToUsers('dealCards', { });
+        this.room.sendMessageToUsers('dealCards', {});
         let historyEntry = 'dealCards';
         this.history.unshift(historyEntry);
     }
@@ -50,7 +96,7 @@ export class MauMau {
         this.room.state = 'finished';
         this.endTime = new Date();
 
-        const leaderboard: string[] = [ ];
+        const leaderboard: string[] = [];
 
         this.room.sendMessageToUsers('end', {
             startTime: this.startTime,
@@ -63,13 +109,15 @@ export class MauMau {
             history: this.history,
             startTiem: this.startTime,
             endTime: this.endTime,
-            users: this.room.users.map(user => { return { name: user.name, id: user.id, handcards: [ ] }})
+            users: this.room.users.map((user) => {
+                return { name: user.name, id: user.id, handcards: [] };
+            })
         });
     }
 
     drawCard(user: User, message: WsMessage) {
         const markerId = message.data.markerId;
-        let card = user.markerMap.get(markerId)
+        let card = user.markerMap.get(markerId);
         // check if this card is already known
         if (!card) {
             // check if we need to shuffle deck
@@ -95,12 +143,11 @@ export class MauMau {
     shuffleDrawPile() {
         this.drawPile = this.drawPile.concat(this.playedCards);
         this.drawPile = this.shuffleArray(this.drawPile);
-        this.playedCards = [ ];
+        this.playedCards = [];
         // notify users
-        this.room.sendMessageToUsers('shuffled', { })
+        this.room.sendMessageToUsers('shuffled', {});
         this.history.unshift('shuffle');
     }
-
 
     shuffleArray(array: any[]) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -108,7 +155,7 @@ export class MauMau {
             const tmp = array[i];
             array[i] = array[j];
             array[j] = tmp;
-        } 
+        }
         return array;
     }
 }
