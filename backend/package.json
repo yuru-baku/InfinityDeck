@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node ./dist/app.js",
     "dev": "npm run build && node --env-file=.env ./dist/app.js",
+    "format": "prettier --write src/ --config .prettierrc.json --cache",
     "build": "npx tsc"
   },
   "author": "",
@@ -16,6 +17,7 @@
   },
   "type": "commonjs",
   "devDependencies": {
+    "prettier": "^3.0.3",
     "@types/ws": "^8.5.10",
     "typescript": "^5.3.3"
   }
