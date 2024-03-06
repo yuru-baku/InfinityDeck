@@ -16,7 +16,7 @@ export class CardSyncService {
     startSync(): void {
         if (!this.intervalId) {
             this.intervalId = setInterval(() => {
-                this.io.emit("getCards");
+                this.io.emit('getCards');
             }, this.period);
         }
     }
