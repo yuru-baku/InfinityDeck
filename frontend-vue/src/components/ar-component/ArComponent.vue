@@ -33,7 +33,6 @@ window.addEventListener(
     },
     { signal: resizeController.signal }
 );
-console.log(AFRAME);
 AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
 // AFRAME.AScene.removeFullScreenStyles();
 
@@ -54,7 +53,7 @@ props.conService.onConnection(() => {
                 var sceneEl = document.querySelector('a-scene');
                 //list of the markers
                 for (var i = 0; i < props.cardService.numberOfCards + 1; ++i) {
-                    var url = './markers/pattern-' + i + '.patt';
+                    var url = './InfintyDeck/markers/pattern-' + i + '.patt';
                     markersURLArray.push(url);
                     markersNameArray.push(i);
                 }
@@ -95,8 +94,8 @@ props.conService.onConnection(() => {
                     markerEl.appendChild(imageEl);
                 }
                 handZone = new Zone(
-                    './markers/ZoneMarker1.patt',
-                    './markers/ZoneMarker2.patt',
+                    './InfintyDeck/markers/ZoneMarker1.patt',
+                    './InfintyDeck/markers/ZoneMarker2.patt',
                     sceneEl,
                     'hand',
                     foundZoneMarkers
@@ -243,7 +242,7 @@ onUnmounted(() => {
         delete AFRAME.components[component];
     }
 
-    console.log('finished umount');
+    console.log('finished unmount');
     location.reload();
 });
 </script>
