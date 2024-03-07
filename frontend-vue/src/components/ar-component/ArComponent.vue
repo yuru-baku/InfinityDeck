@@ -1,6 +1,7 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
 import { Zone } from './Zone';
+import { CardMarker } from './CardMarker';
 import { CardService } from './CardService';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
@@ -144,47 +145,10 @@ props.conService.onConnection(() => {
 
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
-        var markerEl = document.createElement('a-marker');
-        markerEl.setAttribute('type', 'pattern');
-        var url = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
-        markerEl.setAttribute('url', url);
-        markerEl.setAttribute('id', k);
-
-        markerEl.setAttribute('registerevents', '');
-        sceneEl.appendChild(markerEl);
-        if (debug) {
-            addCardNumberToMarker(markerEl, k);
-        }
-        addCardImageToMarker(markerEl);
+        var markerUrl = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
+        var cardBackSrc = props.cardService.cardBack;
+        new CardMarker(sceneEl, markerUrl, cardBackSrc, k);
     }
-}
-
-function addCardImageToMarker(markerEl) {
-    var imageEl = document.createElement('a-image');
-    imageEl.setAttribute('src', props.cardService.cardBack);
-    imageEl.setAttribute('id', 'card');
-    imageEl.setAttribute('data-state', 'back');
-
-    imageEl.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
-    imageEl.object3D.position.set(0, 0, 0);
-    imageEl.object3D.rotation.set(Math.PI / 2, 0, 0);
-    markerEl.appendChild(imageEl);
-}
-
-function addCardNumberToMarker(markerEl, number) {
-    var textEl = document.createElement('a-entity');
-
-    textEl.setAttribute('id', 'text');
-    textEl.setAttribute('text', {
-        color: 'red',
-        align: 'center',
-        value: number,
-        width: '5.5'
-    });
-    textEl.object3D.position.set(0, 0.7, 0);
-    textEl.object3D.rotation.set(-90, 0, 0);
-
-    markerEl.appendChild(textEl);
 }
 
 function isCardBack(marker) {
@@ -271,3 +235,4 @@ onUnmounted(() => {
         </a-scene>
     </div>
 </template>
+./CardMarker
