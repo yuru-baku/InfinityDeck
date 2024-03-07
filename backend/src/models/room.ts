@@ -26,6 +26,13 @@ export class Room {
         this.isLocal = true;
     }
 
+    sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
+        users = users.filter((user) => !user.timeout); // only send to connected users
+        for (let user of users) {
+            user.ws.send(JSON.stringify({ action, data }));
+        }
+    }
+
     join(user: User) {
         this.setUpUserConnection(user, 'joined');
 
@@ -97,6 +104,7 @@ export class Room {
             { id: user.id, name: user.name },
             this.users.filter((u) => u != user)
         );
+        const fiveSeconds: number = 5 * 60 * 1000;
         user.timeout = setTimeout(
             () => {
                 console.log('triggered timeout');
@@ -109,7 +117,7 @@ export class Room {
                     this.game.end();
                 }
             },
-            5 * 60 * 1000
+            fiveSeconds
         );
     }
 
@@ -179,13 +187,6 @@ export class Room {
             }
         } else {
             user.markerMap.set(markerId, data);
-        }
-    }
-
-    sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
-        users = users.filter((user) => !user.timeout); // only send to connected users
-        for (let user of users) {
-            user.ws.send(JSON.stringify({ action, data }));
         }
     }
 
