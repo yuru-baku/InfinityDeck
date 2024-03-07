@@ -75,6 +75,7 @@ export class MauMau {
     }
 
     start() {
+        console.log('Start Game');
         // check user count
         if (this.room.users.length > this.maxUsers) {
             for (let user of this.room.users) {
@@ -101,6 +102,7 @@ export class MauMau {
         if (this.room.state !== 'inGame') {
             return;
         }
+        console.log('End Game');
         this.room.state = 'finished';
         this.endTime = new Date();
 

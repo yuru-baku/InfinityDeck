@@ -14,7 +14,7 @@ const dbName = 'InfinityDeck';
 
 async function main() {
     // Use connect method to connect to the server
-    console.log("> Connecting to database");
+    console.log('> Connecting to database');
     client = await client.connect();
     const db = client.db(dbName);
     console.log(' > Successfully connected to database');
