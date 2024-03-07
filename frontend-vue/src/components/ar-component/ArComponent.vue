@@ -65,27 +65,25 @@ props.conService.onConnection(() => {
     if (!AFRAME.components['registerevents']) {
         AFRAME.registerComponent('registerevents', {
             init: function () {
-                const marker = this.el;
+                const marker = this.el.cardMarker;
 
-                marker.addEventListener('markerFound', () => {
-                    var markerId = marker.id;
+                this.el.addEventListener('markerFound', () => {
                     addFoundMarker(marker, foundCardMarkers);
                     if (handZone.markerInZone(marker)) {
-                        turnCard(marker);
+                        marker.turnCardOnBack();
                     }
-                    console.log('Marker Found: ', markerId, 'at ', marker.object3D.position);
+                    console.log('Marker Found: ', marker.id, 'at ', marker.getMarkerPosition());
                 });
 
-                marker.addEventListener('markerLost', () => {
-                    var markerId = marker.id;
+                this.el.addEventListener('markerLost', () => {
                     removeFoundMarker(marker, foundCardMarkers);
-                    console.log('Marker Lost: ', markerId);
+                    console.log('Marker Lost: ', marker.id);
                 });
                 function checkMarkerInZone() {
                     for (let foundMarker of foundCardMarkers) {
                         if (handZone.markerInZone(foundMarker)) {
-                            turnCard(foundMarker);
-                        } else if (isCardBack(foundMarker)) {
+                            marker.turnCardOnBack();
+                        } else if (!foundMarker.isFaceUp) {
                             showCard(foundMarker);
                         }
                     }
@@ -151,30 +149,13 @@ function generateMarkers(sceneEl) {
     }
 }
 
-function isCardBack(marker) {
-    if (!marker) return false;
-    const imageEl = marker.querySelector('#card');
-    if (!imageEl) return false;
-    return imageEl.getAttribute('src') === props.cardService.cardBack;
-}
-
-function turnCard(marker) {
-    const imageEl = marker.querySelector('#card');
-    const cardState = imageEl.getAttribute('data-state');
-    if (cardState !== 'back') {
-        imageEl.setAttribute('data-state', 'back');
-        imageEl.setAttribute('src', props.cardService.cardBack);
-    }
-}
-
+/**
+ * @param {CardMarker} marker
+ */
 function showCard(marker) {
-    const imageEl = marker.querySelector('#card');
-    const cardState = imageEl.getAttribute('data-state');
-    let id = marker.getAttribute('id');
-    if (cardState !== 'front') {
-        imageEl.setAttribute('data-state', 'front');
-        props.cardService.getCardByMarker(id).then((card) => {
-            imageEl.setAttribute('src', card.url);
+    if (!marker.isFaceUp) {
+        props.cardService.getCardByMarker(marker.id).then((card) => {
+            marker.turnCardOnFace(card.url);
         });
     }
 }
@@ -227,7 +208,7 @@ onUnmounted(() => {
             xr-mode-ui="enabled: false"
             color-space="sRGB"
             renderer="gammaOutput: true"
-            arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best;"
+            arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best; sourceWidth: 1280; sourceHeight: 720;"
         >
             <a-entity id="userCamera" camera>
                 <!-- <a-cursor> </a-cursor> -->
@@ -235,4 +216,3 @@ onUnmounted(() => {
         </a-scene>
     </div>
 </template>
-./CardMarker

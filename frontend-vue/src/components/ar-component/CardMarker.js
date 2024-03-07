@@ -5,6 +5,7 @@ export class CardMarker {
         this.id = id;
         this.debugNumber = false;
         this.cardBackSrc = cardBackSrc;
+        this.isFaceUp = false;
 
         this.#addMarkerToScene();
     }
@@ -15,6 +16,7 @@ export class CardMarker {
         this.markerElement.setAttribute('url', this.markerUrl);
         this.markerElement.setAttribute('id', this.id);
         this.markerElement.setAttribute('registerevents', '');
+        this.markerElement.cardMarker = this;
         this.sceneElement.appendChild(this.markerElement);
 
         this.#addCardImageToMarker();
@@ -56,5 +58,24 @@ export class CardMarker {
         this.textElement.object3D.rotation.set(-90, 0, 0);
 
         this.markerElement.appendChild(this.textElement);
+        this.textElement.setAttribute('visible', false);
+    }
+
+    turnCardOnBack() {
+        if (this.isFaceUp) {
+            this.imageElement.setAttribute('data-state', 'back');
+            this.imageElement.setAttribute('src', this.cardBackSrc);
+        }
+    }
+
+    turnCardOnFace(faceUrl) {
+        if (!this.isFaceUp) {
+            this.imageElement.setAttribute('data-state', 'front');
+            this.imageElement.setAttribute('src', faceUrl);
+        }
+    }
+
+    getMarkerPosition() {
+        return this.markerElement.object3D.position;
     }
 }

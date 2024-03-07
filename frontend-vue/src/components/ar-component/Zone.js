@@ -67,6 +67,8 @@ export class Zone {
 
         this.zoneMarker1 = markerEl;
         this.zoneMarker2 = markerEl2;
+        this.zoneMarker1.zone = this;
+        this.zoneMarker2.zone = this;
     }
 
     drawZone() {
@@ -145,11 +147,14 @@ export class Zone {
         return '#zoneRectangle_' + this.name;
     }
 
+    /**
+     * @param {CardMarker} marker
+     */
     markerInZone(marker) {
         if (!marker) return false;
         if (!this.zoneMarker1 || !this.zoneMarker2) return false;
 
-        const markerPosition = marker.object3D.position.clone();
+        const markerPosition = marker.getMarkerPosition().clone();
         const zoneMarker1Position = this.zoneMarker1.object3D.position.clone();
         const zoneMarker2Position = this.zoneMarker2.object3D.position.clone();
 
