@@ -34,10 +34,13 @@ export class CardSyncService {
     }
 
     addSyncListener(): void {
-        this.room.addListenerToAll('getCards', this.getCards);
+        this.room.addListenerToAll('getCards', this.onGetCards);
     }
-    getCards(user: User, data: any): void {
+
+    onGetCards(user: User, data: any): void {
         console.log('User send their cards');
+        console.log(data);
+        console.log(this.room);
     }
 
     stopSync(): void {
@@ -45,13 +48,6 @@ export class CardSyncService {
             clearInterval(this.intervalId);
             this.intervalId = undefined;
         }
-    }
-
-    onGetCards(socket: Socket, handleCards: (cards: Card[]) => void): void {
-        // ... Implement logic to handle "getCards" message
-        // Potentially:
-        // - Fetch cards from database or other source
-        // - Call handleCards function with retrieved cards
     }
 
     onAllCards(socket: Socket, cards: Card[]): void {

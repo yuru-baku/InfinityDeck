@@ -1,9 +1,11 @@
 import { ConnectionService } from '@/services/ConnectionService';
+import { CardSync } from './CardSync';
 
 export type Card = { name: string; url: string };
 
 export class CardService {
     private conSerivce: ConnectionService;
+    private cardSync: CardSync;
 
     public cardBack: string;
     public numberOfCards: number;
@@ -16,6 +18,8 @@ export class CardService {
         this.numberOfCards = 0;
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
+        this.cardSync = new CardSync(conService, this);
+
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection((data) => {
             this.numberOfCards = 40; // Todo: Marker Anzahl?!

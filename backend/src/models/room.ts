@@ -2,6 +2,7 @@ import { Db } from 'mongodb';
 import { MauMau } from './MauMau';
 import { User } from './user';
 import { CardSyncService } from '../cardSyncService';
+import { Message } from './message';
 
 export type WsMessage = {
     action: string;
@@ -45,6 +46,7 @@ export class Room {
                 break;
             case 'inGame':
                 if (this.state != state) {
+                    this.cardSync?.addSyncListener();
                     this.cardSync?.startSync();
                 }
                 break;
@@ -80,7 +82,7 @@ export class Room {
     }
 
     private setUpUserConnection(user: User, connectionAction: 'joined' | 'reconnected') {
-        console.log(user.id, connectionAction, this.id);
+        console.log({ name: user.name, id: user.id }, connectionAction, this.id);
 
         // notify users
         this.sendMessageToUsers(
@@ -112,6 +114,7 @@ export class Room {
         action: string,
         callback: (user: User, data: any) => void
     ): EventListener[] {
+        console.log('Activate listeners');
         return this.users.map((user) => this.addListener(user, action, callback));
     }
 
@@ -121,9 +124,9 @@ export class Room {
         callback: (user: User, data: any) => void
     ): EventListener {
         const listener = (event: any) => {
-            const data = JSON.parse(event.data.toString());
-            if (data.action == action) {
-                callback(user, data.data);
+            const msg = new Message(event);
+            if (msg.action == action) {
+                callback(user, msg.data);
             }
         };
         user.ws.addEventListener('message', listener);
@@ -136,7 +139,7 @@ export class Room {
         const availableGameActions = ['start', 'end', 'shuffleDrawPile'];
         const availableRoomActions = ['selectGame', 'changeSettings'];
         user.ws.on('message', (msg: string) => {
-            const message: any = JSON.parse(msg);
+            const message = JSON.parse(msg);
             if (availableGameActions.includes(message.action)) {
                 // @ts-ignore
                 this.game[message.action](user, message);

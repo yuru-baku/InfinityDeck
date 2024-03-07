@@ -6,6 +6,7 @@ import { useWebSocketStore } from '@/stores/webSocketStore';
 import type { User } from '@/model/user';
 import type { Game } from '@/model/game';
 import type { Room } from '@/model/room';
+import { Message } from '@/model/message';
 
 export class ConnectionService {
     router: Router;
@@ -51,7 +52,7 @@ export class ConnectionService {
             )
         );
         const abortController = new AbortController();
-        this.store.webSocket.addEventListener(
+        this.getSocket().addEventListener(
             'message',
             (event: MessageEvent) => {
                 const inLandingPage = this.router.currentRoute.value.name === 'landing-page';
@@ -80,15 +81,42 @@ export class ConnectionService {
     }
 
     /**
+     * Registers callback for events on the websocket.
+     * @param action the action to listen for
+     * @param callback the callback to be executet
+     * @returns Eventlistener needed to remove the listener.
+     */
+    public addListener(action: string, callback: (data: any) => void): EventListener {
+        console.log('register new listener for action:', action);
+        const listener = (event: any) => {
+            const msg = new Message(event);
+            if (msg.action == action) {
+                callback(msg.data);
+            }
+        };
+        this.getSocket().addEventListener('message', listener);
+        return listener;
+    }
+
+    /**
+     * Removes the event listener
+     * @param listener the listener to be removed
+     * @returns nothing
+     */
+    public removeListener(listener: EventListener): void {
+        this.getSocket().removeEventListener('message', listener);
+    }
+
+    /**
      * Main stuff of setup
      */
-    public addListeners() {
+    private addListeners() {
         this.sendMessage('getRoomInfo', undefined);
-        this.store.webSocket.addEventListener(
+        this.getSocket().addEventListener(
             'message',
             (event: MessageEvent) => {
                 const message = JSON.parse(event.data);
-                console.log(message.action, message.data);
+                console.log('new message:', message.action, message.data);
                 switch (message.action) {
                     case 'gotRoomInfo':
                         console.log('gotRoomInfo');
@@ -156,14 +184,8 @@ export class ConnectionService {
                             callback(message.data.markerId, message.data.card)
                         );
                         break;
-                    case 'getCards':
-                        console.warn('GETCARDS requested');
-                        break;
                     case 'error':
                         console.error('Error:', message.message);
-                        break;
-                    default:
-                        console.warn('Unhandled action', message.action, message.data);
                         break;
                 }
             },
@@ -201,19 +223,30 @@ export class ConnectionService {
         this.drawCardCallbacks.push(callback);
     }
 
-    private sendMessage(action: string, data: any) {
-        this.store.webSocket.send(JSON.stringify({ action: action, data: data }));
+    public sendMessage(action: string, data: any) {
+        const message = JSON.stringify({ action: action, data: data });
+        console.log('Send:', message);
+        this.getSocket().send(message);
     }
-
     public navigateToGame() {
         if (this.room.value) {
             this.router.push(`/${this.room.value.selectedGame}?roomId=${this.room.value.id}`);
         }
     }
 
+    private onGetCards() {
+        let card: Card = { markerId: '189', cardFace: 'Queen', zone: 0 };
+        let con = this;
+        con.sendMessage('getCards', { data: 'blub' });
+    }
+
     public killConnection() {
         this.controller.abort();
         this.connectionCallbacks.forEach((callback) => callback(undefined));
         this.drawCardCallbacks.forEach((callback) => callback('', ''));
+    }
+
+    private getSocket() {
+        return this.store.webSocket;
     }
 }
