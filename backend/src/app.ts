@@ -83,7 +83,7 @@ async function main() {
                         id: user.id,
                         isOwner: user.isOwner
                     },
-                    state: room.state,
+                    state: room.getState(),
                     selectedGame: room.selectedGame
                 }
             })

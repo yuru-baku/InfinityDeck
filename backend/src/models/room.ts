@@ -1,6 +1,7 @@
 import { Db } from 'mongodb';
 import { MauMau } from './MauMau';
 import { User } from './user';
+import { CardSyncService } from '../cardSyncService';
 
 export type WsMessage = {
     action: string;
@@ -10,26 +11,49 @@ export type WsMessage = {
 export class Room {
     id: string;
     users: User[];
-    state: 'inLobby' | 'inGame' | 'finished';
+    private state: 'inLobby' | 'inGame' | 'finished';
     selectedGame: 'MauMau';
     game: MauMau;
     db: Db;
     isLocal: boolean;
+    private cardSync?: CardSyncService;
 
     constructor(db: Db, id?: string) {
-        if (id && id != "undefined") {
+        if (id && id != 'undefined') {
             this.id = id;
         } else {
             this.id = 'room_' + (Math.random() + 1).toString(36).substring(7);
-        };
+        }
         this.users = []; // Users taking part in this game
         this.state = 'inLobby';
         this.selectedGame = 'MauMau';
         this.game = new MauMau(this);
         this.db = db;
         this.isLocal = true;
+        this.cardSync = new CardSyncService(this, 1000);
     }
 
+    getState(): 'inLobby' | 'inGame' | 'finished' {
+        return this.state;
+    }
+
+    setState(state: 'inLobby' | 'inGame' | 'finished') {
+        switch (state) {
+            case 'finished':
+            case 'inLobby':
+                this.cardSync?.stopSync();
+                break;
+            case 'inGame':
+                if (this.state != state) {
+                    this.cardSync?.startSync();
+                }
+                break;
+            default:
+                console.error('invalid game state change:', state);
+                break;
+        }
+        this.state = state;
+    }
     sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
         users = users.filter((user) => !user.timeout); // only send to connected users
         for (let user of users) {
