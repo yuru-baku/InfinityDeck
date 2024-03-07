@@ -4,7 +4,6 @@ import { Zone } from './Zone';
 import { CardService } from './CardService';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
-import { Card } from '@/model/card';
 
 const props = defineProps({
     cardService: {

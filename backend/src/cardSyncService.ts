@@ -1,8 +1,8 @@
-import { WebSocket as Socket, WebSocketServer as Server } from 'ws';
+import { WebSocket as Socket } from 'ws';
 import { setInterval, clearInterval } from 'timers';
 import { Card } from './models/card';
 import { Room } from './models/room';
-
+import { User } from './models/user';
 /**
  * TODO: integrade cardSyncService
  * TODO: implement Syncing
@@ -12,24 +12,32 @@ import { Room } from './models/room';
  * TODO: broadcast cards
  */
 export class CardSyncService {
-    private io: Server;
     private room: Room;
     private intervalId?: NodeJS.Timeout;
     private period: number;
 
-    constructor(io: Server, room: Room, period: number = 20) {
-        this.io = io;
+    constructor(room: Room, period: number = 20) {
         this.intervalId = undefined;
         this.period = period;
         this.room = room;
     }
 
     startSync(): void {
-        if (!this.intervalId) {
-            this.intervalId = setInterval(() => {
-                this.room.sendMessageToUsers('getCards', {});
-            }, this.period);
+        if (this.intervalId) {
+            console.warn('CardSyncService: Tried to start multiple syncs. Action not supported.');
+            return;
         }
+        this.intervalId = setInterval(() => {
+            console.log('Ask players what their cards are');
+            this.room.sendMessageToUsers('getCards', {});
+        }, this.period);
+    }
+
+    addSyncListener(): void {
+        this.room.addListenerToAll('getCards', this.getCards);
+    }
+    getCards(user: User, data: any): void {
+        console.log('User send their cards');
     }
 
     stopSync(): void {

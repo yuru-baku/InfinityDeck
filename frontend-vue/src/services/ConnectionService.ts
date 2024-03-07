@@ -45,8 +45,7 @@ export class ConnectionService {
 
         this.store.changeWebSocket(
             new WebSocket(
-                `${
-                    import.meta.env.VITE_BACKEND_ENDPOINT
+                `${import.meta.env.VITE_BACKEND_ENDPOINT
                 }?name=${name}&roomId=${roomId}&userId=${userId}`
             )
         );
@@ -91,6 +90,7 @@ export class ConnectionService {
                 console.log(message.action, message.data);
                 switch (message.action) {
                     case 'gotRoomInfo':
+                        console.log("gotRoomInfo");
                         this.room.value = message.data.room;
                         this.game.value = message.data.game;
                         this.you.value = message.data.you;
@@ -106,13 +106,16 @@ export class ConnectionService {
                         this.connectionCallbacks = [];
                         break;
                     case 'settingsChanged':
+                        console.log("changed settings");
                         this.room.value!.isLocal = message.data.isLocal || false;
                         break;
                     case 'joined':
+                        console.log("join");
                         if (!this.room.value) return;
                         this.room.value.users.push({ ...message.data });
                         break;
                     case 'disconnected':
+                        console.log("Disconnect");
                         var user = this.room.value?.users.find(
                             (user) => user.id === message.data.id
                         );
@@ -121,14 +124,16 @@ export class ConnectionService {
                         }
                         break;
                     case 'left':
+                        console.log("Left");
                         if (!this.room.value) return;
                         this.room.value.users = this.room.value.users.filter(
                             (user) => user.id === message.data.id
                         );
                         break;
                     case 'reconnected':
+                        console.log("Reconeccted", message.data);
                         var user = this.room.value?.users.find(
-                            (user) => user.id === message.data.user.id
+                            (player) => player.id === message.data.id
                         );
                         if (user) {
                             user.disconnected = false;
@@ -136,21 +141,29 @@ export class ConnectionService {
                         }
                         break;
                     case 'started':
+                        console.log("Game started");
                     case 'dealCards':
+                        console.log("Deal Cards");
                         if (!this.room.value) return;
                         this.router.push(
                             `/${this.room.value.selectedGame}?roomId=${this.room.value.id}`
                         );
                         break;
                     case 'drawCard':
+                        console.log("Draw Card");
                         this.drawCardCallbacks.forEach((callback) =>
                             callback(message.data.markerId, message.data.card)
                         );
                         break;
+                    case 'getCards':
+                        console.warn("GETCARDS requested");
+                        break;
                     case 'error':
                         console.error('Error:', message.message);
+                        break;
                     default:
                         console.warn('Unhandled action', message.action, message.data);
+                        break;
                 }
             },
             { signal: this.controller.signal }

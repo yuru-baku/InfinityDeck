@@ -80,6 +80,28 @@ export class Room {
         });
     }
 
+    public addListenerToAll(
+        action: string,
+        callback: (user: User, data: any) => void
+    ): EventListener[] {
+        return this.users.map((user) => this.addListener(user, action, callback));
+    }
+
+    private addListener(
+        user: User,
+        action: string,
+        callback: (user: User, data: any) => void
+    ): EventListener {
+        const listener = (event: any) => {
+            const data = JSON.parse(event.data.toString());
+            if (data.action == action) {
+                callback(user, data.data);
+            }
+        };
+        user.ws.addEventListener('message', listener);
+        return listener;
+    }
+
     makeUserAdmin(user: User) {
         user.isOwner = true;
         // listen for actions of admin
@@ -105,20 +127,17 @@ export class Room {
             this.users.filter((u) => u != user)
         );
         const fiveSeconds: number = 5 * 60 * 1000;
-        user.timeout = setTimeout(
-            () => {
-                console.log('triggered timeout');
-                this.users = this.users.filter((u) => u != user); // remove this user
-                // notify remaining
-                this.sendMessageToUsers('left', { id: user.id, name: user.name });
-                // close game if we were the last one and game hasn't finished
-                if (this.users.length === 0) {
-                    // all left :(
-                    this.game.end();
-                }
-            },
-            fiveSeconds
-        );
+        user.timeout = setTimeout(() => {
+            console.log('triggered timeout');
+            this.users = this.users.filter((u) => u != user); // remove this user
+            // notify remaining
+            this.sendMessageToUsers('left', { id: user.id, name: user.name });
+            // close game if we were the last one and game hasn't finished
+            if (this.users.length === 0) {
+                // all left :(
+                this.game.end();
+            }
+        }, fiveSeconds);
     }
 
     getRoomInfo(user: User) {

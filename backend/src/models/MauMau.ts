@@ -1,5 +1,6 @@
 import { Room, WsMessage } from './room';
 import { User } from './user';
+import { CardSyncService } from '../cardSyncService';
 
 export class MauMau {
     room: Room;
@@ -10,7 +11,7 @@ export class MauMau {
     history: string[];
     startTime: Date | undefined;
     endTime: Date | undefined;
-
+    private cardSync?: CardSyncService;
     constructor(room: Room) {
         this.room = room;
         this.deck = [
@@ -70,6 +71,7 @@ export class MauMau {
         this.playedCards = [];
         this.drawPile = []; // "Nachziehstapel"
         this.history = [];
+        //this.cardSync = new CardSyncService(room, 1000);
     }
 
     start() {
@@ -87,6 +89,12 @@ export class MauMau {
         this.room.sendMessageToUsers('dealCards', {});
         let historyEntry = 'dealCards';
         this.history.unshift(historyEntry);
+
+        //note these listers persist for the lifetime of the websockets
+        //we might need to remove these listeners if we want to enable
+        this.cardSync = new CardSyncService(this.room, 1000);
+        this.cardSync.addSyncListener();
+        this.cardSync.startSync();
     }
 
     end() {
@@ -97,6 +105,8 @@ export class MauMau {
         this.endTime = new Date();
 
         const leaderboard: string[] = [];
+
+        this.cardSync?.stopSync();
 
         this.room.sendMessageToUsers('end', {
             startTime: this.startTime,
