@@ -118,7 +118,7 @@ export class ConnectionService {
                     break;
                 case 'reconnected':
                     var user = this.room.value?.users.find(
-                        (user) => user.id === message.data.user.id
+                        (user) => user.id === message.data.id
                     );
                     if (user) {
                         user.disconnected = false;
