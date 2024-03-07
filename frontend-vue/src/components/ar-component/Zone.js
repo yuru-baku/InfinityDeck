@@ -160,14 +160,14 @@ export class Zone {
 
         const minX = Math.min(zoneMarker1Position.x, zoneMarker2Position.x);
         const maxX = Math.max(zoneMarker1Position.x, zoneMarker2Position.x);
-        const minZ = Math.min(zoneMarker1Position.z, zoneMarker2Position.z);
-        const maxZ = Math.max(zoneMarker1Position.z, zoneMarker2Position.z);
+        const minY = Math.min(zoneMarker1Position.y, zoneMarker2Position.y);
+        const maxY = Math.max(zoneMarker1Position.y, zoneMarker2Position.y);
 
         return (
             markerPosition.x >= minX &&
             markerPosition.x <= maxX &&
-            markerPosition.z >= minZ &&
-            markerPosition.z <= maxZ
+            markerPosition.y >= minY &&
+            markerPosition.y <= maxY
         );
     }
 

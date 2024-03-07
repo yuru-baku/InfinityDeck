@@ -65,6 +65,7 @@ export class CardMarker {
         if (this.isFaceUp) {
             this.imageElement.setAttribute('data-state', 'back');
             this.imageElement.setAttribute('src', this.cardBackSrc);
+            this.isFaceUp = false;
         }
     }
 
@@ -72,6 +73,7 @@ export class CardMarker {
         if (!this.isFaceUp) {
             this.imageElement.setAttribute('data-state', 'front');
             this.imageElement.setAttribute('src', faceUrl);
+            this.isFaceUp = true;
         }
     }
 
