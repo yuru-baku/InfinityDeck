@@ -6,6 +6,7 @@ export class CardService {
     private conSerivce: ConnectionService;
 
     public cardBack: string;
+    public markerBaseUrl: string;
     public numberOfCards: number;
     markerMap: Map<string, Card>;
     cardCallbacks: Map<string, Function>;
@@ -13,17 +14,23 @@ export class CardService {
     constructor(conService: ConnectionService) {
         this.conSerivce = conService;
         this.cardBack = 'url(./InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg)';
+        this.markerBaseUrl = './InfintyDeck/markers/';
         this.numberOfCards = 0;
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection((data) => {
-            this.numberOfCards = 40; // Todo: Marker Anzahl?! 
+            this.numberOfCards = 40; // Todo: Marker Anzahl?!
             if (data.markerMap) {
-                this.markerMap = new Map(Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [key, { name: value, url: this.getCardUrl(value) }]));
-                console.log('recovered markerMap')
+                this.markerMap = new Map(
+                    Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [
+                        key,
+                        { name: value, url: this.getCardUrl(value) }
+                    ])
+                );
+                console.log('recovered markerMap');
             }
-        }); 
+        });
         conService.onCardDrawed((markerId, cardName) => this.registerMarker(markerId, cardName));
     }
 

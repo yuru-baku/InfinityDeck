@@ -16,76 +16,42 @@ const props = defineProps({
 const connected = ref(false);
 
 const resizeController = new AbortController();
-window.addEventListener('resize', (event) => {
-    let video = document.getElementById('arjs-video');
-    let canvas = document.getElementsByClassName('a-canvas');
-    if (!video) return;
-    let style = window.getComputedStyle(video);
-    canvas.item(0).setAttribute('style', `width: ${style.width} !important; height: ${style.height} !important; margin-top: ${style.marginTop}; margin-left: ${style.marginLeft};`);
-}, { signal: resizeController.signal });
+window.addEventListener(
+    'resize',
+    (event) => {
+        let video = document.getElementById('arjs-video');
+        let canvas = document.getElementsByClassName('a-canvas');
+        if (!video) return;
+        let style = window.getComputedStyle(video);
+        canvas
+            .item(0)
+            .setAttribute(
+                'style',
+                `width: ${style.width} !important; height: ${style.height} !important; margin-top: ${style.marginTop}; margin-left: ${style.marginLeft};`
+            );
+    },
+    { signal: resizeController.signal }
+);
 AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
 // AFRAME.AScene.removeFullScreenStyles();
-
-//Global Variable
-var markersURLArray = [];
-var markersNameArray = [];
 
 var foundCardMarkers = [];
 var foundZoneMarkers = [];
 var handZone;
+var debug = true;
 
 props.conService.onConnection(() => {
     if (!AFRAME.components['markers_start']) {
         AFRAME.registerComponent('markers_start', {
             init: function () {
-                console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
-
                 var sceneEl = document.querySelector('a-scene');
-                //list of the markers
-                for (var i = 0; i < props.cardService.numberOfCards + 1; i++) {
-                    var url = './InfintyDeck/markers/pattern-' + i + '.patt';
-                    markersURLArray.push(url);
-                    markersNameArray.push(i);
-                }
-                for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
-                    var markerEl = document.createElement('a-marker');
-                    markerEl.setAttribute('type', 'pattern');
-                    markerEl.setAttribute('url', markersURLArray[k]);
-                    markerEl.setAttribute('id', markersNameArray[k]);
 
-                    markerEl.setAttribute('registerevents', '');
-                    sceneEl.appendChild(markerEl);
-                    markerEl.style.zIndex = '1'; // Adjust the value as needed
+                console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
+                generateMarkers(sceneEl);
 
-                    // Add text to each marker
-                    var textEl = document.createElement('a-entity');
-
-                    textEl.setAttribute('id', 'text');
-                    textEl.setAttribute('text', {
-                        color: 'red',
-                        align: 'center',
-                        value: markersNameArray[k],
-                        width: '5.5'
-                    });
-                    textEl.object3D.position.set(0, 0.7, 0);
-                    textEl.object3D.rotation.set(-90, 0, 0);
-
-                    markerEl.appendChild(textEl);
-
-                    // Add the card Image
-                    var imageEl = document.createElement('a-image');
-                    imageEl.setAttribute('src', props.cardService.cardBack);
-                    imageEl.setAttribute('id', 'card');
-                    imageEl.setAttribute('data-state', 'back');
-
-                    imageEl.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
-                    imageEl.object3D.position.set(0, 0, 0);
-                    imageEl.object3D.rotation.set(Math.PI / 2, 0, 0);
-                    markerEl.appendChild(imageEl);
-                }
                 handZone = new Zone(
-                    './InfintyDeck/markers/ZoneMarker1.patt',
-                    './InfintyDeck/markers/ZoneMarker2.patt',
+                    props.cardService.markerBaseUrl + 'ZoneMarker1.patt',
+                    props.cardService.markerBaseUrl + 'ZoneMarker2.patt',
                     sceneEl,
                     'hand',
                     foundZoneMarkers
@@ -176,6 +142,51 @@ props.conService.onConnection(() => {
     connected.value = true;
 });
 
+function generateMarkers(sceneEl) {
+    for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
+        var markerEl = document.createElement('a-marker');
+        markerEl.setAttribute('type', 'pattern');
+        var url = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
+        markerEl.setAttribute('url', url);
+        markerEl.setAttribute('id', k);
+
+        markerEl.setAttribute('registerevents', '');
+        sceneEl.appendChild(markerEl);
+        if (debug) {
+            addCardNumberToMarker(markerEl, k);
+        }
+        addCardImageToMarker(markerEl);
+    }
+}
+
+function addCardImageToMarker(markerEl) {
+    var imageEl = document.createElement('a-image');
+    imageEl.setAttribute('src', props.cardService.cardBack);
+    imageEl.setAttribute('id', 'card');
+    imageEl.setAttribute('data-state', 'back');
+
+    imageEl.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
+    imageEl.object3D.position.set(0, 0, 0);
+    imageEl.object3D.rotation.set(Math.PI / 2, 0, 0);
+    markerEl.appendChild(imageEl);
+}
+
+function addCardNumberToMarker(markerEl, number) {
+    var textEl = document.createElement('a-entity');
+
+    textEl.setAttribute('id', 'text');
+    textEl.setAttribute('text', {
+        color: 'red',
+        align: 'center',
+        value: number,
+        width: '5.5'
+    });
+    textEl.object3D.position.set(0, 0.7, 0);
+    textEl.object3D.rotation.set(-90, 0, 0);
+
+    markerEl.appendChild(textEl);
+}
+
 function isCardBack(marker) {
     if (!marker) return false;
     const imageEl = marker.querySelector('#card');
@@ -235,7 +246,7 @@ onUnmounted(() => {
     }
 
     // remove custom components
-    const componentsToRemove = [ 'markers_start', 'registerevents', 'registerevents_zone' ];
+    const componentsToRemove = ['markers_start', 'registerevents', 'registerevents_zone'];
     for (let component of componentsToRemove) {
         delete AFRAME.components[component];
     }
