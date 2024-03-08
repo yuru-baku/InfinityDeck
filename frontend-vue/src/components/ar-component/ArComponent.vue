@@ -1,6 +1,8 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
+import { InfinityMarker } from './InfinityMarker';
 import { Zone } from './Zone';
+import { CardMarker } from './CardMarker';
 import { CardService } from './CardService';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
@@ -61,30 +63,28 @@ props.conService.onConnection(() => {
     }
 
     //Detect marker found and lost
-    if (!AFRAME.components['registerevents']) {
-        AFRAME.registerComponent('registerevents', {
+    if (!AFRAME.components['registerevents_card']) {
+        AFRAME.registerComponent('registerevents_card', {
             init: function () {
-                const marker = this.el;
+                const marker = this.el.cardMarker;
 
-                marker.addEventListener('markerFound', () => {
-                    var markerId = marker.id;
+                this.el.addEventListener('markerFound', () => {
                     addFoundMarker(marker, foundCardMarkers);
                     if (handZone.markerInZone(marker)) {
-                        turnCard(marker);
+                        marker.turnCardOnBack();
                     }
-                    console.log('Marker Found: ', markerId, 'at ', marker.object3D.position);
+                    console.log('Marker Found: ', marker.id, 'at ', marker.getMarkerPosition());
                 });
 
-                marker.addEventListener('markerLost', () => {
-                    var markerId = marker.id;
+                this.el.addEventListener('markerLost', () => {
                     removeFoundMarker(marker, foundCardMarkers);
-                    console.log('Marker Lost: ', markerId);
+                    console.log('Marker Lost: ', marker.id);
                 });
                 function checkMarkerInZone() {
                     for (let foundMarker of foundCardMarkers) {
                         if (handZone.markerInZone(foundMarker)) {
-                            turnCard(foundMarker);
-                        } else if (isCardBack(foundMarker)) {
+                            marker.turnCardOnBack();
+                        } else if (!foundMarker.isFaceUp) {
                             showCard(foundMarker);
                         }
                     }
@@ -98,44 +98,42 @@ props.conService.onConnection(() => {
     if (!AFRAME.components['registerevents_zone']) {
         AFRAME.registerComponent('registerevents_zone', {
             init: function () {
-                const marker = this.el;
-                var lastPosition1;
-                var lastPosition2;
-                marker.addEventListener('markerFound', () => {
-                    var markerId = marker.id;
-                    var image = marker.querySelector('#text');
-                    var position = marker.object3D.position;
+                const zoneMarker = this.el;
+                zoneMarker.addEventListener('markerFound', () => {
+                    var markerId = zoneMarker.id;
 
-                    addFoundMarker(marker, foundZoneMarkers);
+                    addFoundMarker(zoneMarker, foundZoneMarkers);
                     //add for loop here with zoneArray if we have multiple
                     if (
                         isMarkerIdFound(handZone.getMarker1Id(), foundZoneMarkers) &&
                         isMarkerIdFound(handZone.getMarker2Id(), foundZoneMarkers)
                     ) {
-                        lastPosition1 = handZone.getZoneMarker1().object3D.position.clone();
-                        lastPosition2 = handZone.getZoneMarker2().object3D.position.clone();
                         handZone.drawZone();
+                        handZone.redrawZoneEnable();
                     }
 
-                    console.log('Zone Marker Found: ', markerId, 'at ', marker.object3D.position);
+                    console.log(
+                        'Zone Marker Found: ',
+                        markerId,
+                        'at ',
+                        zoneMarker.object3D.position
+                    );
                 });
 
-                marker.addEventListener('markerLost', () => {
-                    var markerId = marker.id;
+                zoneMarker.addEventListener('markerLost', () => {
+                    var markerId = zoneMarker.id;
 
                     //add for loop here with zoneArray if we have multiple
                     if (
-                        marker.id === handZone.getMarker1Id() ||
-                        marker.id === handZone.getMarker2Id()
+                        zoneMarker.id === handZone.getMarker1Id() ||
+                        zoneMarker.id === handZone.getMarker2Id()
                     ) {
                         handZone.removeZone();
                     }
 
-                    removeFoundMarker(marker, foundZoneMarkers);
+                    removeFoundMarker(zoneMarker, foundZoneMarkers);
                     console.log('Zone Marker Lost: ', markerId);
                 });
-
-                handZone.redrawZoneEnable();
             }
         });
     }
@@ -144,73 +142,20 @@ props.conService.onConnection(() => {
 
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
-        var markerEl = document.createElement('a-marker');
-        markerEl.setAttribute('type', 'pattern');
-        var url = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
-        markerEl.setAttribute('url', url);
-        markerEl.setAttribute('id', k);
-
-        markerEl.setAttribute('registerevents', '');
-        sceneEl.appendChild(markerEl);
-        if (debug) {
-            addCardNumberToMarker(markerEl, k);
-        }
-        addCardImageToMarker(markerEl);
+        var markerUrl = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
+        var cardBackSrc = props.cardService.cardBack;
+        var card = new CardMarker(sceneEl, markerUrl, cardBackSrc, k);
+        card.toggleDebugNumber();
     }
 }
 
-function addCardImageToMarker(markerEl) {
-    var imageEl = document.createElement('a-image');
-    imageEl.setAttribute('src', props.cardService.cardBack);
-    imageEl.setAttribute('id', 'card');
-    imageEl.setAttribute('data-state', 'back');
-
-    imageEl.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
-    imageEl.object3D.position.set(0, 0, 0);
-    imageEl.object3D.rotation.set(Math.PI / 2, 0, 0);
-    markerEl.appendChild(imageEl);
-}
-
-function addCardNumberToMarker(markerEl, number) {
-    var textEl = document.createElement('a-entity');
-
-    textEl.setAttribute('id', 'text');
-    textEl.setAttribute('text', {
-        color: 'red',
-        align: 'center',
-        value: number,
-        width: '5.5'
-    });
-    textEl.object3D.position.set(0, 0.7, 0);
-    textEl.object3D.rotation.set(-90, 0, 0);
-
-    markerEl.appendChild(textEl);
-}
-
-function isCardBack(marker) {
-    if (!marker) return false;
-    const imageEl = marker.querySelector('#card');
-    if (!imageEl) return false;
-    return imageEl.getAttribute('src') === props.cardService.cardBack;
-}
-
-function turnCard(marker) {
-    const imageEl = marker.querySelector('#card');
-    const cardState = imageEl.getAttribute('data-state');
-    if (cardState !== 'back') {
-        imageEl.setAttribute('data-state', 'back');
-        imageEl.setAttribute('src', props.cardService.cardBack);
-    }
-}
-
+/**
+ * @param {CardMarker} marker
+ */
 function showCard(marker) {
-    const imageEl = marker.querySelector('#card');
-    const cardState = imageEl.getAttribute('data-state');
-    let id = marker.getAttribute('id');
-    if (cardState !== 'front') {
-        imageEl.setAttribute('data-state', 'front');
-        props.cardService.getCardByMarker(id).then((card) => {
-            imageEl.setAttribute('src', card.url);
+    if (!marker.isFaceUp) {
+        props.cardService.getCardByMarker(marker.id).then((card) => {
+            marker.turnCardOnFace(card.url);
         });
     }
 }
@@ -246,7 +191,7 @@ onUnmounted(() => {
     }
 
     // remove custom components
-    const componentsToRemove = ['markers_start', 'registerevents', 'registerevents_zone'];
+    const componentsToRemove = ['markers_start', 'registerevents_card', 'registerevents_zone'];
     for (let component of componentsToRemove) {
         delete AFRAME.components[component];
     }
@@ -263,7 +208,7 @@ onUnmounted(() => {
             xr-mode-ui="enabled: false"
             color-space="sRGB"
             renderer="gammaOutput: true"
-            arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best;"
+            arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best; sourceWidth: 1280; sourceHeight: 720;"
         >
             <a-entity id="userCamera" camera>
                 <!-- <a-cursor> </a-cursor> -->
