@@ -38,7 +38,9 @@ AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
 // AFRAME.AScene.removeFullScreenStyles();
 
 var foundCardMarkers = [];
-var foundZoneMarkers = [];
+/**
+ * @type {Zone}
+ */
 var handZone;
 var debug = true;
 
@@ -55,8 +57,7 @@ props.conService.onConnection(() => {
                     props.cardService.markerBaseUrl + 'ZoneMarker1.patt',
                     props.cardService.markerBaseUrl + 'ZoneMarker2.patt',
                     sceneEl,
-                    'hand',
-                    foundZoneMarkers
+                    'hand'
                 );
             }
         });
@@ -66,11 +67,11 @@ props.conService.onConnection(() => {
     if (!AFRAME.components['registerevents_card']) {
         AFRAME.registerComponent('registerevents_card', {
             init: function () {
-                const marker = this.el.cardMarker;
+                const marker = this.el.InfinityMarker;
 
                 this.el.addEventListener('markerFound', () => {
                     addFoundMarker(marker, foundCardMarkers);
-                    if (handZone.markerInZone(marker)) {
+                    if (handZone.cardInZone(marker)) {
                         marker.turnCardOnBack();
                     }
                     console.log('Marker Found: ', marker.id, 'at ', marker.getMarkerPosition());
@@ -82,7 +83,7 @@ props.conService.onConnection(() => {
                 });
                 function checkMarkerInZone() {
                     for (let foundMarker of foundCardMarkers) {
-                        if (handZone.markerInZone(foundMarker)) {
+                        if (handZone.cardInZone(foundMarker)) {
                             marker.turnCardOnBack();
                         } else if (!foundMarker.isFaceUp) {
                             showCard(foundMarker);
@@ -98,41 +99,29 @@ props.conService.onConnection(() => {
     if (!AFRAME.components['registerevents_zone']) {
         AFRAME.registerComponent('registerevents_zone', {
             init: function () {
-                const zoneMarker = this.el;
-                zoneMarker.addEventListener('markerFound', () => {
-                    var markerId = zoneMarker.id;
-
-                    addFoundMarker(zoneMarker, foundZoneMarkers);
+                const zoneMarker = this.el.InfinityMarker;
+                this.el.addEventListener('markerFound', () => {
+                    zoneMarker.found = true;
                     //add for loop here with zoneArray if we have multiple
-                    if (
-                        isMarkerIdFound(handZone.getMarker1Id(), foundZoneMarkers) &&
-                        isMarkerIdFound(handZone.getMarker2Id(), foundZoneMarkers)
-                    ) {
+                    if (handZone.zoneMarker1.found && handZone.zoneMarker2.found) {
                         handZone.drawZone();
                         handZone.redrawZoneEnable();
                     }
-
                     console.log(
                         'Zone Marker Found: ',
-                        markerId,
+                        zoneMarker.id,
                         'at ',
-                        zoneMarker.object3D.position
+                        zoneMarker.getMarkerPosition()
                     );
                 });
 
-                zoneMarker.addEventListener('markerLost', () => {
-                    var markerId = zoneMarker.id;
-
+                this.el.addEventListener('markerLost', () => {
                     //add for loop here with zoneArray if we have multiple
-                    if (
-                        zoneMarker.id === handZone.getMarker1Id() ||
-                        zoneMarker.id === handZone.getMarker2Id()
-                    ) {
+                    if (handZone.hasMarker(zoneMarker)) {
                         handZone.removeZone();
                     }
-
-                    removeFoundMarker(zoneMarker, foundZoneMarkers);
-                    console.log('Zone Marker Lost: ', markerId);
+                    console.log('Zone Marker Lost: ', zoneMarker.id);
+                    zoneMarker.found = false;
                 });
             }
         });
@@ -173,10 +162,6 @@ function removeFoundMarker(marker, markerList) {
         markerList.splice(index, 1);
         console.log('Removed marker:', marker.id, 'from found markers list');
     }
-}
-
-function isMarkerIdFound(markerId, list) {
-    return list.some((marker) => marker.id === markerId);
 }
 
 // is called to remove all remainings of AFRAME as far as possible
