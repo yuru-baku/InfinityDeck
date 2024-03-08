@@ -1,20 +1,18 @@
 import { WebSocket as Socket } from 'ws';
 import { setInterval, clearInterval } from 'timers';
-import { Card } from './models/card';
+import { Card, UserCards } from './models/card';
 import { Room } from './models/room';
 import { User } from './models/user';
-/**
- * TODO: integrade cardSyncService
- * TODO: implement Syncing
- * TODO: stopSync when room is empty
- * TODO: gather cards
- * TODO: store cards in room
- * TODO: broadcast cards
- */
+
 export class CardSyncService {
     private room: Room;
     private intervalId?: NodeJS.Timeout;
     private period: number;
+    private partial = (fn: any, firstArg: any) => {
+        return (...lastArgs: any) => {
+            return fn(firstArg, ...lastArgs);
+        };
+    };
 
     constructor(room: Room, period: number = 20) {
         this.intervalId = undefined;
@@ -24,7 +22,6 @@ export class CardSyncService {
 
     startSync(): void {
         if (this.intervalId) {
-            console.warn('CardSyncService: Tried to start multiple syncs. Action not supported.');
             return;
         }
         this.intervalId = setInterval(() => {
@@ -34,13 +31,24 @@ export class CardSyncService {
     }
 
     addSyncListener(): void {
-        this.room.addListenerToAll('getCards', this.onGetCards);
+        const partial = (fn: any, firstArg: any) => {
+            return (...lastArgs: any) => {
+                return fn(firstArg, ...lastArgs);
+            };
+        };
+        this.room.addListenerToAll('getCards', this.partial(this.onGetCards, this));
     }
 
-    onGetCards(user: User, data: any): void {
+    /**
+     *
+     * @param cardSync explicitly passsing reference to this object
+     * @param user whichs users cards we received
+     * @param cards the cards we received
+     */
+    onGetCards(cardSync: CardSyncService, user: User, cards: Card[]): void {
         console.log('User send their cards');
-        console.log(data);
-        console.log(this.room);
+        console.log(cards);
+        cardSync.updateUserCards(user, cards);
     }
 
     stopSync(): void {
@@ -50,7 +58,31 @@ export class CardSyncService {
         }
     }
 
-    onAllCards(socket: Socket, cards: Card[]): void {
-        // ... Process received cards (e.g., update server-side state or propagate to other clients)
+    //Controlling the user cards
+    //------------------------------------------------
+    //
+
+    updateUserCards(user: User, cards: Card[]) {
+        console.log('update userCards');
+        this.userCards[this.find(user)].cards = cards;
+        console.log(this.userCards);
     }
+
+    /**
+     * Finds the userCards of a given user. May create the entry if needed
+     * @param user which cards are searched
+     * @returns index of the users cardss
+     */
+    private find(user: User): number {
+        for (let i = 0; i < this.userCards.length; ++i) {
+            if (this.userCards[i].userId == user.id) {
+                return i;
+            }
+        }
+        this.userCards.push({ userId: user.id, cards: [] });
+        return this.userCards.length;
+    }
+
+    //We have very few users. So an array is fine to use here.
+    private userCards: UserCards[] = [];
 }
