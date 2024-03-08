@@ -7,7 +7,7 @@ export class CardMarker extends InfinityMarker {
         this.markerElement.setAttribute('registerevents_card', '');
         this.cardBackSrc = cardBackSrc;
         this.isFaceUp = false;
-
+        this.cardFaceSrc = '';
         this.#addCardImageToMarker();
     }
 
@@ -31,11 +31,28 @@ export class CardMarker extends InfinityMarker {
         }
     }
 
-    turnCardOnFace(faceUrl) {
+    turnCardOnNewFace(faceUrl) {
         if (!this.isFaceUp) {
             this.imageElement.setAttribute('data-state', 'front');
             this.imageElement.setAttribute('src', faceUrl);
             this.isFaceUp = true;
+            this.cardFaceSrc = faceUrl;
         }
+    }
+
+    turnCardCurrentFace() {
+        if (this.hasFace() && !this.isFaceUp) {
+            this.imageElement.setAttribute('data-state', 'front');
+            this.imageElement.setAttribute('src', this.cardFaceSrc);
+            this.isFaceUp = true;
+        }
+    }
+
+    hasFace() {
+        return this.cardFaceSrc != '';
+    }
+
+    setFaceUrl(faceUrl) {
+        this.cardFaceSrc = faceUrl;
     }
 }

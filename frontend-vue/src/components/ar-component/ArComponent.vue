@@ -129,20 +129,14 @@ props.conService.onConnection(() => {
     connected.value = true;
 });
 
-function tryDrawingHandzone() {
-    let zoneMarkers = [handzone.getZoneMarker1(), handZone.getZoneMarker2()];
-    let isPresent = (id) => isMarkerIdFound(id, foundZoneMarkers);
-    if (zoneMarkers.reduce((acc, id) => acc && isPresent(id), true)) {
-        handZone.drawZone();
-    }
-}
-
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
         var markerUrl = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
         var cardBackSrc = props.cardService.cardBack;
         var card = new CardMarker(sceneEl, markerUrl, cardBackSrc, k);
-        card.toggleDebugNumber();
+        if (debug) {
+            card.toggleDebugNumber();
+        }
     }
 }
 
@@ -151,9 +145,21 @@ function generateMarkers(sceneEl) {
  */
 function showCard(marker) {
     if (!marker.isFaceUp) {
-        props.cardService.getCardByMarker(marker.id).then((card) => {
-            marker.turnCardOnFace(card.url);
+        props.cardService.getCardByMarkerId(marker.id).then((card) => {
+            marker.turnCardOnNewFace(card.url);
         });
+    }
+}
+
+//TODO check if this is better than showCard for us
+/**
+ * @param {CardMarker} marker
+ */
+function showCardSyncOnlyIfNew(marker) {
+    if (marker.hasFace()) {
+        marker.turnCardCurrentFace();
+    } else {
+        showCard();
     }
 }
 
