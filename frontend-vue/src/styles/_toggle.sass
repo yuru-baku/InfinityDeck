@@ -3,11 +3,12 @@
 .toggle-button 
     position: relative
     display: inline-block
-    width: 4.6rem
-    height: 2.6rem
-    border: .2rem solid colors.$toggleBorder
+    width: 60px
+    height: 40px
+    border: 3px solid colors.$toggleBorder
     // background: colors.$secondary
     border-radius: 1.3rem
+    flex-shrink: 0
     &.disabled
         opacity: .5
         .toggle-slider
@@ -24,9 +25,9 @@ input.toggle-input
         box-shadow: 0 0 1px colors.$lightBlue
     
     &:checked + .toggle-slider:before 
-        -webkit-transform: translateX(1.8rem)
-        -ms-transform: translateX(1.8rem)
-        transform: translateX(1.8rem)
+        -webkit-transform: translateX(18px)
+        -ms-transform: translateX(18px)
+        transform: translateX(18px)
     
 
 .toggle-slider 
@@ -43,10 +44,10 @@ input.toggle-input
         border-radius: 50%
         position: absolute
         content: ""
-        height: 2.0rem
-        width: 2.0rem
-        left: .2rem
-        bottom: .1rem
+        height: 32px
+        width: 32px
+        left: 2px
+        bottom: 1px
         background-color: colors.$toggleBlue
         -webkit-transition: .4s
         transition: .4s

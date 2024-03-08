@@ -1,5 +1,7 @@
 @use 'colors'
 
+#app
+    overflow-y: auto
 .lobby
     margin-top: 5vh
     display: flex
@@ -71,3 +73,16 @@
                 border-radius: 0
                 max-height: 6rem
                 max-width: 6rem
+
+@media only screen and (max-width: 600px) 
+    .lobby
+        flex-direction: column
+        margin: 0
+        padding: 1em
+        width: 100vw
+    #gameSettings
+        flex-direction: column
+        #chooseGame
+            flex-direction: row
+            flex-wrap: wrap
+            justify-content: center
