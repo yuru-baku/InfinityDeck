@@ -1,5 +1,6 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
+import { InfinityMarker } from './InfinityMarker';
 import { Zone } from './Zone';
 import { CardMarker } from './CardMarker';
 import { CardService } from './CardService';
@@ -215,3 +216,4 @@ onUnmounted(() => {
         </a-scene>
     </div>
 </template>
+./InfinityMarker
