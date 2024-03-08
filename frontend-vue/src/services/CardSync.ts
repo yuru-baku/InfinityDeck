@@ -17,17 +17,17 @@ export class CardSync {
     }
 
     onBroadcastCards(cardSync: CardSync, allCards: UserCards[], _conService: ConnectionService) {
-        console.log('Backend synced the cards.', allCards);
+        console.debug('Backend synced the cards.', allCards);
         cardSync.cardService.setUsersCards(allCards);
     }
 
     onGetCards(cardSync: CardSync, _data: any, conService: ConnectionService) {
-        console.log('Backend wants to see our cards:');
+        console.debug('Backend wants to see our cards:');
         conService.sendMessage('getCards', cardSync.gatherCards());
     }
 
     gatherCards(): Card[] {
-        console.log('I am gathering ya cards!');
+        console.debug('I am gathering ya cards!');
         return [];
     }
 
