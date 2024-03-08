@@ -97,40 +97,39 @@ props.conService.onConnection(() => {
     if (!AFRAME.components['registerevents_zone']) {
         AFRAME.registerComponent('registerevents_zone', {
             init: function () {
-                const marker = this.el;
-                var lastPosition1;
-                var lastPosition2;
-                marker.addEventListener('markerFound', () => {
-                    var markerId = marker.id;
-                    var image = marker.querySelector('#text');
-                    var position = marker.object3D.position;
+                const zoneMarker = this.el;
+                zoneMarker.addEventListener('markerFound', () => {
+                    var markerId = zoneMarker.id;
 
-                    addFoundMarker(marker, foundZoneMarkers);
+                    addFoundMarker(zoneMarker, foundZoneMarkers);
                     //add for loop here with zoneArray if we have multiple
                     if (
                         isMarkerIdFound(handZone.getMarker1Id(), foundZoneMarkers) &&
                         isMarkerIdFound(handZone.getMarker2Id(), foundZoneMarkers)
                     ) {
-                        lastPosition1 = handZone.getZoneMarker1().object3D.position.clone();
-                        lastPosition2 = handZone.getZoneMarker2().object3D.position.clone();
                         handZone.drawZone();
                     }
 
-                    console.log('Zone Marker Found: ', markerId, 'at ', marker.object3D.position);
+                    console.log(
+                        'Zone Marker Found: ',
+                        markerId,
+                        'at ',
+                        zoneMarker.object3D.position
+                    );
                 });
 
-                marker.addEventListener('markerLost', () => {
-                    var markerId = marker.id;
+                zoneMarker.addEventListener('markerLost', () => {
+                    var markerId = zoneMarker.id;
 
                     //add for loop here with zoneArray if we have multiple
                     if (
-                        marker.id === handZone.getMarker1Id() ||
-                        marker.id === handZone.getMarker2Id()
+                        zoneMarker.id === handZone.getMarker1Id() ||
+                        zoneMarker.id === handZone.getMarker2Id()
                     ) {
                         handZone.removeZone();
                     }
 
-                    removeFoundMarker(marker, foundZoneMarkers);
+                    removeFoundMarker(zoneMarker, foundZoneMarkers);
                     console.log('Zone Marker Lost: ', markerId);
                 });
 

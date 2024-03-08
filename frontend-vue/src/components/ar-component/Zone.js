@@ -96,14 +96,6 @@ export class Zone {
                 .addVectors(position1, position2)
                 .multiplyScalar(0.5);
 
-            var geometry = new THREE.PlaneGeometry(width, height);
-            var material = new THREE.MeshBasicMaterial({
-                color: 0x00ff00,
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.5
-            });
-
             this.zoneEntity = document.createElement('a-entity');
             this.zoneEntity.setAttribute('geometry', {
                 primitive: 'plane',
