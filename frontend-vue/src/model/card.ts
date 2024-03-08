@@ -20,9 +20,9 @@ export enum Zone {
  * the zone encoding the position on the table
  */
 export type Card = {
-    markerId: string;
+    url: string;
     cardFace: string;
-    zone: Zone;
+    zone: Zone | undefined;
 };
 
 /**

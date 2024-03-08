@@ -1,34 +1,36 @@
-import type { Card, Zone } from '@/model/card.ts';
+import type { Card, UserCards, Zone } from '@/model/card';
 import { CardService } from './CardService';
 import type { ConnectionService } from '@/services/ConnectionService';
-import type { User } from '@/model/user';
 
 export class CardSync {
     constructor(conService: ConnectionService, cardService: CardService) {
         this.conService = conService;
-        this.conService.addListener('getCards', this.onGetCards);
+        const partial = (fn: any, firstArg: any) => {
+            return (...lastArgs: any) => {
+                return fn(firstArg, ...lastArgs);
+            };
+        };
+        this.conService.addListener('getCards', partial(this.onGetCards, this));
+        this.conService.addListener('getCards', partial(this.onGetCards, this));
 
         this.cardService = cardService;
     }
 
-    onGetCards() {
-        //console.log("sync:", this.conService);
-        //console.log("Backend wants to see our cards");
-        let card: Card = { markerId: '189', cardFace: 'Queen', zone: 0 };
-        let con = this;
-        con.sendMessage('getCards', { data: 'blub' });
+    onBroadcastCards(cardSync: CardSync, data: UserCards[], _conService: ConnectionService) {
+        console.log('Backend synced the cards.');
+        cardSync.cardService.setUsersCards(data);
     }
 
-    /*
-    public found(marker: string): Card {
-        this.cardService.drawCard();
+    onGetCards(cardSync: CardSync, _data: any, conService: ConnectionService) {
+        console.log('Backend wants to see our cards:');
+        conService.sendMessage('getCards', cardSync.gatherCards());
     }
 
-    public lost(marker: string): Card { }
-    public setShared(marker: string): Card { }
-    public setPrivate(marker: string): Card { }
-    */
+    gatherCards(): Card[] {
+        console.log('I am gathering ya cards!');
+        return [];
+    }
+
     private cardService: CardService;
     private conService: ConnectionService;
-    private user: User;
 }

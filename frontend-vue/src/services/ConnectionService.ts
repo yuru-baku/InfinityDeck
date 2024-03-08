@@ -83,15 +83,18 @@ export class ConnectionService {
     /**
      * Registers callback for events on the websocket.
      * @param action the action to listen for
-     * @param callback the callback to be executet
+     * @param callback the callback to be executet. The given connectionService can be used to anwer the requests.
      * @returns Eventlistener needed to remove the listener.
      */
-    public addListener(action: string, callback: (data: any) => void): EventListener {
+    public addListener(
+        action: string,
+        callback: (data: any, conService: ConnectionService) => void
+    ): EventListener {
         console.log('register new listener for action:', action);
         const listener = (event: any) => {
             const msg = new Message(event);
             if (msg.action == action) {
-                callback(msg.data);
+                callback(msg.data, this);
             }
         };
         this.getSocket().addEventListener('message', listener);
@@ -232,12 +235,6 @@ export class ConnectionService {
         if (this.room.value) {
             this.router.push(`/${this.room.value.selectedGame}?roomId=${this.room.value.id}`);
         }
-    }
-
-    private onGetCards() {
-        let card: Card = { markerId: '189', cardFace: 'Queen', zone: 0 };
-        let con = this;
-        con.sendMessage('getCards', { data: 'blub' });
     }
 
     public killConnection() {
