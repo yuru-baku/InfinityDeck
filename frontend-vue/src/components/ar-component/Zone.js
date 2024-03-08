@@ -95,12 +95,6 @@ export class Zone {
 
             // Set the position to the midpoint between markers
             this.zoneEntity.object3D.position.copy(midpoint);
-
-            // Apply rotation to the zoneEntity
-            const direction = new THREE.Vector3().subVectors(position2, position1);
-            const angle = Math.atan2(direction.x, direction.z);
-            this.zoneEntity.object3D.rotation.set(0, 0, 0); // Adjusted rotation
-
             this.zoneEntity.setAttribute('id', 'zoneRectangle_' + this.name);
 
             this.scene.appendChild(this.zoneEntity);
@@ -181,7 +175,6 @@ export class Zone {
 
     #redrawZone() {
         if (this.moving) {
-            console.log('REDRAWING ZONE');
             if (
                 isMarkerIdFound(this.zoneMarker1.id, this.foundZoneMarkers) &&
                 isMarkerIdFound(this.zoneMarker2.id, this.foundZoneMarkers)
