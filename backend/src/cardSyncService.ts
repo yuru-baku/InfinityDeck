@@ -49,6 +49,11 @@ export class CardSyncService {
         console.log('User send their cards');
         console.log(cards);
         cardSync.updateUserCards(user, cards);
+        cardSync.sendAllCards();
+    }
+
+    sendAllCards(): void {
+        this.room.sendMessageToUsers('allCards', this.userCards);
     }
 
     stopSync(): void {
@@ -80,7 +85,7 @@ export class CardSyncService {
             }
         }
         this.userCards.push({ userId: user.id, cards: [] });
-        return this.userCards.length;
+        return this.userCards.length - 1;
     }
 
     //We have very few users. So an array is fine to use here.

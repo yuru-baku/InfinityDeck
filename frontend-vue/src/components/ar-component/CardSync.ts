@@ -11,14 +11,14 @@ export class CardSync {
             };
         };
         this.conService.addListener('getCards', partial(this.onGetCards, this));
-        this.conService.addListener('getCards', partial(this.onGetCards, this));
+        this.conService.addListener('allCards', partial(this.onBroadcastCards, this));
 
         this.cardService = cardService;
     }
 
-    onBroadcastCards(cardSync: CardSync, data: UserCards[], _conService: ConnectionService) {
-        console.log('Backend synced the cards.');
-        cardSync.cardService.setUsersCards(data);
+    onBroadcastCards(cardSync: CardSync, allCards: UserCards[], _conService: ConnectionService) {
+        console.log('Backend synced the cards.', allCards);
+        cardSync.cardService.setUsersCards(allCards);
     }
 
     onGetCards(cardSync: CardSync, _data: any, conService: ConnectionService) {
