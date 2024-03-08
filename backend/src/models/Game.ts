@@ -1,5 +1,5 @@
-import { Room, WsMessage } from "./room";
-import { User } from "./user";
+import { Room, WsMessage } from './room';
+import { User } from './user';
 
 export abstract class Game {
 
@@ -11,11 +11,10 @@ export abstract class Game {
     drawPile: string[];
     maxUsers: number = 4;
     history: string[];
-    startTime: Date|undefined;
-    endTime: Date|undefined;
+    startTime: Date | undefined;
+    endTime: Date | undefined;
 
-
-    constructor (room: Room) {
+    constructor(room: Room) {
         this.room = room;
         this.playedCards = [ ];
         this.drawPile = [ ];        // "Nachziehstapel"
@@ -23,6 +22,7 @@ export abstract class Game {
     }
 
     start() {
+        console.log('Start Game');
         // check user count
         if (this.room.users.length > this.maxUsers) {
             for (let user of this.room.users) {
@@ -31,22 +31,23 @@ export abstract class Game {
             return;
         }
         this.startTime = new Date();
-        this.room.state = 'inGame';
+        this.room.setState('inGame');
         this.drawPile = [...this.deck]; // copy array
         this.shuffleArray(this.drawPile);
-        this.room.sendMessageToUsers('dealCards', { });
+        this.room.sendMessageToUsers('dealCards', {});
         let historyEntry = 'dealCards';
         this.history.unshift(historyEntry);
     }
 
     end() {
-        if (this.room.state !== 'inGame') {
+        if (this.room.getState() !== 'inGame') {
             return;
         }
-        this.room.state = 'finished';
+        console.log('End Game');
+        this.room.setState('finished');
         this.endTime = new Date();
 
-        const leaderboard: string[] = [ ];
+        const leaderboard: string[] = [];
 
         this.room.sendMessageToUsers('end', {
             startTime: this.startTime,
@@ -59,13 +60,15 @@ export abstract class Game {
             history: this.history,
             startTiem: this.startTime,
             endTime: this.endTime,
-            users: this.room.users.map(user => { return { name: user.name, id: user.id, handcards: [ ] }})
+            users: this.room.users.map((user) => {
+                return { name: user.name, id: user.id, handcards: [] };
+            })
         });
     }
 
     drawCard(user: User, message: WsMessage) {
         const markerId = message.data.markerId;
-        let card = user.markerMap.get(markerId)
+        let card = user.markerMap.get(markerId);
         // check if this card is already known
         if (!card) {
             // check if we need to shuffle deck
@@ -91,12 +94,11 @@ export abstract class Game {
     shuffleDrawPile() {
         this.drawPile = this.drawPile.concat(this.playedCards);
         this.drawPile = this.shuffleArray(this.drawPile);
-        this.playedCards = [ ];
+        this.playedCards = [];
         // notify users
-        this.room.sendMessageToUsers('shuffled', { })
+        this.room.sendMessageToUsers('shuffled', {});
         this.history.unshift('shuffle');
     }
-
 
     shuffleArray(array: any[]) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -104,7 +106,7 @@ export abstract class Game {
             const tmp = array[i];
             array[i] = array[j];
             array[j] = tmp;
-        } 
+        }
         return array;
     }
 }

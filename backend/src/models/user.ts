@@ -1,15 +1,14 @@
-import { WebSocket } from "ws";
+import { WebSocket } from 'ws';
 
 export class User {
-
     ws: WebSocket;
     id: string;
     name: string;
     isOwner: boolean;
-    timeout: NodeJS.Timeout|undefined;
+    timeout: NodeJS.Timeout | undefined;
     markerMap: Map<string, any>;
 
-    constructor(ws: WebSocket, id: string|undefined, name: string|undefined) {
+    constructor(ws: WebSocket, id: string | undefined, name: string | undefined) {
         this.ws = ws;
         if (id) {
             this.id = id;

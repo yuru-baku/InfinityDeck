@@ -1,8 +1,10 @@
-import { Db } from "mongodb";
-import { MauMau } from "./games/MauMau";
-import { User } from "./user";
-import { Game } from "./Game";
-import { Uno } from "./games/Uno";
+import { Db } from 'mongodb';
+import { User } from './user';
+import { CardSyncService } from '../cardSyncService';
+import { Uno } from './games/Uno';
+import { MauMau } from './games/MauMau';
+import { Game } from './Game';
+import { Message } from './message';
 
 export type WsMessage = {
     action: string,
@@ -15,7 +17,6 @@ const Games = {
 }
 
 export class Room {
-
     id: string;
     users: User[];
     state: 'inLobby'|'inGame'|'finished';
@@ -23,6 +24,7 @@ export class Room {
     game: Game;
     db: Db;
     isLocal: boolean;
+    private cardSync?: CardSyncService;
 
     constructor(db: Db, id?: string) {
         if (id === undefined || id === null || id === 'undefined' || id === 'null') {
@@ -30,12 +32,42 @@ export class Room {
         } else {
             this.id = id;
         }
-        this.users = [];    // Users taking part in this game
+        this.users = []; // Users taking part in this game
         this.state = 'inLobby';
         this.selectedGame = 'MauMau';
         this.game = new MauMau(this);
         this.db = db;
         this.isLocal = true;
+        this.cardSync = new CardSyncService(this, 1000);
+    }
+
+    getState(): 'inLobby' | 'inGame' | 'finished' {
+        return this.state;
+    }
+
+    setState(state: 'inLobby' | 'inGame' | 'finished') {
+        switch (state) {
+            case 'finished':
+            case 'inLobby':
+                this.cardSync?.stopSync();
+                break;
+            case 'inGame':
+                if (this.state != state) {
+                    this.cardSync?.addSyncListener();
+                    this.cardSync?.startSync();
+                }
+                break;
+            default:
+                console.error('invalid game state change:', state);
+                break;
+        }
+        this.state = state;
+    }
+    sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
+        users = users.filter((user) => !user.timeout); // only send to connected users
+        for (let user of users) {
+            user.ws.send(JSON.stringify({ action, data }));
+        }
     }
 
     join(user: User) {
@@ -56,27 +88,29 @@ export class Room {
         this.setUpUserConnection(user, 'reconnected');
     }
 
-    private setUpUserConnection(user: User, connectionAction: 'joined'|'reconnected') {
-        console.log(user.id, connectionAction, this.id);
+    private setUpUserConnection(user: User, connectionAction: 'joined' | 'reconnected') {
+        console.log({ name: user.name, id: user.id }, connectionAction, this.id);
 
         // notify users
-        this.sendMessageToUsers(connectionAction, { id: user.id, name: user.name, isOwner: user.isOwner }, this.users.filter(u => u.id != user.id));
+        this.sendMessageToUsers(
+            connectionAction,
+            { id: user.id, name: user.name, isOwner: user.isOwner },
+            this.users.filter((u) => u.id != user.id)
+        );
 
         // listen for actions of normal players
         const availableActions = [
             'drawCard',
-            'playCard',
+            'playCard'
             // 'endTurn'
         ];
-        const availableRoomActions = [
-            'getRoomInfo',
-        ];
+        const availableRoomActions = ['getRoomInfo'];
         user.ws.on('message', (msg: string) => {
             const message: any = JSON.parse(msg);
             if (availableActions.includes(message.action)) {
                 // @ts-ignore
                 this.game[message.action](user, message);
-            } else if (availableRoomActions.includes(message.action)){
+            } else if (availableRoomActions.includes(message.action)) {
                 // @ts-ignore
                 this[message.action](user, message);
             }
@@ -86,21 +120,14 @@ export class Room {
     makeUserAdmin(user: User) {
         user.isOwner = true;
         // listen for actions of admin
-        const availableGameActions = [
-            'start',
-            'end',
-            'shuffleDrawPile'
-        ];
-        const availableRoomActions = [
-            'changeGame',
-            'changeSettings'
-        ];
+        const availableGameActions = ['start', 'end', 'shuffleDrawPile'];
+        const availableRoomActions = ['changeGame', 'changeSettings'];
         user.ws.on('message', (msg: string) => {
-            const message: any = JSON.parse(msg);
+            const message = JSON.parse(msg);
             if (availableGameActions.includes(message.action)) {
                 // @ts-ignore
                 this.game[message.action](user, message);
-            } else if (availableRoomActions.includes(message.action)){
+            } else if (availableRoomActions.includes(message.action)) {
                 // @ts-ignore
                 this[message.action](user, message);
             }
@@ -109,10 +136,15 @@ export class Room {
 
     leave(user: User) {
         console.log(user.id, 'disconnected', this.id);
-        this.sendMessageToUsers('disconnected', { id: user.id, name: user.name }, this.users.filter(u => u != user));
+        this.sendMessageToUsers(
+            'disconnected',
+            { id: user.id, name: user.name },
+            this.users.filter((u) => u != user)
+        );
+        const fiveMinutes: number = 5 * 60 * 1000;
         user.timeout = setTimeout(() => {
-            console.log('triggered timeout')
-            this.users = this.users.filter(u => u != user); // remove this user
+            console.log('triggered timeout');
+            this.users = this.users.filter((u) => u != user); // remove this user
             // notify remaining
             this.sendMessageToUsers('left', { id: user.id, name: user.name });
             // close game if we were the last one and game hasn't finished
@@ -120,23 +152,27 @@ export class Room {
                 // all left :(
                 this.game.end();
             }
-        }, 5 * 60 * 1000);
+        }, fiveMinutes);
     }
 
     getRoomInfo(user: User) {
-        console.log('getting room infos')
-        this.sendMessageToUsers('gotRoomInfo', {
+        console.log('getting room infos');
+        this.sendMessageToUsers(
+            'gotRoomInfo',
+            {
                 you: { name: user.name, isOwner: user.isOwner, id: user.id },
                 room: {
                     isLocal: this.isLocal,
                     selectedGame: this.selectedGame,
                     state: this.state,
                     users: this.getUserInformations(),
-                    id: this.id,
+                    id: this.id
                 },
                 game: { ...this.game, room: undefined },
                 markerMap: Object.fromEntries(user.markerMap.entries()) // convert to plain object
-            }, [user]);
+            },
+            [user]
+        );
     }
 
     changeGame(user: User, message: WsMessage) {
@@ -154,13 +190,15 @@ export class Room {
         this.sendMessageToUsers('gameChanged', { selectedGame: this.selectedGame, game: { ...this.game, room: undefined } })
     }
 
-    changeSettings(user: User, message: { action: 'changeSettings', data: { isLocal: boolean }}) {
+    changeSettings(user: User, message: { action: 'changeSettings', data: { isLocal: boolean } }) {
         if (!user.isOwner) {
-            user.ws.send(JSON.stringify({ error: 'Only the owner of this room might perform this action!' }));
+            user.ws.send(
+                JSON.stringify({ error: 'Only the owner of this room might perform this action!' })
+            );
             return;
         }
         this.isLocal = message.data.isLocal || false;
-        this.sendMessageToUsers('settingsChanged', { isLocal: this.isLocal })
+        this.sendMessageToUsers('settingsChanged', { isLocal: this.isLocal });
     }
 
     addLocalDataToMarker(user: User, message: WsMessage) {
@@ -176,10 +214,15 @@ export class Room {
         this.sendMessageToUsers('addedLocalDataMarker', message.data, [user]);
     }
 
-
-
-    getUserInformations(): { name: string, isOwner: boolean, id: string, disconnected: boolean }[] {
-        return this.users.map(user => { return { name: user.name, isOwner: user.isOwner, id: user.id, disconnected: user.timeout !== undefined }})
+    getUserInformations(): { name: string; isOwner: boolean; id: string; disconnected: boolean }[] {
+        return this.users.map((user) => {
+            return {
+                name: user.name,
+                isOwner: user.isOwner,
+                id: user.id,
+                disconnected: user.timeout !== undefined
+            };
+        });
     }
 
     addDataToMarker(markerId: string, data: any, user: User) {
@@ -192,14 +235,31 @@ export class Room {
         }
     }
 
-    sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
-        users = users.filter(user => !user.timeout); // only send to connected users
-        for (let user of users) {
-            user.ws.send(JSON.stringify({ action, data }));
-        }
-    }
-
     public isJoinable(): boolean {
         return this.users.length < this.game.maxUsers && this.state === 'inLobby';
     }
+
+    public addListenerToAll(
+        action: string,
+        callback: (user: User, data: any) => void
+    ): EventListener[] {
+        console.log('Activate listeners');
+        return this.users.map((user) => this.addListener(user, action, callback));
+    }
+
+    private addListener(
+        user: User,
+        action: string,
+        callback: (user: User, data: any) => void
+    ): EventListener {
+        const listener = (event: any) => {
+            const msg = new Message(event);
+            if (msg.action == action) {
+                callback(user, msg.data);
+            }
+        };
+        user.ws.addEventListener('message', listener);
+        return listener;
+    }
+
 }

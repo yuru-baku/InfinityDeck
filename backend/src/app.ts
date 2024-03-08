@@ -14,10 +14,11 @@ const dbName = 'InfinityDeck';
 
 async function main() {
     // Use connect method to connect to the server
+    console.log('> Connecting to database');
     client = await client.connect();
-    console.log(' > Successfully connected to database'); 
     const db = client.db(dbName);
-    // const db = undefined;
+    console.log(' > Successfully connected to database');
+    //const db = undefined;
 
     const rooms = new Map();
     const wss = new WebSocketServer({ port: Number(process.env.PORT) });
@@ -26,7 +27,7 @@ async function main() {
         const room_id = req.url?.match(/(?<=roomId=)\w*/)?.at(0);
         const name = req.url?.match(/(?<=name=)\w*/)?.at(0);
         const user_id = req.url?.match(/(?<=userId=)\w*/)?.at(0);
-        let room: Room|undefined = rooms.get(room_id);
+        let room: Room | undefined = rooms.get(room_id);
 
         // if (room_id && room_id !== '' && room_id !== 'undefined') { // get open room
         //     room = rooms.get(room_id);
@@ -36,7 +37,8 @@ async function main() {
         //         return;
         //     }
         //     console.log('User joined', room.id);
-        if (!room) { // create new room
+        if (!room) {
+            // create new room
             room = new Room(db, room_id);
             while (rooms.get(room.id)) {
                 console.log('Room was already taken!');
@@ -48,44 +50,50 @@ async function main() {
         // find user and join
         let user: User;
         // check if user tries to reconnect
-        const _user = room.users.find((user) => user.id === user_id && user.name === name && user.timeout);
+        const _user = room.users.find(
+            (user) => user.id === user_id && user.name === name && user.timeout
+        );
         if (_user) {
             user = _user;
             user.ws = ws;
             room.reconnect(user);
         } else {
             if (!room.isJoinable()) {
-                ws.send(JSON.stringify({
-                    action: 'error',
-                    data: {
-                        message: 'The Room is already full or in a running game!'
-                    }
-                }));
+                ws.send(
+                    JSON.stringify({
+                        action: 'error',
+                        data: {
+                            message: 'The Room is already full or in a running game!'
+                        }
+                    })
+                );
                 return;
             }
             user = new User(ws, undefined, name);
             room.join(user);
         }
-        ws.send(JSON.stringify({
-            action: 'connected',
-            data: {
-                roomId: room.id,
-                users: room.getUserInformations(),
-                you: {
-                    name: name,
-                    id: user.id,
-                    isOwner: user.isOwner
-                },
-                state: room.state,
-                selectedGame: room.selectedGame
-            }
-        }));
+        ws.send(
+            JSON.stringify({
+                action: 'connected',
+                data: {
+                    roomId: room.id,
+                    users: room.getUserInformations(),
+                    you: {
+                        name: name,
+                        id: user.id,
+                        isOwner: user.isOwner
+                    },
+                    state: room.getState(),
+                    selectedGame: room.selectedGame
+                }
+            })
+        );
 
         ws.on('error', console.error);
-        ws.on('close', data => {
+        ws.on('close', (data) => {
             let userCount = room!.leave(user); // is he actually leaving?
             // if (userCount <= 0) {
-                // rooms.delete(room.id);
+            // rooms.delete(room.id);
             // }
         });
     });
@@ -94,6 +102,6 @@ async function main() {
 }
 
 main()
-  .then(console.log)
-  .catch(console.error)
-  .finally(() => client.close());
+    .then(console.log)
+    .catch(console.error)
+    .finally(() => client.close());
