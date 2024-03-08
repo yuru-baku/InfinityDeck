@@ -25,7 +25,7 @@ export class CardSyncService {
             return;
         }
         this.intervalId = setInterval(() => {
-            console.log('Ask players what their cards are');
+            console.debug('Ask players what their cards are');
             this.room.sendMessageToUsers('getCards', {});
         }, this.period);
     }
@@ -46,8 +46,8 @@ export class CardSyncService {
      * @param cards the cards we received
      */
     onGetCards(cardSync: CardSyncService, user: User, cards: Card[]): void {
-        console.log('User send their cards');
-        console.log(cards);
+        console.debug('User send their cards');
+        console.debug(cards);
         cardSync.updateUserCards(user, cards);
         cardSync.sendAllCards();
     }
@@ -68,9 +68,9 @@ export class CardSyncService {
     //
 
     updateUserCards(user: User, cards: Card[]) {
-        console.log('update userCards');
+        console.debug('update userCards');
         this.userCards[this.find(user)].cards = cards;
-        console.log(this.userCards);
+        console.debug(this.userCards);
     }
 
     /**
