@@ -1,6 +1,8 @@
 import { Db } from 'mongodb';
 import { MauMau } from './MauMau';
 import { User } from './user';
+import { CardSyncService } from '../cardSyncService';
+import { Message } from './message';
 
 export type WsMessage = {
     action: string;
@@ -10,20 +12,55 @@ export type WsMessage = {
 export class Room {
     id: string;
     users: User[];
-    state: 'inLobby' | 'inGame' | 'finished';
+    private state: 'inLobby' | 'inGame' | 'finished';
     selectedGame: 'MauMau';
     game: MauMau;
     db: Db;
     isLocal: boolean;
+    private cardSync?: CardSyncService;
 
     constructor(db: Db, id?: string) {
-        this.id = id || 'room_' + (Math.random() + 1).toString(36).substring(7);
+        if (id && id != 'undefined') {
+            this.id = id;
+        } else {
+            this.id = 'room_' + (Math.random() + 1).toString(36).substring(7);
+        }
         this.users = []; // Users taking part in this game
         this.state = 'inLobby';
         this.selectedGame = 'MauMau';
         this.game = new MauMau(this);
         this.db = db;
         this.isLocal = true;
+        this.cardSync = new CardSyncService(this, 1000);
+    }
+
+    getState(): 'inLobby' | 'inGame' | 'finished' {
+        return this.state;
+    }
+
+    setState(state: 'inLobby' | 'inGame' | 'finished') {
+        switch (state) {
+            case 'finished':
+            case 'inLobby':
+                this.cardSync?.stopSync();
+                break;
+            case 'inGame':
+                if (this.state != state) {
+                    this.cardSync?.addSyncListener();
+                    this.cardSync?.startSync();
+                }
+                break;
+            default:
+                console.error('invalid game state change:', state);
+                break;
+        }
+        this.state = state;
+    }
+    sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
+        users = users.filter((user) => !user.timeout); // only send to connected users
+        for (let user of users) {
+            user.ws.send(JSON.stringify({ action, data }));
+        }
     }
 
     join(user: User) {
@@ -45,7 +82,7 @@ export class Room {
     }
 
     private setUpUserConnection(user: User, connectionAction: 'joined' | 'reconnected') {
-        console.log(user.id, connectionAction, this.id);
+        console.log({ name: user.name, id: user.id }, connectionAction, this.id);
 
         // notify users
         this.sendMessageToUsers(
@@ -73,13 +110,36 @@ export class Room {
         });
     }
 
+    public addListenerToAll(
+        action: string,
+        callback: (user: User, data: any) => void
+    ): EventListener[] {
+        console.log('Activate listeners');
+        return this.users.map((user) => this.addListener(user, action, callback));
+    }
+
+    private addListener(
+        user: User,
+        action: string,
+        callback: (user: User, data: any) => void
+    ): EventListener {
+        const listener = (event: any) => {
+            const msg = new Message(event);
+            if (msg.action == action) {
+                callback(user, msg.data);
+            }
+        };
+        user.ws.addEventListener('message', listener);
+        return listener;
+    }
+
     makeUserAdmin(user: User) {
         user.isOwner = true;
         // listen for actions of admin
         const availableGameActions = ['start', 'end', 'shuffleDrawPile'];
         const availableRoomActions = ['selectGame', 'changeSettings'];
         user.ws.on('message', (msg: string) => {
-            const message: any = JSON.parse(msg);
+            const message = JSON.parse(msg);
             if (availableGameActions.includes(message.action)) {
                 // @ts-ignore
                 this.game[message.action](user, message);
@@ -97,20 +157,18 @@ export class Room {
             { id: user.id, name: user.name },
             this.users.filter((u) => u != user)
         );
-        user.timeout = setTimeout(
-            () => {
-                console.log('triggered timeout');
-                this.users = this.users.filter((u) => u != user); // remove this user
-                // notify remaining
-                this.sendMessageToUsers('left', { id: user.id, name: user.name });
-                // close game if we were the last one and game hasn't finished
-                if (this.users.length === 0) {
-                    // all left :(
-                    this.game.end();
-                }
-            },
-            5 * 60 * 1000
-        );
+        const fiveSeconds: number = 5 * 60 * 1000;
+        user.timeout = setTimeout(() => {
+            console.log('triggered timeout');
+            this.users = this.users.filter((u) => u != user); // remove this user
+            // notify remaining
+            this.sendMessageToUsers('left', { id: user.id, name: user.name });
+            // close game if we were the last one and game hasn't finished
+            if (this.users.length === 0) {
+                // all left :(
+                this.game.end();
+            }
+        }, fiveSeconds);
     }
 
     getRoomInfo(user: User) {
@@ -179,13 +237,6 @@ export class Room {
             }
         } else {
             user.markerMap.set(markerId, data);
-        }
-    }
-
-    sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
-        users = users.filter((user) => !user.timeout); // only send to connected users
-        for (let user of users) {
-            user.ws.send(JSON.stringify({ action, data }));
         }
     }
 

@@ -81,6 +81,7 @@ props.conService.onConnection(() => {
                     removeFoundMarker(marker, foundCardMarkers);
                     console.log('Marker Lost: ', marker.id);
                 });
+
                 function checkMarkerInZone() {
                     for (let foundMarker of foundCardMarkers) {
                         if (handZone.cardInZone(foundMarker)) {
@@ -128,6 +129,14 @@ props.conService.onConnection(() => {
     }
     connected.value = true;
 });
+
+function tryDrawingHandzone() {
+    let zoneMarkers = [handzone.getZoneMarker1(), handZone.getZoneMarker2()];
+    let isPresent = (id) => isMarkerIdFound(id, foundZoneMarkers);
+    if (zoneMarkers.reduce((acc, id) => acc && isPresent(id), true)) {
+        handZone.drawZone();
+    }
+}
 
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
@@ -195,9 +204,7 @@ onUnmounted(() => {
             renderer="gammaOutput: true"
             arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best; sourceWidth: 1280; sourceHeight: 720;"
         >
-            <a-entity id="userCamera" camera>
-                <!-- <a-cursor> </a-cursor> -->
-            </a-entity>
+            <a-entity id="userCamera" camera> </a-entity>
         </a-scene>
     </div>
 </template>

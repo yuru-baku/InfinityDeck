@@ -1,9 +1,11 @@
 import { ConnectionService } from '@/services/ConnectionService';
-
-export type Card = { name: string; url: string };
+import { CardSync } from './CardSync';
+import { type Card, type UserCards, type Zone } from '@/model/card';
+import type { User } from '@/model/user';
 
 export class CardService {
     private conSerivce: ConnectionService;
+    private cardSync: CardSync;
 
     public cardBack: string;
     public markerBaseUrl: string;
@@ -18,6 +20,8 @@ export class CardService {
         this.numberOfCards = 0;
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
+        this.cardSync = new CardSync(conService, this);
+
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection((data) => {
             this.numberOfCards = 40; // Todo: Marker Anzahl?!
@@ -25,7 +29,7 @@ export class CardService {
                 this.markerMap = new Map(
                     Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [
                         key,
-                        { name: value, url: this.getCardUrl(value) }
+                        { cardFace: value, url: this.getCardUrl(value), zone: undefined }
                     ])
                 );
                 console.log('recovered markerMap');
@@ -34,7 +38,7 @@ export class CardService {
         conService.onCardDrawed((markerId, cardName) => this.registerMarker(markerId, cardName));
     }
 
-    private getCardUrl(cardName: string) {
+    private getCardUrl(cardName: string): string {
         const basePath = './InfintyDeck/cardImages/french-suited-cards';
         const fileType = 'svg';
         return `url(${basePath}/${cardName}.${fileType})`;
@@ -63,16 +67,18 @@ export class CardService {
     /**
      * Registers a new marker and card combination.
      * If there is a callback waiting it will be called.
-     * @param markerId
-     * @param cardName
      */
     public registerMarker(markerId: string, cardName: string) {
-        const card = { name: cardName, url: this.getCardUrl(cardName) };
         // if it is a local game, update markerMap and check for waiting callbacks
         if (this.conSerivce.room.value?.isLocal) {
             if (this.markerMap.get(markerId)) {
                 console.warn('Marker was already known, but was registered twice!');
             }
+            const card: Card = {
+                cardFace: cardName,
+                url: this.getCardUrl(cardName),
+                zone: undefined
+            };
             this.markerMap.set(markerId, card);
             const callback = this.cardCallbacks.get(markerId);
             // if there was no callback someone else drew this card locally
@@ -85,5 +91,26 @@ export class CardService {
         }
     }
 
-    public reloadMarkerMap() {}
+    public reloadMarkerMap() {
+        throw new Error('Method not implemented.');
+    }
+
+    //Handeling the cards of other users
+    getAllUserCards(): UserCards[] {
+        return this.userCards;
+    }
+
+    getUserCards(user: User): Card[] {
+        return this.userCards.filter((usercard) => usercard.userId == user.id)[0].cards;
+    }
+
+    /**
+     * Sets the cards for all users.
+     * These cards are used to render the cards of other players
+     * @param cards
+     */
+    setUsersCards(cards: UserCards[]) {
+        this.userCards = cards;
+    }
+    private userCards: UserCards[] = [];
 }

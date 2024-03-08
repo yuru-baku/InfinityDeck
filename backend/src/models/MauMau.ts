@@ -70,9 +70,11 @@ export class MauMau {
         this.playedCards = [];
         this.drawPile = []; // "Nachziehstapel"
         this.history = [];
+        //this.cardSync = new CardSyncService(room, 1000);
     }
 
     start() {
+        console.log('Start Game');
         // check user count
         if (this.room.users.length > this.maxUsers) {
             for (let user of this.room.users) {
@@ -81,7 +83,7 @@ export class MauMau {
             return;
         }
         this.startTime = new Date();
-        this.room.state = 'inGame';
+        this.room.setState('inGame');
         this.drawPile = [...this.deck]; // copy array
         this.shuffleArray(this.drawPile);
         this.room.sendMessageToUsers('dealCards', {});
@@ -90,10 +92,11 @@ export class MauMau {
     }
 
     end() {
-        if (this.room.state !== 'inGame') {
+        if (this.room.getState() !== 'inGame') {
             return;
         }
-        this.room.state = 'finished';
+        console.log('End Game');
+        this.room.setState('finished');
         this.endTime = new Date();
 
         const leaderboard: string[] = [];

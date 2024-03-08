@@ -4,17 +4,23 @@
     "env.d.ts",
     "src/**/*",
     "src/**/*.vue",
-    "src/**/*.ts"
+    "src/**/*.ts",
   ],
   "exclude": [
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
+    "rootDirs": [
+      "src",
+      "tests"
+    ],
     "composite": true,
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "allowJs": true
   }
