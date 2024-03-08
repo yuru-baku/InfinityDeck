@@ -1,29 +1,36 @@
 import { Db } from 'mongodb';
-import { MauMau } from './MauMau';
 import { User } from './user';
 import { CardSyncService } from '../cardSyncService';
+import { Uno } from './games/Uno';
+import { MauMau } from './games/MauMau';
+import { Game } from './Game';
 import { Message } from './message';
 
 export type WsMessage = {
-    action: string;
-    data: any;
-};
+    action: string,
+    data: any
+}
+
+const Games = {
+    Uno: Uno,
+    MauMau: MauMau
+}
 
 export class Room {
     id: string;
     users: User[];
-    private state: 'inLobby' | 'inGame' | 'finished';
-    selectedGame: 'MauMau';
-    game: MauMau;
+    state: 'inLobby'|'inGame'|'finished';
+    selectedGame: keyof typeof Games;
+    game: Game;
     db: Db;
     isLocal: boolean;
     private cardSync?: CardSyncService;
 
     constructor(db: Db, id?: string) {
-        if (id && id != 'undefined') {
-            this.id = id;
-        } else {
+        if (id === undefined || id === null || id === 'undefined' || id === 'null') {
             this.id = 'room_' + (Math.random() + 1).toString(36).substring(7);
+        } else {
+            this.id = id;
         }
         this.users = []; // Users taking part in this game
         this.state = 'inLobby';
@@ -110,34 +117,11 @@ export class Room {
         });
     }
 
-    public addListenerToAll(
-        action: string,
-        callback: (user: User, data: any) => void
-    ): EventListener[] {
-        console.log('Activate listeners');
-        return this.users.map((user) => this.addListener(user, action, callback));
-    }
-
-    private addListener(
-        user: User,
-        action: string,
-        callback: (user: User, data: any) => void
-    ): EventListener {
-        const listener = (event: any) => {
-            const msg = new Message(event);
-            if (msg.action == action) {
-                callback(user, msg.data);
-            }
-        };
-        user.ws.addEventListener('message', listener);
-        return listener;
-    }
-
     makeUserAdmin(user: User) {
         user.isOwner = true;
         // listen for actions of admin
         const availableGameActions = ['start', 'end', 'shuffleDrawPile'];
-        const availableRoomActions = ['selectGame', 'changeSettings'];
+        const availableRoomActions = ['changeGame', 'changeSettings'];
         user.ws.on('message', (msg: string) => {
             const message = JSON.parse(msg);
             if (availableGameActions.includes(message.action)) {
@@ -157,7 +141,7 @@ export class Room {
             { id: user.id, name: user.name },
             this.users.filter((u) => u != user)
         );
-        const fiveSeconds: number = 5 * 60 * 1000;
+        const fiveMinutes: number = 5 * 60 * 1000;
         user.timeout = setTimeout(() => {
             console.log('triggered timeout');
             this.users = this.users.filter((u) => u != user); // remove this user
@@ -168,7 +152,7 @@ export class Room {
                 // all left :(
                 this.game.end();
             }
-        }, fiveSeconds);
+        }, fiveMinutes);
     }
 
     getRoomInfo(user: User) {
@@ -191,11 +175,22 @@ export class Room {
         );
     }
 
-    selectGame() {
-        // ToDo add multiple games
+    changeGame(user: User, message: WsMessage) {
+        if (!user.isOwner) {
+            user.ws.send(JSON.stringify({ error: 'Only the owner of this room might perform this action!' }));
+            return;
+        }
+        let selection = message.data.selectedGame;
+        if (!Object.keys(Games).includes(selection)) {
+            user.ws.send(JSON.stringify({ error: `${selection} is not a known game!` }));
+            return;
+        }
+        this.selectedGame = selection;
+        this.game = new Games[this.selectedGame](this);
+        this.sendMessageToUsers('gameChanged', { selectedGame: this.selectedGame, game: { ...this.game, room: undefined } })
     }
 
-    changeSettings(user: User, message: { action: 'changeSettings'; data: { isLocal: boolean } }) {
+    changeSettings(user: User, message: { action: 'changeSettings', data: { isLocal: boolean } }) {
         if (!user.isOwner) {
             user.ws.send(
                 JSON.stringify({ error: 'Only the owner of this room might perform this action!' })
@@ -243,4 +238,28 @@ export class Room {
     public isJoinable(): boolean {
         return this.users.length < this.game.maxUsers && this.state === 'inLobby';
     }
+
+    public addListenerToAll(
+        action: string,
+        callback: (user: User, data: any) => void
+    ): EventListener[] {
+        console.log('Activate listeners');
+        return this.users.map((user) => this.addListener(user, action, callback));
+    }
+
+    private addListener(
+        user: User,
+        action: string,
+        callback: (user: User, data: any) => void
+    ): EventListener {
+        const listener = (event: any) => {
+            const msg = new Message(event);
+            if (msg.action == action) {
+                callback(user, msg.data);
+            }
+        };
+        user.ws.addEventListener('message', listener);
+        return listener;
+    }
+
 }

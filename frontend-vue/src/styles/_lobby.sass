@@ -1,11 +1,15 @@
 @use 'colors'
 
+#app
+    overflow-y: auto
 .lobby
+    margin-top: 5vh
     display: flex
     flex-direction: row
     align-content: start
     align-items: stretch
     justify-content: start
+    gap: 2vw
 
     
     #playerList
@@ -13,15 +17,20 @@
         align-items: stretch
         
         .playerStatus
-            padding: 1em
+            padding: .5em
+            padding-right: 1em
+            font-size: x-large
             display: flex
             flex-wrap: nowrap
             flex-direction: row
-            border: 2px solid black
+            border: 3px solid black
+            border-radius: 2em .8em .8em 2em
             background-color: colors.$frameBackgroundColor
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 2px 7px
+
             &.online
                 svg path
-                    fill: colors.$greenPrimary
+                    fill: colors.$darkBlue
             &.offline
                 opacity: .8
                 svg path
@@ -30,7 +39,8 @@
                 opacity: .5
 
             &.selected
-                border: 2px solid colors.$greenPrimary
+                // border: 3px solid colors.$greenPrimary
+                box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px
 
         button
             align-self: flex-end
@@ -39,6 +49,7 @@
     display: flex
     flex-direction: row
     align-items: start
+    gap: 4em
 
     .gameConfig
         display: flex 
@@ -48,3 +59,30 @@
         flex-grow: 1
         background-color: transparent
         padding: 0
+
+    #chooseGame
+        display: flex
+        align-items: stretch
+        flex-direction: column
+        gap: 1em
+
+        .game-option
+            padding: 1em 2.5em 
+            img
+                border: none
+                border-radius: 0
+                max-height: 6rem
+                max-width: 6rem
+
+@media only screen and (max-width: 600px) 
+    .lobby
+        flex-direction: column
+        margin: 0
+        padding: 1em
+        width: 100vw
+    #gameSettings
+        flex-direction: column
+        #chooseGame
+            flex-direction: row
+            flex-wrap: wrap
+            justify-content: center

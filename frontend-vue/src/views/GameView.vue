@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ArComponent from '@/components/ar-component/ArComponent.vue';
-import { CardService } from '@/components/ar-component/CardService';
+import { CardService } from '@/services/CardService';
 import { ConnectionService } from '@/services/ConnectionService';
 import { ref, onUnmounted } from 'vue';
 

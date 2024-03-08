@@ -27,8 +27,12 @@ export class ConnectionService {
             return;
         }
         // maybe we need to reconnect
-        if (!this.store.webSocket || this.store.webSocket === null) {
-            console.log('connecting');
+        this.tryConnection();
+    }
+
+    public tryConnection() {
+        if (!this.isConnected()) {
+            console.log('connecting...')
             this.connect();
         } else {
             // wait with init function until websocket connection was confirmed
@@ -39,7 +43,8 @@ export class ConnectionService {
     /**
      * Handles a connection or reconnection
      */
-    public connect() {
+    private connect() {
+        // check for open connection
         const roomId = this.router.currentRoute.value.query.roomId || this.cookies.get('roomId');
         const userId = this.cookies.get('userId');
         const name = this.cookies.get('username');
@@ -141,6 +146,10 @@ export class ConnectionService {
                         console.log('changed settings');
                         this.room.value!.isLocal = message.data.isLocal || false;
                         break;
+                    case 'gameChanged':
+                        this.room.value!.selectedGame = message.data.selectedGame;
+                        this.game.value! = message.data.game;
+                        break;
                     case 'joined':
                         console.log('join');
                         if (!this.room.value) return;
@@ -202,6 +211,7 @@ export class ConnectionService {
      * Starts the game, should only be callable if we are an admin.
      */
     public startGame() {
+        if (!this.room.value || !this.you.value?.isOwner) return;
         this.sendMessage('start', undefined);
     }
 
@@ -209,6 +219,11 @@ export class ConnectionService {
         if (!this.room.value || !this.you.value?.isOwner) return;
         console.log(!this.room.value.isLocal);
         this.sendMessage('changeSettings', { isLocal: !this.room.value.isLocal });
+    }
+
+    public changeGame(game: string) {
+        if (!this.room.value || !this.you.value?.isOwner) return;
+        this.sendMessage('changeGame', { selectedGame: game });
     }
 
     public drawNewCard(markerId: string) {
@@ -227,14 +242,19 @@ export class ConnectionService {
     }
 
     public sendMessage(action: string, data: any) {
+        console.log('Send:', { action: action, data: data });
         const message = JSON.stringify({ action: action, data: data });
-        console.log('Send:', message);
         this.getSocket().send(message);
     }
     public navigateToGame() {
         if (this.room.value) {
             this.router.push(`/${this.room.value.selectedGame}?roomId=${this.room.value.id}`);
         }
+    }
+
+    private isConnected() {
+        const webSocket = this.store.webSocket;
+        return webSocket && webSocket !== null && (webSocket.readyState === 1 || webSocket.readyState === 0) /* OPEN */
     }
 
     public killConnection() {

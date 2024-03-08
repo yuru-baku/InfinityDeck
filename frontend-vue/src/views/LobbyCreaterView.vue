@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import startButton from '@/components/startButton.vue';
-import toggleDiscription from '@/components/toggleDiscription.vue';
+import toggleDescription from '@/components/toggleDescription.vue';
 import { GameOption } from '@/model/room';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted } from 'vue';
@@ -9,8 +9,9 @@ const games = Object.keys(GameOption).filter((key: any) => typeof GameOption[key
 
 let conService = new ConnectionService();
 
-function copyToClipboard() {
-    navigator.clipboard.writeText(window.location.origin + window.location.search);
+function copyInviteToClipboard() {
+    const inviteURL = window.location.origin + window.location.hash.replace('lobby', '');
+    navigator.clipboard.writeText(inviteURL);
 }
 
 onUnmounted(() => {
@@ -42,30 +43,33 @@ onUnmounted(() => {
                 <font-awesome-icon :icon="['fas', 'circle']" />
                 empty
             </div>
-            <button id="invite" @click="copyToClipboard()">Copy Invite</button>
+            <button id="invite" @click="copyInviteToClipboard()">Copy Invite</button>
         </div>
 
         <div class="column">
             <div id="gameSettings" class="frame">
-                <div id="chooseGame" class="frame">
-                    <div
-                        class="frame"
+                <div id="chooseGame">
+                    <button
+                        class="game-option frame"
                         v-for="game in games"
                         :class="{
-                            selected: game === conService.room.value?.selectedGame.toString()
+                            selected: game === conService.room.value?.selectedGame.toString(),
+                            disabled: !conService.you.value.isOwner
                         }"
+                        v-on:click="() => conService.changeGame(game)"
                     >
+                        <img src="/InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg"></img>
                         {{ game }}
-                    </div>
+                    </button>
                 </div>
                 <div class="frame gameConfig">
-                    <toggleDiscription
+                    <toggleDescription
                         header="Local"
                         info="are you playing across the table or the ocean?"
                         :isOn="conService.room.value?.isLocal"
                         :disabled="!conService.you.value?.isOwner"
                         @toggle="conService.toggleLocal()"
-                    ></toggleDiscription>
+                    ></toggleDescription>
                 </div>
             </div>
             <startButton

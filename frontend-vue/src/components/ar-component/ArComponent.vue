@@ -1,9 +1,8 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
-import { InfinityMarker } from './InfinityMarker';
 import { Zone } from './Zone';
+import { CardService } from '@/services/CardService';
 import { CardMarker } from './CardMarker';
-import { CardService } from './CardService';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
 
