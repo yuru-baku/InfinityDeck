@@ -5,6 +5,7 @@ export class InfinityMarker {
         this.id = id;
         this.#addMarkerToScene();
         this.debugNumber = false;
+        this.found = false;
     }
 
     #addMarkerToScene() {
@@ -12,7 +13,7 @@ export class InfinityMarker {
         this.markerElement.setAttribute('type', 'pattern');
         this.markerElement.setAttribute('url', this.markerUrl);
         this.markerElement.setAttribute('id', this.id);
-        this.markerElement.cardMarker = this;
+        this.markerElement.InfinityMarker = this;
         this.sceneElement.appendChild(this.markerElement);
 
         this.#addDebugNumberToMarker();

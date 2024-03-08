@@ -3,16 +3,12 @@
  */
 import { ZoneMarker } from './ZoneMarker';
 
-function isMarkerIdFound(markerId, list) {
-    return list.some((marker) => marker.id === markerId);
-}
-
 export class Zone {
-    constructor(marker1Url, marker2Url, sceneEl, name, foundZoneMarkers) {
+    constructor(marker1Url, marker2Url, sceneEl, name) {
         this.scene = sceneEl;
         this.name = name;
         this.zoneEntity = null;
-        this.foundZoneMarkers = foundZoneMarkers;
+        this.cardsInZone = [];
         this.moving = false;
         this.redrawTolerance = 0.2;
         this.#createZoneMarkers(marker1Url, marker2Url);
@@ -36,6 +32,10 @@ export class Zone {
 
     getMarker2Id() {
         return this.zoneMarker2.id;
+    }
+
+    hasMarker(marker) {
+        return marker === this.zoneMarker1 || marker === this.zoneMarker2;
     }
 
     #createZoneMarkers(marker1Url, marker2Url) {
@@ -112,6 +112,7 @@ export class Zone {
 
     refreshZone() {
         this.zoneEntity.parentNode.removeChild(this.zoneEntity);
+        this.zoneEntity = null;
         this.drawZone();
     }
 
@@ -124,10 +125,10 @@ export class Zone {
     }
 
     /**
-     * @param {CardMarker} marker
+     * @param {CardMarker} card
      */
-    markerInZone(marker) {
-        if (!marker) return false;
+    cardInZone(card) {
+        if (!card) return false;
         if (!this.zoneMarker1 || !this.zoneMarker2) return false;
 
         const minX = Math.min(
@@ -147,12 +148,32 @@ export class Zone {
             this.zoneMarker2.getMarkerPosition().y
         );
 
-        return (
-            marker.getMarkerPosition().x >= minX &&
-            marker.getMarkerPosition().x <= maxX &&
-            marker.getMarkerPosition().y >= minY &&
-            marker.getMarkerPosition().y <= maxY
-        );
+        var isCardInZone =
+            card.getMarkerPosition().x >= minX &&
+            card.getMarkerPosition().x <= maxX &&
+            card.getMarkerPosition().y >= minY &&
+            card.getMarkerPosition().y <= maxY;
+
+        if (isCardInZone) {
+            this.addFoundCard();
+        } else {
+            this.removeCardFromZoneFound();
+        }
+
+        return isCardInZone;
+    }
+
+    addFoundCard(marker) {
+        if (!this.cardsInZone.includes(marker)) {
+            this.cardsInZone.push(marker);
+        }
+    }
+
+    removeCardFromZoneFound(marker) {
+        if (this.cardsInZone.includes(marker)) {
+            const index = this.cardsInZone.indexOf(marker);
+            this.cardsInZone.splice(index, 1);
+        }
     }
 
     redrawZoneDisable() {
@@ -173,16 +194,13 @@ export class Zone {
         }
     }
 
+    checkIfMarkerFound() {}
+
     #redrawZone() {
         if (this.moving) {
-            if (
-                isMarkerIdFound(this.zoneMarker1.id, this.foundZoneMarkers) &&
-                isMarkerIdFound(this.zoneMarker2.id, this.foundZoneMarkers)
-            ) {
+            if (this.zoneMarker1.found && this.zoneMarker2.found) {
                 const currentZoneMarker1Position = this.zoneMarker1.getMarkerPosition();
                 const currentZoneMarker2Position = this.zoneMarker2.getMarkerPosition();
-                console.log(currentZoneMarker2Position);
-                console.log(this.lastZoneMarker2Position);
                 if (
                     Math.abs(this.lastZoneMarker1Position.x - currentZoneMarker1Position.x) >
                         this.redrawTolerance ||
