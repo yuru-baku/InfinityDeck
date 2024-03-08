@@ -4,6 +4,7 @@ export class CardMarker extends InfinityMarker {
     constructor(sceneEl, markerUrl, cardBackSrc, id) {
         super(sceneEl, markerUrl, id);
 
+        this.markerElement.setAttribute('registerevents_card', '');
         this.cardBackSrc = cardBackSrc;
         this.isFaceUp = false;
 

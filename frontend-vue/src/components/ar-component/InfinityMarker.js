@@ -3,9 +3,7 @@ export class InfinityMarker {
         this.sceneElement = sceneEl;
         this.markerUrl = markerUrl;
         this.id = id;
-
         this.#addMarkerToScene();
-        this.#addDebugNumberToMarker();
         this.debugNumber = false;
     }
 
@@ -14,9 +12,10 @@ export class InfinityMarker {
         this.markerElement.setAttribute('type', 'pattern');
         this.markerElement.setAttribute('url', this.markerUrl);
         this.markerElement.setAttribute('id', this.id);
-        this.markerElement.setAttribute('registerevents', '');
         this.markerElement.cardMarker = this;
         this.sceneElement.appendChild(this.markerElement);
+
+        this.#addDebugNumberToMarker();
     }
 
     #addDebugNumberToMarker() {

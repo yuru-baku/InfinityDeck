@@ -1,6 +1,8 @@
 /**
  * Zonelogic
  */
+import { ZoneMarker } from './ZoneMarker';
+
 function isMarkerIdFound(markerId, list) {
     return list.some((marker) => marker.id === markerId);
 }
@@ -11,7 +13,8 @@ export class Zone {
         this.name = name;
         this.zoneEntity = null;
         this.foundZoneMarkers = foundZoneMarkers;
-
+        this.moving = false;
+        this.redrawTolerance = 0.2;
         this.#createZoneMarkers(marker1Url, marker2Url);
     }
 
@@ -28,53 +31,34 @@ export class Zone {
     }
 
     getMarker1Id() {
-        return this.zoneMarker1.getAttribute('id');
+        return this.zoneMarker1.id;
     }
 
     getMarker2Id() {
-        return this.zoneMarker2.getAttribute('id');
+        return this.zoneMarker2.id;
     }
 
     #createZoneMarkers(marker1Url, marker2Url) {
-        var markerEl = document.createElement('a-marker');
-        markerEl.setAttribute('type', 'pattern');
-        markerEl.setAttribute('url', marker1Url);
-        markerEl.setAttribute('id', 'ZoneMarker_1_' + this.name);
-        markerEl.setAttribute('registerevents_zone', '');
-
-        this.scene.appendChild(markerEl);
-
-        var textEl = document.createElement('a-entity');
-        textEl.setAttribute('id', 'text');
-        textEl.setAttribute('text', { color: 'red', align: 'center', value: '1', width: '5.5' });
-        textEl.object3D.position.set(0, 0.0, 0);
-        textEl.object3D.rotation.set(-90, 0, 0);
-        markerEl.appendChild(textEl);
-
-        var markerEl2 = document.createElement('a-marker');
-        markerEl2.setAttribute('type', 'pattern');
-        markerEl2.setAttribute('url', marker2Url);
-        markerEl2.setAttribute('id', 'ZoneMarker_2_' + this.name);
-        markerEl2.setAttribute('registerevents_zone', '');
-        this.scene.appendChild(markerEl2);
-
-        var textEl2 = document.createElement('a-entity');
-        textEl2.setAttribute('id', 'text');
-        textEl2.setAttribute('text', { color: 'red', align: 'center', value: '2', width: '5.5' });
-        textEl2.object3D.position.set(0, 0.0, 0);
-        textEl2.object3D.rotation.set(-90, 0, 0);
-        markerEl2.appendChild(textEl2);
-
-        this.zoneMarker1 = markerEl;
-        this.zoneMarker2 = markerEl2;
-        this.zoneMarker1.zone = this;
-        this.zoneMarker2.zone = this;
+        this.zoneMarker1 = new ZoneMarker(
+            this.scene,
+            marker1Url,
+            'ZoneMarker_1_' + this.name,
+            this
+        );
+        this.zoneMarker2 = new ZoneMarker(
+            this.scene,
+            marker2Url,
+            'ZoneMarker_2_' + this.name,
+            this
+        );
+        this.zoneMarker1.toggleDebugNumber();
+        this.zoneMarker2.toggleDebugNumber();
     }
 
     drawZone() {
         if (this.zoneMarker1 && this.zoneMarker2) {
-            const position1 = this.zoneMarker1.object3D.position.clone();
-            const position2 = this.zoneMarker2.object3D.position.clone();
+            const position1 = this.zoneMarker1.getMarkerPosition().clone();
+            const position2 = this.zoneMarker2.getMarkerPosition().clone();
 
             // Get the marker widths TODO maybe calculate this
             const width1 = 1;
@@ -128,7 +112,13 @@ export class Zone {
             this.zoneEntity.parentNode.removeChild(this.zoneEntity);
             this.zoneEntity = null;
             console.log('Removed zone');
+            this.redrawZoneDisable();
         }
+    }
+
+    refreshZone() {
+        this.zoneEntity.parentNode.removeChild(this.zoneEntity);
+        this.drawZone();
     }
 
     getZone() {
@@ -146,54 +136,80 @@ export class Zone {
         if (!marker) return false;
         if (!this.zoneMarker1 || !this.zoneMarker2) return false;
 
-        const markerPosition = marker.getMarkerPosition().clone();
-        const zoneMarker1Position = this.zoneMarker1.object3D.position.clone();
-        const zoneMarker2Position = this.zoneMarker2.object3D.position.clone();
-
-        const minX = Math.min(zoneMarker1Position.x, zoneMarker2Position.x);
-        const maxX = Math.max(zoneMarker1Position.x, zoneMarker2Position.x);
-        const minY = Math.min(zoneMarker1Position.y, zoneMarker2Position.y);
-        const maxY = Math.max(zoneMarker1Position.y, zoneMarker2Position.y);
+        const minX = Math.min(
+            this.zoneMarker1.getMarkerPosition().x,
+            this.zoneMarker2.getMarkerPosition().x
+        );
+        const maxX = Math.max(
+            this.zoneMarker1.getMarkerPosition().x,
+            this.zoneMarker2.getMarkerPosition().x
+        );
+        const minY = Math.min(
+            this.zoneMarker1.getMarkerPosition().y,
+            this.zoneMarker2.getMarkerPosition().y
+        );
+        const maxY = Math.max(
+            this.zoneMarker1.getMarkerPosition().y,
+            this.zoneMarker2.getMarkerPosition().y
+        );
 
         return (
-            markerPosition.x >= minX &&
-            markerPosition.x <= maxX &&
-            markerPosition.y >= minY &&
-            markerPosition.y <= maxY
+            marker.getMarkerPosition().x >= minX &&
+            marker.getMarkerPosition().x <= maxX &&
+            marker.getMarkerPosition().y >= minY &&
+            marker.getMarkerPosition().y <= maxY
         );
     }
 
     redrawZoneDisable() {
         this.moving = false;
+        clearTimeout(this.redrawTimeout);
     }
 
     redrawZoneEnable() {
-        this.moving = true;
-        this.#redrawZone();
+        if (!this.moving) {
+            this.moving = true;
+            this.lastZoneMarker1Position = new THREE.Vector3().copy(
+                this.zoneMarker1.getMarkerPosition()
+            );
+            this.lastZoneMarker2Position = new THREE.Vector3().copy(
+                this.zoneMarker2.getMarkerPosition()
+            );
+            this.#redrawZone();
+        }
     }
 
     #redrawZone() {
         if (this.moving) {
+            console.log('REDRAWING ZONE');
             if (
-                isMarkerIdFound('ZoneMarker_1', this.foundZoneMarkers) &&
-                isMarkerIdFound('ZoneMarker_2', this.foundZoneMarkers)
+                isMarkerIdFound(this.zoneMarker1.id, this.foundZoneMarkers) &&
+                isMarkerIdFound(this.zoneMarker2.id, this.foundZoneMarkers)
             ) {
-                const marker1 = document.getElementById('ZoneMarker_1'); // Get ZoneMarker_1
-                const marker2 = document.getElementById('ZoneMarker_2'); // Get ZoneMarker_1
-                const currentPosition1 = marker1.object3D.position.clone();
-                const currentPosition2 = marker2.object3D.position.clone();
+                const currentZoneMarker1Position = this.zoneMarker1.getMarkerPosition();
+                const currentZoneMarker2Position = this.zoneMarker2.getMarkerPosition();
+                console.log(currentZoneMarker2Position);
+                console.log(this.lastZoneMarker2Position);
                 if (
-                    !lastPosition1.equals(currentPosition1) ||
-                    !lastPosition2.equals(currentPosition2)
+                    Math.abs(this.lastZoneMarker1Position.x - currentZoneMarker1Position.x) >
+                        this.redrawTolerance ||
+                    Math.abs(this.lastZoneMarker1Position.y - currentZoneMarker1Position.y) >
+                        this.redrawTolerance ||
+                    Math.abs(this.lastZoneMarker2Position.x - currentZoneMarker2Position.x) >
+                        this.redrawTolerance ||
+                    Math.abs(this.lastZoneMarker2Position.y - currentZoneMarker2Position.y) >
+                        this.redrawTolerance
                 ) {
-                    lastPosition1.copy(currentPosition1); // Update the last position
-                    lastPosition2.copy(currentPosition2); // Update the last position
-                    removeZone();
-                    drawZone(); // Redraw the zone whenever the position changes
+                    this.lastZoneMarker1Position = new THREE.Vector3().copy(
+                        currentZoneMarker1Position
+                    );
+                    this.lastZoneMarker2Position = new THREE.Vector3().copy(
+                        currentZoneMarker2Position
+                    );
+                    this.refreshZone();
                 }
             }
-            // Check periodically
-            setTimeout(this.#redrawZone, 100); // Adjust the timing as needed
+            this.redrawTimeout = setTimeout(() => this.#redrawZone(), 100);
         }
     }
 }

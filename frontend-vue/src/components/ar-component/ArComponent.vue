@@ -63,8 +63,8 @@ props.conService.onConnection(() => {
     }
 
     //Detect marker found and lost
-    if (!AFRAME.components['registerevents']) {
-        AFRAME.registerComponent('registerevents', {
+    if (!AFRAME.components['registerevents_card']) {
+        AFRAME.registerComponent('registerevents_card', {
             init: function () {
                 const marker = this.el.cardMarker;
 
@@ -109,6 +109,7 @@ props.conService.onConnection(() => {
                         isMarkerIdFound(handZone.getMarker2Id(), foundZoneMarkers)
                     ) {
                         handZone.drawZone();
+                        handZone.redrawZoneEnable();
                     }
 
                     console.log(
@@ -133,8 +134,6 @@ props.conService.onConnection(() => {
                     removeFoundMarker(zoneMarker, foundZoneMarkers);
                     console.log('Zone Marker Lost: ', markerId);
                 });
-
-                handZone.redrawZoneEnable();
             }
         });
     }
@@ -145,7 +144,8 @@ function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
         var markerUrl = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
         var cardBackSrc = props.cardService.cardBack;
-        new CardMarker(sceneEl, markerUrl, cardBackSrc, k);
+        var card = new CardMarker(sceneEl, markerUrl, cardBackSrc, k);
+        card.toggleDebugNumber();
     }
 }
 
@@ -191,7 +191,7 @@ onUnmounted(() => {
     }
 
     // remove custom components
-    const componentsToRemove = ['markers_start', 'registerevents', 'registerevents_zone'];
+    const componentsToRemove = ['markers_start', 'registerevents_card', 'registerevents_zone'];
     for (let component of componentsToRemove) {
         delete AFRAME.components[component];
     }
@@ -216,4 +216,3 @@ onUnmounted(() => {
         </a-scene>
     </div>
 </template>
-./InfinityMarker
