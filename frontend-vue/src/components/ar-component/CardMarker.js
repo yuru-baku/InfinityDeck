@@ -55,4 +55,20 @@ export class CardMarker extends InfinityMarker {
     setFaceUrl(faceUrl) {
         this.cardFaceSrc = faceUrl;
     }
+
+    getVisibility() {
+        this.imageElement.getAttribute('visible');
+    }
+
+    hideCardImage() {
+        this.imageElement.setAttribute('visible', false);
+        this.textElement.setAttribute('visible', false);
+    }
+
+    showCardImage() {
+        if (this.debugNumber) {
+            this.textElement.setAttribute('visible', true);
+        }
+        this.imageElement.setAttribute('visible', true);
+    }
 }

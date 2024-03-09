@@ -3,6 +3,7 @@ import '@ar-js-org/ar.js';
 import { Zone } from './Zone';
 import { CardService } from '@/services/CardService';
 import { CardMarker } from './CardMarker';
+import { CardDisplay } from './CardDisplay';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
 
@@ -40,8 +41,13 @@ var foundCardMarkers = [];
 /**
  * @type {Zone}
  */
-var handZone;
+var hideZone;
 var debug = true;
+var handDisplayEnabled = true;
+/**
+ * @type {CardDisplay}
+ */
+var handDisplay = new CardDisplay('HandDisplay');
 
 props.conService.onConnection(() => {
     if (!AFRAME.components['markers_start']) {
@@ -52,7 +58,7 @@ props.conService.onConnection(() => {
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
                 generateMarkers(sceneEl);
 
-                handZone = new Zone(
+                hideZone = new Zone(
                     props.cardService.markerBaseUrl + 'ZoneMarker1.patt',
                     props.cardService.markerBaseUrl + 'ZoneMarker2.patt',
                     sceneEl,
@@ -66,27 +72,31 @@ props.conService.onConnection(() => {
     if (!AFRAME.components['registerevents_card']) {
         AFRAME.registerComponent('registerevents_card', {
             init: function () {
-                const marker = this.el.InfinityMarker;
+                const card = this.el.InfinityMarker;
 
                 this.el.addEventListener('markerFound', () => {
-                    addFoundMarker(marker, foundCardMarkers);
-                    if (handZone.cardInZone(marker)) {
-                        marker.turnCardOnBack();
+                    addFoundMarker(card, foundCardMarkers);
+                    if (hideZone.cardInZone(card)) {
+                        card.turnCardOnBack();
                     }
-                    console.log('Marker Found: ', marker.id, 'at ', marker.getMarkerPosition());
+                    console.log('Marker Found: ', card.id, 'at ', card.getMarkerPosition());
                 });
 
                 this.el.addEventListener('markerLost', () => {
-                    removeFoundMarker(marker, foundCardMarkers);
-                    console.log('Marker Lost: ', marker.id);
+                    removeFoundMarker(card, foundCardMarkers);
+                    console.log('Marker Lost: ', card.id);
+                    handDisplay.removeCardFromDisplay(card);
                 });
 
                 function checkMarkerInZone() {
-                    for (let foundMarker of foundCardMarkers) {
-                        if (handZone.cardInZone(foundMarker)) {
-                            marker.turnCardOnBack();
-                        } else if (!foundMarker.isFaceUp) {
-                            showCard(foundMarker);
+                    for (let foundCard of foundCardMarkers) {
+                        if (hideZone.cardInZone(foundCard)) {
+                            card.turnCardOnBack();
+                            if (handDisplayEnabled) {
+                                handDisplay.removeCardFromDisplayAndShow(foundCard);
+                            }
+                        } else if (!foundCard.isFaceUp) {
+                            showCard(foundCard);
                         }
                     }
                     setTimeout(checkMarkerInZone, 100);
@@ -103,9 +113,9 @@ props.conService.onConnection(() => {
                 this.el.addEventListener('markerFound', () => {
                     zoneMarker.found = true;
                     //add for loop here with zoneArray if we have multiple
-                    if (handZone.zoneMarker1.found && handZone.zoneMarker2.found) {
-                        handZone.drawZone();
-                        handZone.redrawZoneEnable();
+                    if (hideZone.zoneMarker1.found && hideZone.zoneMarker2.found) {
+                        hideZone.drawZone();
+                        hideZone.redrawZoneEnable();
                     }
                     console.log(
                         'Zone Marker Found: ',
@@ -117,8 +127,8 @@ props.conService.onConnection(() => {
 
                 this.el.addEventListener('markerLost', () => {
                     //add for loop here with zoneArray if we have multiple
-                    if (handZone.hasMarker(zoneMarker)) {
-                        handZone.removeZone();
+                    if (hideZone.hasMarker(zoneMarker)) {
+                        hideZone.removeZone();
                     }
                     console.log('Zone Marker Lost: ', zoneMarker.id);
                     zoneMarker.found = false;
@@ -141,12 +151,15 @@ function generateMarkers(sceneEl) {
 }
 
 /**
- * @param {CardMarker} marker
+ * @param {CardMarker} card
  */
-function showCard(marker) {
-    if (!marker.isFaceUp) {
-        props.cardService.getCardByMarkerId(marker.id).then((card) => {
-            marker.turnCardOnNewFace(card.url);
+function showCard(card) {
+    if (!card.isFaceUp) {
+        props.cardService.getCardByMarkerId(card.id).then((face) => {
+            card.turnCardOnNewFace(face.url);
+            if (handDisplayEnabled) {
+                handDisplay.addCardToDisplayAndHide(card);
+            }
         });
     }
 }
