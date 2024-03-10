@@ -36,7 +36,9 @@ window.addEventListener(
 );
 AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
 // AFRAME.AScene.removeFullScreenStyles();
-
+/**
+ * @type {CardMarker[]}
+ */
 var foundCardMarkers = [];
 /**
  * @type {Zone}
@@ -69,7 +71,8 @@ props.conService.onConnection(() => {
                     props.cardService.markerBaseUrl + 'shareZoneMarker1.patt',
                     props.cardService.markerBaseUrl + 'shareZoneMarker2.patt',
                     sceneEl,
-                    'share'
+                    'share',
+                    0xadd8e6
                 );
 
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
@@ -105,8 +108,13 @@ props.conService.onConnection(() => {
                             if (handDisplayEnabled) {
                                 handDisplay.removeCardFromDisplayAndShow(foundCard);
                             }
+                            foundCard.showCardImage();
+                        } else if (shareZone.cardInZone(foundCard)) {
+                            foundCard.hideCardImage();
+                            //SYNCCARD WITH OTEHR PLAYER
                         } else if (!foundCard.isFaceUp) {
                             showCard(foundCard);
+                            foundCard.showCardImage();
                         }
                     }
                     setTimeout(checkMarkerInZone, 100);
@@ -123,10 +131,7 @@ props.conService.onConnection(() => {
                 this.el.addEventListener('markerFound', () => {
                     zoneMarker.found = true;
                     //add for loop here with zoneArray if we have multiple
-                    if (hideZone.zoneMarker1.found && hideZone.zoneMarker2.found) {
-                        hideZone.drawZone();
-                        hideZone.redrawZoneEnable();
-                    }
+                    drawZonesIfMarkersFound();
                     console.log(
                         'Zone Marker Found: ',
                         zoneMarker.id,
@@ -137,9 +142,7 @@ props.conService.onConnection(() => {
 
                 this.el.addEventListener('markerLost', () => {
                     //add for loop here with zoneArray if we have multiple
-                    if (hideZone.hasMarker(zoneMarker)) {
-                        hideZone.removeZone();
-                    }
+                    removeZonesIfMarkerLost(zoneMarker);
                     console.log('Zone Marker Lost: ', zoneMarker.id);
                     zoneMarker.found = false;
                 });
@@ -148,6 +151,26 @@ props.conService.onConnection(() => {
     }
     connected.value = true;
 });
+
+function drawZonesIfMarkersFound() {
+    if (hideZone.zoneMarker1.found && hideZone.zoneMarker2.found) {
+        hideZone.drawZone();
+        hideZone.redrawZoneEnable();
+    }
+    if (shareZone.zoneMarker1.found && shareZone.zoneMarker2.found) {
+        shareZone.drawZone();
+        shareZone.redrawZoneEnable();
+    }
+}
+
+function removeZonesIfMarkerLost(zoneMarker) {
+    if (hideZone.hasMarker(zoneMarker)) {
+        hideZone.removeZone();
+    }
+    if (shareZone.hasMarker(zoneMarker)) {
+        shareZone.removeZone();
+    }
+}
 
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {

@@ -4,13 +4,14 @@
 import { ZoneMarker } from './ZoneMarker';
 
 export class Zone {
-    constructor(marker1Url, marker2Url, sceneEl, name) {
+    constructor(marker1Url, marker2Url, sceneEl, name, color = 0x00ff00) {
         this.scene = sceneEl;
         this.name = name;
         this.zoneEntity = null;
         this.cardsInZone = [];
         this.moving = false;
         this.redrawTolerance = 0.2;
+        this.color = color;
         this.#createZoneMarkers(marker1Url, marker2Url);
     }
 
@@ -87,7 +88,7 @@ export class Zone {
                 height: height
             });
             this.zoneEntity.setAttribute('material', {
-                color: 0x00ff00,
+                color: this.color,
                 side: 'double',
                 transparent: true,
                 opacity: 0.5
