@@ -119,8 +119,13 @@ export class CardService {
                 }
                 card.zone = Zone.shared;
                 this.sharedCard = card;
+
             }
+            let shareZone = document.getElementById('shareZone');
+            shareZone?.setAttribute('src', this.sharedCard?.cardFace);
+            shareZone?.setAttribute('visible', 'true');
         }
+
     }
 
     //
@@ -146,6 +151,7 @@ export class CardService {
      */
     setUsersCards(cards: UserCards[]) {
         this.userCards = cards;
+
     }
     private userCards: UserCards[] = [];
 }
