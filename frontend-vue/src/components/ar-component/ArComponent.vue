@@ -1,6 +1,8 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
 import { Zone } from './Zone';
+import { ShareZone } from './ShareZone';
+
 import { CardService } from '@/services/CardService';
 import { CardMarker } from './CardMarker';
 import { CardDisplay } from './CardDisplay';
@@ -67,12 +69,11 @@ props.conService.onConnection(() => {
                     sceneEl,
                     'hand'
                 );
-                shareZone = new Zone(
+                shareZone = new ShareZone(
                     props.cardService.markerBaseUrl + 'shareZoneMarker1.patt',
                     props.cardService.markerBaseUrl + 'shareZoneMarker2.patt',
                     sceneEl,
-                    'share',
-                    0xadd8e6
+                    'share'
                 );
 
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
