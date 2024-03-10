@@ -104,18 +104,25 @@ props.conService.onConnection(() => {
 
                 function checkMarkerInZone() {
                     for (let foundCard of foundCardMarkers) {
-                        if (hideZone.cardInZone(foundCard)) {
+                        let isInAnyZone = false;
+                        if ((isInAnyZone = hideZone.cardInZone(foundCard))) {
                             card.turnCardOnBack();
-                            if (handDisplayEnabled) {
-                                handDisplay.removeCardFromDisplayAndShow(foundCard);
-                            }
                             foundCard.showCardImage();
-                        } else if (shareZone.cardInZone(foundCard)) {
-                            foundCard.hideCardImage();
-                            //SYNCCARD WITH OTEHR PLAYER
-                        } else if (!foundCard.isFaceUp) {
+                        }
+
+                        if (
+                            foundCard != shareZone.lastFoundCard &&
+                            (isInAnyZone = shareZone.cardInZone(foundCard))
+                        ) {
+                            cardService.share(foundCard);
+                        }
+
+                        if (!isInAnyZone && !foundCard.isFaceUp) {
                             showCard(foundCard);
                             foundCard.showCardImage();
+                        }
+                        if (isInAnyZone && handDisplayEnabled) {
+                            handDisplay.removeCardFromDisplayAndShow(foundCard);
                         }
                     }
                     setTimeout(checkMarkerInZone, 100);
@@ -189,12 +196,10 @@ function generateMarkers(sceneEl) {
  */
 function showCard(card) {
     if (!card.isFaceUp) {
-        props.cardService.getCardByMarkerId(card.id).then((face) => {
-            card.turnCardOnNewFace(face.url);
-            if (handDisplayEnabled) {
-                handDisplay.addCardToDisplayAndHide(card);
-            }
-        });
+        card.turnCardCurrentFace();
+        if (handDisplayEnabled) {
+            handDisplay.addCardToDisplayAndHide(card);
+        }
     }
 }
 
@@ -213,11 +218,16 @@ function showCardSyncOnlyIfNew(marker) {
 function addFoundMarker(marker, markerList) {
     if (!markerList.includes(marker)) {
         markerList.push(marker);
+
+        props.cardService.getCardByMarkerId(marker.id).then((face) => {
+            marker.setFaceUrl(face.url);
+        });
         console.log('Added marker:', marker.id, 'to found markers list');
     }
 }
 
 function removeFoundMarker(marker, markerList) {
+    props.cardService.lostCard(marker.id);
     const index = markerList.indexOf(marker);
     if (index !== -1) {
         markerList.splice(index, 1);

@@ -10,7 +10,11 @@ export class ShareZone extends Zone {
     cardInZone(card) {
         var found = super.cardInZone(card);
         if (found) {
+            //alte card
+            this.lastFoundCard.showCardImage();
+            //neue card
             this.lastFoundCard = card;
+            card.hideCardImage();
         }
         return found;
     }

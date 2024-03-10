@@ -1,6 +1,6 @@
 import { ConnectionService } from '@/services/ConnectionService';
 import { CardSync } from './CardSync';
-import { type Card, type UserCards, type Zone } from '@/model/card';
+import { Zone, type Card, type UserCards } from '@/model/card';
 import type { User } from '@/model/user';
 
 export class CardService {
@@ -11,6 +11,7 @@ export class CardService {
     public markerBaseUrl: string;
     public numberOfCards: number;
     markerMap: Map<string, Card>;
+    private sharedCard: Card | undefined;
     cardCallbacks: Map<string, Function>;
 
     constructor(conService: ConnectionService) {
@@ -29,7 +30,12 @@ export class CardService {
                 this.markerMap = new Map(
                     Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [
                         key,
-                        { cardFace: value, url: this.getCardUrl(value), zone: undefined }
+                        {
+                            cardFace: value,
+                            url: this.getCardUrl(value),
+                            zone: undefined,
+                            found: true
+                        }
                     ])
                 );
                 console.log('recovered markerMap');
@@ -44,6 +50,12 @@ export class CardService {
         return `url(${basePath}/${cardName}.${fileType})`;
     }
 
+    public lostCard(markerId: string): void {
+        let card = this.markerMap.get(markerId);
+        if (card) {
+            card.found = false;
+        }
+    }
     /**
      * Checks if the card is known. If it is it will be returned immediately.
      * Otherwise it will be returned when the server responded.
@@ -54,8 +66,10 @@ export class CardService {
         const card = this.markerMap.get(markerId);
         // marker is already known
         if (card) {
+            card.found = true;
             return new Promise((resolve) => resolve(card));
         }
+
         // unknown marker detectet
         this.conSerivce.drawNewCard(markerId);
         return new Promise((resolve, reject) => {
@@ -68,7 +82,7 @@ export class CardService {
      * Registers a new marker and card combination.
      * If there is a callback waiting it will be called.
      */
-    public registerMarker(markerId: string, cardName: string) {
+    public registerMarker(markerId: string, cardName: string): void {
         // if it is a local game, update markerMap and check for waiting callbacks
         if (this.conSerivce.room.value?.isLocal) {
             if (this.markerMap.get(markerId)) {
@@ -77,7 +91,8 @@ export class CardService {
             const card: Card = {
                 cardFace: cardName,
                 url: this.getCardUrl(cardName),
-                zone: undefined
+                zone: Zone.private,
+                found: true
             };
             this.markerMap.set(markerId, card);
             const callback = this.cardCallbacks.get(markerId);
@@ -95,7 +110,27 @@ export class CardService {
         throw new Error('Method not implemented.');
     }
 
+    public share(id: string) {
+        let card = this.markerMap.get(id);
+        if (card) {
+            if (card != this.sharedCard) {
+                if (this.sharedCard) {
+                    this.sharedCard.zone = Zone.private;
+                }
+                card.zone = Zone.shared;
+                this.sharedCard = card;
+            }
+        }
+    }
+
+    //
     //Handeling the cards of other users
+    //-----------------------------------------------------------------------------------
+
+    getMyCards(): Card[] {
+        return Array.from(this.markerMap.values()).filter((card) => card.found);
+    }
+
     getAllUserCards(): UserCards[] {
         return this.userCards;
     }

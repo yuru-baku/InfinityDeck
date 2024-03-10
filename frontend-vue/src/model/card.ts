@@ -9,8 +9,8 @@ import type { User } from './user';
  * position may influence rendering
  */
 export enum Zone {
-    shared,
-    private
+    shared = 'shared',
+    private = 'private'
 }
 
 /**
@@ -23,6 +23,7 @@ export type Card = {
     url: string;
     cardFace: string;
     zone: Zone | undefined;
+    found: boolean;
 };
 
 /**
