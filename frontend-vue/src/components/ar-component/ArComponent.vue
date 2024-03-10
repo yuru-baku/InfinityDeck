@@ -43,7 +43,7 @@ var foundCardMarkers = [];
  */
 var hideZone;
 var debug = true;
-var handDisplayEnabled = true;
+var handDisplayEnabled = false;
 /**
  * @type {CardDisplay}
  */
