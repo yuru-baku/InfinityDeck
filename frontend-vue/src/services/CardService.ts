@@ -50,7 +50,7 @@ export class CardService {
      * @param markerId
      * @returns a promise which will be resolved as soon as the card is available
      */
-    public getCardByMarker(markerId: string): Promise<Card> {
+    public getCardByMarkerId(markerId: string): Promise<Card> {
         const card = this.markerMap.get(markerId);
         // marker is already known
         if (card) {
