@@ -1,12 +1,16 @@
 import type { User } from './user';
 
+// note these types exist both in the back and frontend
+// if performance issues arrise due to synchronisation we can simplify these types in transport
+// this would however would rise the calculcation needs on both ends.
+
 /**
  * Enum discripbing position of card on the table
  * position may influence rendering
  */
 export enum Zone {
-    shared,
-    private
+    shared = 'shared',
+    private = 'private'
 }
 
 /**
@@ -16,9 +20,10 @@ export enum Zone {
  * the zone encoding the position on the table
  */
 export type Card = {
-    markerId: string;
+    url: string;
     cardFace: string;
-    zone: Zone;
+    zone: Zone | undefined;
+    found: boolean;
 };
 
 /**

@@ -2,9 +2,8 @@ import { Room, WsMessage } from './room';
 import { User } from './user';
 
 export abstract class Game {
-
-    abstract deck: string[];    // All cards of this deck 
-    abstract label: string;  // display and ID
+    abstract deck: string[]; // All cards of this deck
+    abstract label: string; // display and ID
 
     room: Room;
     playedCards: string[];
@@ -16,9 +15,9 @@ export abstract class Game {
 
     constructor(room: Room) {
         this.room = room;
-        this.playedCards = [ ];
-        this.drawPile = [ ];        // "Nachziehstapel"
-        this.history = [ ];
+        this.playedCards = [];
+        this.drawPile = []; // "Nachziehstapel"
+        this.history = [];
     }
 
     start() {

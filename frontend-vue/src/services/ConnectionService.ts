@@ -32,7 +32,7 @@ export class ConnectionService {
 
     public tryConnection() {
         if (!this.isConnected()) {
-            console.log('connecting...')
+            console.log('connecting...');
             this.connect();
         } else {
             // wait with init function until websocket connection was confirmed
@@ -254,7 +254,11 @@ export class ConnectionService {
 
     private isConnected() {
         const webSocket = this.store.webSocket;
-        return webSocket && webSocket !== null && (webSocket.readyState === 1 || webSocket.readyState === 0) /* OPEN */
+        return (
+            webSocket &&
+            webSocket !== null &&
+            (webSocket.readyState === 1 || webSocket.readyState === 0)
+        ); /* OPEN */
     }
 
     public killConnection() {

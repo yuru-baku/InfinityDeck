@@ -1,6 +1,8 @@
 <script setup lang="js">
 import '@ar-js-org/ar.js';
 import { Zone } from './Zone';
+import { ShareZone } from './ShareZone';
+
 import { CardService } from '@/services/CardService';
 import { CardMarker } from './CardMarker';
 import { CardDisplay } from './CardDisplay';
@@ -36,12 +38,18 @@ window.addEventListener(
 );
 AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
 // AFRAME.AScene.removeFullScreenStyles();
-
+/**
+ * @type {CardMarker[]}
+ */
 var foundCardMarkers = [];
 /**
  * @type {Zone}
  */
 var hideZone;
+/**
+ * @type {Zone}
+ */
+var shareZone;
 var debug = true;
 var handDisplayEnabled = false;
 /**
@@ -55,15 +63,21 @@ props.conService.onConnection(() => {
             init: function () {
                 var sceneEl = document.querySelector('a-scene');
 
-                console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
-                generateMarkers(sceneEl);
-
                 hideZone = new Zone(
                     props.cardService.markerBaseUrl + 'ZoneMarker1.patt',
                     props.cardService.markerBaseUrl + 'ZoneMarker2.patt',
                     sceneEl,
                     'hand'
                 );
+                shareZone = new ShareZone(
+                    props.cardService.markerBaseUrl + 'shareZoneMarker1.patt',
+                    props.cardService.markerBaseUrl + 'shareZoneMarker2.patt',
+                    sceneEl,
+                    'share'
+                );
+
+                console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
+                generateMarkers(sceneEl);
             }
         });
     }
@@ -90,13 +104,26 @@ props.conService.onConnection(() => {
 
                 function checkMarkerInZone() {
                     for (let foundCard of foundCardMarkers) {
-                        if (hideZone.cardInZone(foundCard)) {
+                        let isInAnyZone = false;
+                        if ((isInAnyZone = hideZone.cardInZone(foundCard))) {
                             card.turnCardOnBack();
-                            if (handDisplayEnabled) {
-                                handDisplay.removeCardFromDisplayAndShow(foundCard);
+                            foundCard.showCardImage();
+                        }
+                        if (props.cardService.markerMapContainsId(foundCard.id)) {
+                            if (
+                                foundCard != shareZone.lastFoundCard &&
+                                (isInAnyZone = shareZone.cardInZone(foundCard))
+                            ) {
+                                props.cardService.share(foundCard.id);
                             }
-                        } else if (!foundCard.isFaceUp) {
+                        }
+
+                        if (!isInAnyZone && !foundCard.isFaceUp) {
                             showCard(foundCard);
+                            foundCard.showCardImage();
+                        }
+                        if (isInAnyZone && handDisplayEnabled) {
+                            handDisplay.removeCardFromDisplayAndShow(foundCard);
                         }
                     }
                     setTimeout(checkMarkerInZone, 100);
@@ -113,10 +140,7 @@ props.conService.onConnection(() => {
                 this.el.addEventListener('markerFound', () => {
                     zoneMarker.found = true;
                     //add for loop here with zoneArray if we have multiple
-                    if (hideZone.zoneMarker1.found && hideZone.zoneMarker2.found) {
-                        hideZone.drawZone();
-                        hideZone.redrawZoneEnable();
-                    }
+                    drawZonesIfMarkersFound();
                     console.log(
                         'Zone Marker Found: ',
                         zoneMarker.id,
@@ -127,9 +151,7 @@ props.conService.onConnection(() => {
 
                 this.el.addEventListener('markerLost', () => {
                     //add for loop here with zoneArray if we have multiple
-                    if (hideZone.hasMarker(zoneMarker)) {
-                        hideZone.removeZone();
-                    }
+                    removeZonesIfMarkerLost(zoneMarker);
                     console.log('Zone Marker Lost: ', zoneMarker.id);
                     zoneMarker.found = false;
                 });
@@ -138,6 +160,26 @@ props.conService.onConnection(() => {
     }
     connected.value = true;
 });
+
+function drawZonesIfMarkersFound() {
+    if (hideZone.zoneMarker1.found && hideZone.zoneMarker2.found) {
+        hideZone.drawZone();
+        hideZone.redrawZoneEnable();
+    }
+    if (shareZone.zoneMarker1.found && shareZone.zoneMarker2.found) {
+        shareZone.drawZone();
+        shareZone.redrawZoneEnable();
+    }
+}
+
+function removeZonesIfMarkerLost(zoneMarker) {
+    if (hideZone.hasMarker(zoneMarker)) {
+        hideZone.removeZone();
+    }
+    if (shareZone.hasMarker(zoneMarker)) {
+        shareZone.removeZone();
+    }
+}
 
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
@@ -155,12 +197,10 @@ function generateMarkers(sceneEl) {
  */
 function showCard(card) {
     if (!card.isFaceUp) {
-        props.cardService.getCardByMarkerId(card.id).then((face) => {
-            card.turnCardOnNewFace(face.url);
-            if (handDisplayEnabled) {
-                handDisplay.addCardToDisplayAndHide(card);
-            }
-        });
+        card.turnCardCurrentFace();
+        if (handDisplayEnabled) {
+            handDisplay.addCardToDisplayAndHide(card);
+        }
     }
 }
 
@@ -179,11 +219,16 @@ function showCardSyncOnlyIfNew(marker) {
 function addFoundMarker(marker, markerList) {
     if (!markerList.includes(marker)) {
         markerList.push(marker);
+
+        props.cardService.getCardByMarkerId(marker.id).then((face) => {
+            marker.setFaceUrl(face.url);
+        });
         console.log('Added marker:', marker.id, 'to found markers list');
     }
 }
 
 function removeFoundMarker(marker, markerList) {
+    props.cardService.lostCard(marker.id);
     const index = markerList.indexOf(marker);
     if (index !== -1) {
         markerList.splice(index, 1);

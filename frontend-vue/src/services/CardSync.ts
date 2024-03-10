@@ -27,8 +27,7 @@ export class CardSync {
     }
 
     gatherCards(): Card[] {
-        console.debug('I am gathering ya cards!');
-        return [];
+        return this.cardService.getMyCards();
     }
 
     private cardService: CardService;
