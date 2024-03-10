@@ -42,6 +42,10 @@ var foundCardMarkers = [];
  * @type {Zone}
  */
 var hideZone;
+/**
+ * @type {Zone}
+ */
+var shareZone;
 var debug = true;
 var handDisplayEnabled = false;
 /**
@@ -55,15 +59,21 @@ props.conService.onConnection(() => {
             init: function () {
                 var sceneEl = document.querySelector('a-scene');
 
-                console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
-                generateMarkers(sceneEl);
-
                 hideZone = new Zone(
                     props.cardService.markerBaseUrl + 'ZoneMarker1.patt',
                     props.cardService.markerBaseUrl + 'ZoneMarker2.patt',
                     sceneEl,
                     'hand'
                 );
+                shareZone = new Zone(
+                    props.cardService.markerBaseUrl + 'shareZoneMarker1.patt',
+                    props.cardService.markerBaseUrl + 'shareZoneMarker2.patt',
+                    sceneEl,
+                    'share'
+                );
+
+                console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
+                generateMarkers(sceneEl);
             }
         });
     }
