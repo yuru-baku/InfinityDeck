@@ -51,7 +51,7 @@ var hideZone;
  */
 var shareZone;
 var debug = true;
-var handDisplayEnabled = false;
+var handDisplayEnabled = true;
 /**
  * @type {CardDisplay}
  */
@@ -109,12 +109,13 @@ props.conService.onConnection(() => {
                             card.turnCardOnBack();
                             foundCard.showCardImage();
                         }
-
-                        if (
-                            foundCard != shareZone.lastFoundCard &&
-                            (isInAnyZone = shareZone.cardInZone(foundCard))
-                        ) {
-                            cardService.share(foundCard);
+                        if (props.cardService.markerMapContainsId(foundCard.id)) {
+                            if (
+                                foundCard != shareZone.lastFoundCard &&
+                                (isInAnyZone = shareZone.cardInZone(foundCard))
+                            ) {
+                                props.cardService.share(foundCard.id);
+                            }
                         }
 
                         if (!isInAnyZone && !foundCard.isFaceUp) {

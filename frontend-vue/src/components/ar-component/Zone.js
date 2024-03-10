@@ -104,7 +104,7 @@ export class Zone {
 
     removeZone() {
         if (this.zoneEntity) {
-            this.zoneEntity.parentNode.removeChild(this.zoneEntity);
+            this.zoneEntity.remove();
             this.zoneEntity = null;
             console.log('Removed zone');
             this.redrawZoneDisable();

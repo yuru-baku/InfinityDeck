@@ -6,9 +6,9 @@ export class ShareZone extends Zone {
         this.imageElement = document.createElement('a-image');
         this.imageElement.setAttribute('id', 'shareZone');
         this.imageElement.setAttribute('visible', 'false');
-        this.imageElement.object3D.scale.set(6.4 / 4, 8.9 / 4, 1);
+        this.imageElement.object3D.rotation.set(Math.PI, 0, 0);
+        this.imageElement.object3D.scale.set(1, 1, 1);
         this.imageElement.object3D.position.set(0, 0, 0);
-        this.zoneEntity.appendChild(this.imageElement);
     }
     /**
      * @param {CardMarker} card
@@ -17,11 +17,16 @@ export class ShareZone extends Zone {
         var found = super.cardInZone(card);
         if (found) {
             //alte card
-            this.lastFoundCard.showCardImage();
+            this.lastFoundCard?.showCardImage();
             //neue card
             this.lastFoundCard = card;
             card.hideCardImage();
         }
         return found;
+    }
+
+    drawZone() {
+        super.drawZone();
+        this.zoneEntity.appendChild(this.imageElement);
     }
 }

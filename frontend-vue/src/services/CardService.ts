@@ -78,6 +78,10 @@ export class CardService {
         });
     }
 
+    public markerMapContainsId(markerId: string) {
+        return this.markerMap.has(markerId);
+    }
+
     /**
      * Registers a new marker and card combination.
      * If there is a callback waiting it will be called.
@@ -119,13 +123,11 @@ export class CardService {
                 }
                 card.zone = Zone.shared;
                 this.sharedCard = card;
-
             }
             let shareZone = document.getElementById('shareZone');
-            shareZone?.setAttribute('src', this.sharedCard?.cardFace);
+            shareZone?.setAttribute('src', this.sharedCard?.url);
             shareZone?.setAttribute('visible', 'true');
         }
-
     }
 
     //
@@ -151,7 +153,6 @@ export class CardService {
      */
     setUsersCards(cards: UserCards[]) {
         this.userCards = cards;
-
     }
     private userCards: UserCards[] = [];
 }
