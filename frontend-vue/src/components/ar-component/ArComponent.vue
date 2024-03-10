@@ -51,7 +51,7 @@ var hideZone;
  */
 var shareZone;
 var debug = true;
-var handDisplayEnabled = true;
+var handDisplayEnabled = false;
 /**
  * @type {CardDisplay}
  */
