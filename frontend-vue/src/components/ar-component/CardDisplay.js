@@ -6,15 +6,15 @@ export class CardDisplay {
      * @param {string} name - The name of the display.
      * @param {number} [centerX=0] - The starting x-coordinate.
      * @param {number} [startY=-0.5] - The starting y-coordinate.
-     * @param {Object} [scale={ x: 0.5, y: 0.5, z: 1 }] - The scale of the image elements.
+     * @param {Object} [scale={ x: 0.3 * 0.64, y: 0.3, z: 1 }] - The scale of the image elements.
      * @param {number} [cardSpacing=0.4] - The spacing between cards.
      */
     constructor(
         name,
         centerX = 0,
-        startY = -0.5,
-        scale = { x: 0.5, y: 0.5, z: 1 },
-        cardSpacing = 0.4
+        startY = -0.4,
+        scale = { x: 0.3 * 0.64, y: 0.3, z: 1 },
+        cardSpacing = 0.1
     ) {
         /**
          * An array of numbers.
@@ -88,9 +88,11 @@ export class CardDisplay {
             var position = {
                 x: startX + this.cardSpacing * index,
                 y: this.startY,
-                z: -2
+                z: -1
             };
-            this.#generateImageElement(card, position);
+            this.#generateImageElement(card, position, -1 + index);
+            this.#sortElementsByXPosition();
+            this.#showCards(card.sceneElement);
             this.visible = true;
         });
     }
@@ -103,7 +105,7 @@ export class CardDisplay {
      * @param {number} position.z - The z-coordinate.
      * @private
      */
-    #generateImageElement(card, position) {
+    #generateImageElement(card, position, zIndex) {
         const newImageEl = document.createElement('a-image');
 
         newImageEl.setAttribute('src', card.cardFaceSrc);
@@ -111,9 +113,21 @@ export class CardDisplay {
         newImageEl.object3D.scale.set(this.scale.x, this.scale.y, this.scale.z);
         newImageEl.object3D.rotation.set(0, 0, 0);
         newImageEl.object3D.position.set(position.x, position.y, position.z);
-
-        card.sceneElement.appendChild(newImageEl);
         newImageEl.display = this;
         this.imageElements.push(newImageEl);
+    }
+
+    #sortElementsByXPosition() {
+        this.imageElements.sort((a, b) => {
+            const positionA = a.object3D.position.x;
+            const positionB = b.object3D.position.x;
+            return positionA - positionB;
+        });
+    }
+
+    #showCards(sceneEl) {
+        this.imageElements.forEach((element) => {
+            sceneEl.appendChild(element);
+        });
     }
 }
