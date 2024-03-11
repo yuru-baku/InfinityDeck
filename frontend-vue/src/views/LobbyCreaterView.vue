@@ -58,7 +58,7 @@ onUnmounted(() => {
                         }"
                         v-on:click="() => conService.changeGame(game)"
                     >
-                        <!--<img src="../InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg"></img>-->
+                        <img src="/InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg"></img>
                         {{ game }}
                     </button>
                 </div>
@@ -70,6 +70,13 @@ onUnmounted(() => {
                         :disabled="!conService.you.value?.isOwner"
                         @toggle="conService.toggleLocal()"
                     ></toggleDescription>
+                    <div class="frame toggleDescription">
+                        <div>
+                            <h2>No cards?</h2>
+                            <p>You will need a set of marker-cards to play the game.<br/>We recommend you to print them on an A4-paper.</p>
+                        </div>
+                        <a href="/InfintyDeck/markers.pdf" target="_blank"  class="button">Print the Cards</a>
+                    </div>
                 </div>
             </div>
             <startButton
