@@ -59,6 +59,7 @@ onUnmounted(() => {
                         v-on:click="() => conService.changeGame(game)"
                     >
                         <img src="/InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg"></img>
+                        <!-- <img src="/InfintyDeck/cardImages/uno-cards/red-1.svg"></img> -->
                         {{ game }}
                     </button>
                 </div>
