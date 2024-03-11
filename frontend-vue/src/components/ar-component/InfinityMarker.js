@@ -1,7 +1,7 @@
 export class InfinityMarker {
-    constructor(sceneEl, markerUrl, id) {
+    constructor(sceneEl, barcodeValue, id) {
         this.sceneElement = sceneEl;
-        this.markerUrl = markerUrl;
+        this.barcodeValue = barcodeValue;
         this.id = id;
         this.#addMarkerToScene();
         this.debugNumber = false;
@@ -10,8 +10,8 @@ export class InfinityMarker {
 
     #addMarkerToScene() {
         this.markerElement = document.createElement('a-marker');
-        this.markerElement.setAttribute('type', 'pattern');
-        this.markerElement.setAttribute('url', this.markerUrl);
+        this.markerElement.setAttribute('type', 'barcode');
+        this.markerElement.setAttribute('value', this.barcodeValue);
         this.markerElement.setAttribute('id', this.id);
         this.markerElement.InfinityMarker = this;
         this.sceneElement.appendChild(this.markerElement);

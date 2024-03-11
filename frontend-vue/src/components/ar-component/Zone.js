@@ -4,7 +4,7 @@
 import { ZoneMarker } from './ZoneMarker';
 
 export class Zone {
-    constructor(marker1Url, marker2Url, sceneEl, name, color = 0x00ff00) {
+    constructor(marker1BarcodeValue, marker2BarcodeValue, sceneEl, name, color = 0xff6961) {
         this.scene = sceneEl;
         this.name = name;
         this.zoneEntity = null;
@@ -12,7 +12,7 @@ export class Zone {
         this.moving = true;
         this.redrawTolerance = 0.2;
         this.color = color;
-        this.#createZoneMarkers(marker1Url, marker2Url);
+        this.#createZoneMarkers(marker1BarcodeValue, marker2BarcodeValue);
     }
 
     getName() {
@@ -39,16 +39,16 @@ export class Zone {
         return marker === this.zoneMarker1 || marker === this.zoneMarker2;
     }
 
-    #createZoneMarkers(marker1Url, marker2Url) {
+    #createZoneMarkers(marker1BarcodeValue, marker2BarcodeValue) {
         this.zoneMarker1 = new ZoneMarker(
             this.scene,
-            marker1Url,
+            marker1BarcodeValue,
             'ZoneMarker_1_' + this.name,
             this
         );
         this.zoneMarker2 = new ZoneMarker(
             this.scene,
-            marker2Url,
+            marker2BarcodeValue,
             'ZoneMarker_2_' + this.name,
             this
         );
