@@ -205,15 +205,15 @@ export class Zone {
 
     redrawZoneToggle() {
         if (this.moving) {
-            this.redrawZoneDisable();
             this.moving = false;
+            this.redrawZoneDisable();
         } else {
+            this.moving = true;
             this.redrawZoneEnable();
             this.removeZone();
-            this.moving = true;
+            this.drawZoneIfMarkersFound();
         }
     }
-    checkIfMarkerFound() {}
 
     #redrawZone() {
         if (this.moving) {
