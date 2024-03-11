@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import startButton from '@/components/startButton.vue';
 import toggleDescription from '@/components/toggleDescription.vue';
-import { GameOption } from '@/model/room';
+import { GAME_CONFIG } from '@/model/game';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted } from 'vue';
-
-const games = Object.keys(GameOption).filter((key: any) => typeof GameOption[key] === 'number');
 
 let conService = new ConnectionService();
 
@@ -51,16 +49,15 @@ onUnmounted(() => {
                 <div id="chooseGame">
                     <button
                         class="game-option frame"
-                        v-for="game in games"
+                        v-for="game in Object.values(GAME_CONFIG)"
                         :class="{
-                            selected: game === conService.room.value?.selectedGame.toString(),
+                            selected: game.id === conService.room.value?.selectedGame.toString(),
                             disabled: !conService.you.value.isOwner
                         }"
-                        v-on:click="() => conService.changeGame(game)"
+                        v-on:click="() => conService.changeGame(game.id)"
                     >
-                        <img src="/InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg"></img>
-                        <!-- <img src="/InfintyDeck/cardImages/uno-cards/red-1.svg"></img> -->
-                        {{ game }}
+                        <img :src="game.cardBack"></img>
+                        <label>{{ game.label }}</label>
                     </button>
                 </div>
                 <div class="frame gameConfig">

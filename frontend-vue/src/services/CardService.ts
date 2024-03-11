@@ -2,6 +2,7 @@ import { ConnectionService } from '@/services/ConnectionService';
 import { CardSync } from './CardSync';
 import { Zone, type Card, type UserCards } from '@/model/card';
 import type { User } from '@/model/user';
+import { GAME_CONFIG } from '@/model/game';
 
 export class CardService {
     private conSerivce: ConnectionService;
@@ -43,7 +44,10 @@ export class CardService {
     }
 
     private getCardUrl(cardName: string): string {
-        const basePath = './InfintyDeck/cardImages/french-suited-cards';
+        if (!this.conSerivce.room.value?.selectedGame) {
+            return this.cardBack;
+        }
+        const basePath = GAME_CONFIG[this.conSerivce.room.value?.selectedGame].basePath;
         const fileType = 'svg';
         return `url(${basePath}/${cardName}.${fileType})`;
     }
