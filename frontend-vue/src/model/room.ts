@@ -1,14 +1,10 @@
 import type { User } from './user.ts';
-
-export enum GameOption {
-    MauMau,
-    Uno
-}
+import { GAME_CONFIG } from './game.js';
 
 export type Room = {
     id: string;
     users: User[];
     isLocal: boolean;
-    selectedGame: GameOption;
+    selectedGame: keyof typeof GAME_CONFIG;
     state: 'inLobby' | 'inGame' | 'finished';
 };

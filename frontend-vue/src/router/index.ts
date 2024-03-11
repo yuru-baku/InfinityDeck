@@ -23,8 +23,8 @@ const router = createRouter({
             component: ArComponent
         },
         {
-            path: '/maumau',
-            name: 'MauMau',
+            path: '/game',
+            name: 'Game',
             component: GameView
         }
     ]
