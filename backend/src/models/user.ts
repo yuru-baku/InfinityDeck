@@ -1,4 +1,5 @@
 import { WebSocket } from 'ws';
+import { Card, Zone } from './card';
 
 export class User {
     ws: WebSocket;
@@ -7,6 +8,8 @@ export class User {
     isOwner: boolean;
     timeout: NodeJS.Timeout | undefined;
     markerMap: Map<string, any>;
+    private cards: Card[];
+    private sharedCard?: Card;
 
     constructor(ws: WebSocket, id: string | undefined, name: string | undefined) {
         this.ws = ws;
@@ -22,5 +25,23 @@ export class User {
         }
         this.isOwner = false;
         this.markerMap = new Map();
+        this.cards = [];
+    }
+
+    getShared(): Card | undefined {
+        return this.sharedCard;
+    }
+
+    updateCards(cards: Card[]): boolean {
+        const newShared: Card = cards.filter((card) => card.zone == Zone.shared)[0];
+        const newisNotNull = newShared;
+        const isDifferent = newShared.cardFace != this.sharedCard?.cardFace;
+        const isSharedUpdated = newisNotNull && isDifferent;
+
+        if (isSharedUpdated) {
+            this.sharedCard = newShared;
+        }
+        this.cards = cards;
+        return isSharedUpdated;
     }
 }

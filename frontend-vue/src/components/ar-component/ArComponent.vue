@@ -122,7 +122,7 @@ props.conService.onConnection(() => {
                                 foundCard != shareZone.lastFoundCard &&
                                 (isInAnyZone = shareZone.cardInZone(foundCard))
                             ) {
-                                props.cardService.share(foundCard.id);
+                                props.cardService.shareLocal(foundCard.id);
                             }
                         }
 
