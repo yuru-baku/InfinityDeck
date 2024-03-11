@@ -25,6 +25,7 @@ window.addEventListener(
     (event) => {
         let video = document.getElementById('arjs-video');
         let canvas = document.getElementsByClassName('a-canvas');
+
         if (!video) return;
         let style = window.getComputedStyle(video);
         canvas
@@ -77,6 +78,13 @@ props.conService.onConnection(() => {
                 );
 
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
+                document.querySelector('a-scene').addEventListener('click', (event) => {
+                    let x = (event.clientX / window.innerWidth) * 4 - 2;
+                    let y = 3 - (event.clientY / window.innerHeight) * 6;
+                    if (shareZone.isInZone(x, y)) {
+                        shareZone.redrawZoneToggle();
+                    }
+                });
                 generateMarkers(sceneEl);
             }
         });
@@ -140,7 +148,8 @@ props.conService.onConnection(() => {
                 this.el.addEventListener('markerFound', () => {
                     zoneMarker.found = true;
                     //add for loop here with zoneArray if we have multiple
-                    drawZonesIfMarkersFound();
+                    hideZone.drawZoneIfMarkersFound();
+                    shareZone.drawZoneIfMarkersFound();
                     console.log(
                         'Zone Marker Found: ',
                         zoneMarker.id,
@@ -151,35 +160,18 @@ props.conService.onConnection(() => {
 
                 this.el.addEventListener('markerLost', () => {
                     //add for loop here with zoneArray if we have multiple
-                    removeZonesIfMarkerLost(zoneMarker);
+                    hideZone.removeZoneIfMarkerLost();
+                    shareZone.removeZoneIfMarkerLost();
+
                     console.log('Zone Marker Lost: ', zoneMarker.id);
                     zoneMarker.found = false;
                 });
             }
         });
     }
+
     connected.value = true;
 });
-
-function drawZonesIfMarkersFound() {
-    if (hideZone.zoneMarker1.found && hideZone.zoneMarker2.found) {
-        hideZone.drawZone();
-        hideZone.redrawZoneEnable();
-    }
-    if (shareZone.zoneMarker1.found && shareZone.zoneMarker2.found) {
-        shareZone.drawZone();
-        shareZone.redrawZoneEnable();
-    }
-}
-
-function removeZonesIfMarkerLost(zoneMarker) {
-    if (hideZone.hasMarker(zoneMarker)) {
-        hideZone.removeZone();
-    }
-    if (shareZone.hasMarker(zoneMarker)) {
-        shareZone.removeZone();
-    }
-}
 
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
