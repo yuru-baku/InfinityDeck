@@ -9,7 +9,7 @@ export class Zone {
         this.name = name;
         this.zoneEntity = null;
         this.cardsInZone = [];
-        this.moving = false;
+        this.moving = true;
         this.redrawTolerance = 0.2;
         this.color = color;
         this.#createZoneMarkers(marker1Url, marker2Url);
@@ -98,8 +98,34 @@ export class Zone {
             this.zoneEntity.object3D.position.copy(midpoint);
             this.zoneEntity.setAttribute('id', 'zoneRectangle_' + this.name);
 
+            this.zoneEntity.zone = this;
+
             this.scene.appendChild(this.zoneEntity);
+            this.setTotalZonePosition();
         }
+    }
+
+    setTotalZonePosition() {
+        this.minX = Math.min(
+            this.zoneMarker1.getMarkerPosition().x,
+            this.zoneMarker2.getMarkerPosition().x
+        );
+        this.maxX = Math.max(
+            this.zoneMarker1.getMarkerPosition().x,
+            this.zoneMarker2.getMarkerPosition().x
+        );
+        this.minY = Math.min(
+            this.zoneMarker1.getMarkerPosition().y,
+            this.zoneMarker2.getMarkerPosition().y
+        );
+        this.maxY = Math.max(
+            this.zoneMarker1.getMarkerPosition().y,
+            this.zoneMarker2.getMarkerPosition().y
+        );
+    }
+
+    onclick() {
+        console.log('TEST');
     }
 
     removeZone() {
@@ -132,29 +158,7 @@ export class Zone {
         if (!card) return false;
         if (!this.zoneMarker1 || !this.zoneMarker2) return false;
 
-        const minX = Math.min(
-            this.zoneMarker1.getMarkerPosition().x,
-            this.zoneMarker2.getMarkerPosition().x
-        );
-        const maxX = Math.max(
-            this.zoneMarker1.getMarkerPosition().x,
-            this.zoneMarker2.getMarkerPosition().x
-        );
-        const minY = Math.min(
-            this.zoneMarker1.getMarkerPosition().y,
-            this.zoneMarker2.getMarkerPosition().y
-        );
-        const maxY = Math.max(
-            this.zoneMarker1.getMarkerPosition().y,
-            this.zoneMarker2.getMarkerPosition().y
-        );
-
-        var isCardInZone =
-            card.getMarkerPosition().x >= minX &&
-            card.getMarkerPosition().x <= maxX &&
-            card.getMarkerPosition().y >= minY &&
-            card.getMarkerPosition().y <= maxY;
-
+        const isCardInZone = this.isInZone(card.getMarkerPosition().x, card.getMarkerPosition().y);
         if (isCardInZone) {
             this.addFoundCard();
         } else {
@@ -162,6 +166,14 @@ export class Zone {
         }
 
         return isCardInZone;
+    }
+
+    isInZone(x, y) {
+        if (!this.zoneEntity) {
+            return false;
+        }
+        console.log(this.minX + ', ' + this.maxX + ' Y: ' + this.minY + ', ' + this.maxY);
+        return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY;
     }
 
     addFoundCard(marker) {
@@ -178,23 +190,29 @@ export class Zone {
     }
 
     redrawZoneDisable() {
-        this.moving = false;
         clearTimeout(this.redrawTimeout);
     }
 
     redrawZoneEnable() {
-        if (!this.moving) {
-            this.moving = true;
-            this.lastZoneMarker1Position = new THREE.Vector3().copy(
-                this.zoneMarker1.getMarkerPosition()
-            );
-            this.lastZoneMarker2Position = new THREE.Vector3().copy(
-                this.zoneMarker2.getMarkerPosition()
-            );
-            this.#redrawZone();
-        }
+        this.lastZoneMarker1Position = new THREE.Vector3().copy(
+            this.zoneMarker1.getMarkerPosition()
+        );
+        this.lastZoneMarker2Position = new THREE.Vector3().copy(
+            this.zoneMarker2.getMarkerPosition()
+        );
+        this.#redrawZone();
     }
 
+    redrawZoneToggle() {
+        if (this.moving) {
+            this.redrawZoneDisable();
+            this.moving = false;
+        } else {
+            this.redrawZoneEnable();
+            this.removeZone();
+            this.moving = true;
+        }
+    }
     checkIfMarkerFound() {}
 
     #redrawZone() {
@@ -222,6 +240,23 @@ export class Zone {
                 }
             }
             this.redrawTimeout = setTimeout(() => this.#redrawZone(), 100);
+        }
+    }
+
+    drawZoneIfMarkersFound() {
+        if (this.moving) {
+            if (this.zoneMarker1.found && this.zoneMarker2.found) {
+                this.drawZone();
+                this.redrawZoneEnable();
+            }
+        }
+    }
+
+    removeZoneIfMarkerLost() {
+        if (this.moving) {
+            if (this.zoneMarker1.found && this.zoneMarker2.found) {
+                this.removeZone();
+            }
         }
     }
 }
