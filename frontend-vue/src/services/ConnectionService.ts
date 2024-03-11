@@ -133,7 +133,7 @@ export class ConnectionService {
                         this.you.value = message.data.you;
                         if (message.data.state === 'inGame') {
                             this.router.push(
-                                `/${message.data.selectedGame}?roomId=${message.data.roomId}`
+                                `/game?roomId=${message.data.roomId}`
                             );
                         }
                         if (message.data.state === 'inLobby') {
@@ -187,7 +187,7 @@ export class ConnectionService {
                         console.log('Deal Cards');
                         if (!this.room.value) return;
                         this.router.push(
-                            `/${this.room.value.selectedGame}?roomId=${this.room.value.id}`
+                            `/game?roomId=${this.room.value.id}`
                         );
                         break;
                     case 'drawCard':
@@ -248,7 +248,7 @@ export class ConnectionService {
     }
     public navigateToGame() {
         if (this.room.value) {
-            this.router.push(`/${this.room.value.selectedGame}?roomId=${this.room.value.id}`);
+            this.router.push(`/game?roomId=${this.room.value.id}`);
         }
     }
 
