@@ -118,7 +118,7 @@ export class CardService {
         throw new Error('Method not implemented.');
     }
 
-    public share(id: string) {
+    public shareLocal(id: string): void {
         let card = this.markerMap.get(id);
         if (card) {
             if (card != this.sharedCard) {
@@ -128,10 +128,21 @@ export class CardService {
                 card.zone = Zone.shared;
                 this.sharedCard = card;
             }
-            let shareZone = document.getElementById('shareZone');
-            shareZone?.setAttribute('src', this.sharedCard?.url);
-            shareZone?.setAttribute('visible', 'true');
+            if (this.sharedCard) {
+                this.setShareZone(this.sharedCard);
+            }
         }
+    }
+
+    //TODO: avoid update conflicts here I currently just update the HTML
+    public shareGlobal(card: Card): void {
+        this.setShareZone(card);
+    }
+
+    private setShareZone(card: Card): void {
+        let shareZone = document.getElementById('shareZone');
+        shareZone?.setAttribute('src', card.url);
+        shareZone?.setAttribute('visible', 'true');
     }
 
     //

@@ -32,14 +32,11 @@ export type Card = {
  */
 export type UserCards = { userId: string; cards: Card[] };
 
-export function toUserCards(user: User, cards: Card[]): UserCards {
-    return { userId: user.id, cards: cards };
-}
-
 /**
  * list of all cards currrently known to the session as
  * regulary provided by the backend
  */
-export type allCards = {
+export type AllCards = {
+    sharedCard: Card | undefined;
     userCards: UserCards[];
 };
