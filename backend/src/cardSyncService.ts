@@ -1,6 +1,6 @@
 import { WebSocket as Socket } from 'ws';
 import { setInterval, clearInterval } from 'timers';
-import { Card, UserCards } from './models/card';
+import { AllCards, Card, UserCards } from './models/card';
 import { Room } from './models/room';
 import { User } from './models/user';
 
@@ -53,7 +53,8 @@ export class CardSyncService {
     }
 
     sendAllCards(): void {
-        this.room.sendMessageToUsers('allCards', this.userCards);
+        const allCards: AllCards = { sharedCard: this.sharedCard, userCards: this.userCards };
+        this.room.sendMessageToUsers('allCards', allCards);
     }
 
     stopSync(): void {
@@ -66,10 +67,15 @@ export class CardSyncService {
     //Controlling the user cards
     //------------------------------------------------
     //
-
     updateUserCards(user: User, cards: Card[]) {
         console.debug('update userCards');
-        this.userCards[this.find(user)].cards = cards;
+        this.userCards[this.find(user)].cards = cards; //my view on the cards
+        let isSharedUpdated: boolean = user.updateCards(cards); //update in user
+        //update the shared card is needed
+        if (isSharedUpdated) {
+            this.sharedCard = user.getShared();
+            console.debug('New shared card', this.sharedCard);
+        }
         console.debug(this.userCards);
     }
 
@@ -90,4 +96,5 @@ export class CardSyncService {
 
     //We have very few users. So an array is fine to use here.
     private userCards: UserCards[] = [];
+    private sharedCard?: Card;
 }
