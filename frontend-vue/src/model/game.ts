@@ -15,7 +15,7 @@ export const GAME_CONFIG: {[game: string]: { label: string, basePath: string, ca
         label: 'Uno',
         id: 'Uno',
         basePath: '/InfintyDeck/cardImages/uno-cards',
-        cardBack: '/InfintyDeck/cardImages/uno-cards/wish.svg',
+        cardBack: '/InfintyDeck/cardImages/uno-cards/back.svg',
     },
     MauMau: {
         label: 'french',
