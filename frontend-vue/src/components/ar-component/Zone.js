@@ -58,28 +58,16 @@ export class Zone {
 
     drawZone() {
         if (this.zoneMarker1 && this.zoneMarker2) {
-            const position1 = this.zoneMarker1.getMarkerPosition().clone();
-            const position2 = this.zoneMarker2.getMarkerPosition().clone();
+            this.setTotalZonePosition();
 
-            // Get the marker widths TODO maybe calculate this
-            const width1 = 1;
-            const width2 = 1;
-            const height1 = 3;
-            const height2 = 3;
+            const width = Math.abs(this.maxX - this.minX);
+            const height = Math.abs(this.maxY - this.minY);
 
-            // Adjust the positions based on the outer edges
-            position1.x -= width1 / 2;
-            position1.z -= height1 / 2;
-
-            position2.x += width2 / 2;
-            position2.z += height2 / 2;
-
-            const width = Math.abs(position2.x - position1.x);
-            const height = Math.abs(position2.z - position1.z);
-
-            const midpoint = new THREE.Vector3()
-                .addVectors(position1, position2)
-                .multiplyScalar(0.5);
+            const midpoint = new THREE.Vector3(
+                this.minX + width / 2,
+                this.minY + height / 2, // Assuming y position is constant, adjust if necessary
+                this.zoneMarker1.getMarkerPosition().z
+            );
 
             this.zoneEntity = document.createElement('a-entity');
             this.zoneEntity.setAttribute('geometry', {
@@ -101,27 +89,17 @@ export class Zone {
             this.zoneEntity.zone = this;
 
             this.scene.appendChild(this.zoneEntity);
-            this.setTotalZonePosition();
         }
     }
 
     setTotalZonePosition() {
-        this.minX = Math.min(
-            this.zoneMarker1.getMarkerPosition().x,
-            this.zoneMarker2.getMarkerPosition().x
-        );
-        this.maxX = Math.max(
-            this.zoneMarker1.getMarkerPosition().x,
-            this.zoneMarker2.getMarkerPosition().x
-        );
-        this.minY = Math.min(
-            this.zoneMarker1.getMarkerPosition().y,
-            this.zoneMarker2.getMarkerPosition().y
-        );
-        this.maxY = Math.max(
-            this.zoneMarker1.getMarkerPosition().y,
-            this.zoneMarker2.getMarkerPosition().y
-        );
+        const position1 = this.zoneMarker1.getMarkerPosition().clone();
+        const position2 = this.zoneMarker2.getMarkerPosition().clone();
+
+        this.minX = Math.min(position1.x, position2.x);
+        this.maxX = Math.max(position1.x, position2.x);
+        this.minY = Math.min(position1.y, position2.y);
+        this.maxY = Math.max(position1.y, position2.y);
     }
 
     onclick() {
