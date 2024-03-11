@@ -54,15 +54,19 @@ export abstract class Game {
             leaderboard: leaderboard
         });
         // finally persist and close
-        this.room.db.collection(`${this.label}-Games`).insertOne({
-            leaderboard: leaderboard,
-            history: this.history,
-            startTiem: this.startTime,
-            endTime: this.endTime,
-            users: this.room.users.map((user) => {
-                return { name: user.name, id: user.id, handcards: [] };
-            })
-        });
+        try {
+            this.room.db.collection(`${this.label}-Games`).insertOne({
+                leaderboard: leaderboard,
+                history: this.history,
+                startTiem: this.startTime,
+                endTime: this.endTime,
+                users: this.room.users.map((user) => {
+                    return { name: user.name, id: user.id, handcards: [] };
+                })
+            });
+        } catch (e) {
+            console.warn('Failed to persist game with reason', e);
+        }
     }
 
     drawCard(user: User, message: WsMessage) {
