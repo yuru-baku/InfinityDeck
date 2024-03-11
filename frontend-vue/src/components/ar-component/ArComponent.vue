@@ -165,7 +165,6 @@ props.conService.onConnection(() => {
 
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
-        var markerUrl = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
         var cardBackSrc = props.cardService.cardBack;
         var card = new CardMarker(sceneEl, cardBackSrc, k);
         if (debug) {

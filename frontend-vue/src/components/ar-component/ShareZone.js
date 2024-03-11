@@ -1,8 +1,8 @@
 import { Zone } from './Zone';
 
 export class ShareZone extends Zone {
-    constructor(marker1Url, marker2Url, sceneEl, name) {
-        super(marker1Url, marker2Url, sceneEl, name, 0xadd8e6);
+    constructor(marker1BarcodeValue, marker2BarcodeValue, sceneEl, name) {
+        super(marker1BarcodeValue, marker2BarcodeValue, sceneEl, name, 0xadd8e6);
         this.imageElement = document.createElement('a-image');
         this.imageElement.setAttribute('id', 'shareZone');
         this.imageElement.setAttribute('visible', 'false');

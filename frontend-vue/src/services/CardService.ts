@@ -8,7 +8,6 @@ export class CardService {
     private cardSync: CardSync;
 
     public cardBack: string;
-    public markerBaseUrl: string;
     public numberOfCards: number;
     markerMap: Map<string, Card>;
     private sharedCard: Card | undefined;
@@ -17,7 +16,6 @@ export class CardService {
     constructor(conService: ConnectionService) {
         this.conSerivce = conService;
         this.cardBack = 'url(./InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg)';
-        this.markerBaseUrl = './InfintyDeck/markers/';
         this.numberOfCards = 0;
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
