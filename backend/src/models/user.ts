@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { Card, Zone } from './card';
+import { Card, UserCards, Zone } from './card';
 
 export class User {
     ws: WebSocket;
@@ -32,10 +32,14 @@ export class User {
         return this.sharedCard;
     }
 
+    getCards(): UserCards {
+        return { userId: this.id, cards: this.cards };
+    }
+
     updateCards(cards: Card[]): boolean {
         const newShared: Card = cards.filter((card) => card.zone == Zone.shared)[0];
         const newisNotNull = newShared;
-        const isDifferent = newShared.cardFace != this.sharedCard?.cardFace;
+        const isDifferent = newShared?.cardFace != this.sharedCard?.cardFace;
         const isSharedUpdated = newisNotNull && isDifferent;
 
         if (isSharedUpdated) {
