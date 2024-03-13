@@ -78,7 +78,7 @@ props.conService.onConnection(() => {
                     }
                 });
                 generateMarkers(sceneEl);
-                handDisplay.enabled = true;
+                //handDisplay.enabled = true;
             }
         });
     }
