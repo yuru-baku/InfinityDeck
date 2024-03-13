@@ -132,9 +132,7 @@ export class ConnectionService {
                         this.game.value = message.data.game;
                         this.you.value = message.data.you;
                         if (message.data.state === 'inGame') {
-                            this.router.push(
-                                `/game?roomId=${message.data.roomId}`
-                            );
+                            this.router.push(`/game?roomId=${message.data.roomId}`);
                         }
                         if (message.data.state === 'inLobby') {
                             this.router.push(`/lobby?roomId=${message.data.roomId}`);
@@ -186,9 +184,7 @@ export class ConnectionService {
                     case 'dealCards':
                         console.log('Deal Cards');
                         if (!this.room.value) return;
-                        this.router.push(
-                            `/game?roomId=${this.room.value.id}`
-                        );
+                        this.router.push(`/game?roomId=${this.room.value.id}`);
                         break;
                     case 'drawCard':
                         console.log('Draw Card');
