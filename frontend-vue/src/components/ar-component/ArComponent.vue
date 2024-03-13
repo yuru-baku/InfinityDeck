@@ -107,10 +107,9 @@ props.conService.onConnection(() => {
                     for (let foundCard of foundCardMarkers) {
                         let isInAnyZone = false;
                         if ((isInAnyZone = hideZone.cardInZone(foundCard))) {
-                            card.turnCardOnBack();
                             foundCard.showCardImage();
-                        }
-                        if (props.cardService.markerMapContainsId(foundCard.id)) {
+                            card.turnCardOnBack();
+                        } else if (props.cardService.markerMapContainsId(foundCard.id)) {
                             if (
                                 foundCard != shareZone.lastFoundCard &&
                                 (isInAnyZone = shareZone.cardInZone(foundCard))

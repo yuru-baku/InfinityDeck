@@ -105,10 +105,6 @@ export class Zone {
         this.maxY = Math.max(position1.y, position2.y);
     }
 
-    onclick() {
-        console.log('TEST');
-    }
-
     removeZone() {
         if (this.zoneEntity) {
             this.zoneEntity.remove();
@@ -153,7 +149,6 @@ export class Zone {
         if (!this.zoneEntity) {
             return false;
         }
-        console.log(this.minX + ', ' + this.maxX + ' Y: ' + this.minY + ', ' + this.maxY);
         return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY;
     }
 
