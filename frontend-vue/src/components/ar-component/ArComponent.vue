@@ -52,7 +52,7 @@ var hideZone;
  */
 var shareZone;
 var debug = true;
-var handDisplayEnabled = false;
+var handDisplayEnabled = true;
 /**
  * @type {CardDisplay}
  */
@@ -73,6 +73,9 @@ props.conService.onConnection(() => {
                     let y = 3 - (event.clientY / window.innerHeight) * 6;
                     if (shareZone.isInZone(x, y)) {
                         shareZone.redrawZoneToggle();
+                    }
+                    if (hideZone.isInZone(x, y)) {
+                        hideZone.redrawZoneToggle();
                     }
                 });
                 generateMarkers(sceneEl);
@@ -116,11 +119,9 @@ props.conService.onConnection(() => {
                             }
                         }
 
-                        if (!isInAnyZone && !foundCard.isFaceUp) {
+                        if (!isInAnyZone) {
                             showCard(foundCard);
-                            foundCard.showCardImage();
-                        }
-                        if (isInAnyZone && handDisplayEnabled) {
+                        } else if (handDisplayEnabled) {
                             handDisplay.removeCardFromDisplayAndShow(foundCard);
                         }
                     }
@@ -179,21 +180,22 @@ function generateMarkers(sceneEl) {
 function showCard(card) {
     if (!card.isFaceUp) {
         card.turnCardCurrentFace();
-        if (handDisplayEnabled) {
-            handDisplay.addCardToDisplayAndHide(card);
-        }
+        foundCard.showCardImage();
+    }
+    if (handDisplayEnabled) {
+        handDisplay.addCardToDisplayAndHide(card);
     }
 }
 
 //TODO check if this is better than showCard for us
 /**
- * @param {CardMarker} marker
+ * @param {CardMarker} card
  */
-function showCardSyncOnlyIfNew(marker) {
-    if (marker.hasFace()) {
-        marker.turnCardCurrentFace();
+function showCardSyncOnlyIfNew(card) {
+    if (card.hasFace()) {
+        card.turnCardCurrentFace();
     } else {
-        showCard();
+        showCard(card);
     }
 }
 

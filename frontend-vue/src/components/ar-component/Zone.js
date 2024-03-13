@@ -58,6 +58,9 @@ export class Zone {
 
     drawZone() {
         if (this.zoneMarker1 && this.zoneMarker2) {
+            if (this.zoneEntity) {
+                this.zoneEntity.remove();
+            }
             this.setTotalZonePosition();
 
             const width = Math.abs(this.maxX - this.minX);
@@ -116,7 +119,7 @@ export class Zone {
     }
 
     refreshZone() {
-        this.zoneEntity.parentNode.removeChild(this.zoneEntity);
+        this.zoneEntity.remove();
         this.zoneEntity = null;
         this.drawZone();
     }

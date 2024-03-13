@@ -31,6 +31,16 @@ export class CardDisplay {
         this.enabled = true;
     }
 
+    toggleDisplay() {
+        if (this.enabled) {
+            this.enabled = false;
+            this.removeDisplay();
+        } else {
+            this.enabled = true;
+            this.refreshDisplay();
+        }
+    }
+
     /**
      * @param {CardMarker} marker
      */
@@ -74,10 +84,10 @@ export class CardDisplay {
     removeDisplay() {
         if (this.visible || this.imageElements.length > 0) {
             this.visible = false;
-            this.imageElements.forEach((image, index) => {
-                this.imageElements.splice(index, 1);
+            this.imageElements.forEach((image) => {
                 image.remove();
             });
+            this.imageElements = [];
         }
     }
 
@@ -105,7 +115,7 @@ export class CardDisplay {
      * @param {number} position.z - The z-coordinate.
      * @private
      */
-    #generateImageElement(card, position, zIndex) {
+    #generateImageElement(card, position) {
         const newImageEl = document.createElement('a-image');
 
         newImageEl.setAttribute('src', card.cardFaceSrc);
