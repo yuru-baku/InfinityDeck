@@ -101,7 +101,5 @@ async function main() {
     return ` > Started with port ${process.env.PORT}`;
 }
 
-main()
-    .then(console.log)
-    .catch(console.error);
-    // .finally(() => client.close());
+main().then(console.log).catch(console.error);
+// .finally(() => client.close());

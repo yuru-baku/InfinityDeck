@@ -2,8 +2,8 @@ import { InfinityMarker } from './InfinityMarker';
 import { Zone } from './Zone';
 
 export class ZoneMarker extends InfinityMarker {
-    constructor(sceneEl, zoneMarkerUrl, id, zone) {
-        super(sceneEl, zoneMarkerUrl, id);
+    constructor(sceneEl, barcodeValue, id, zone) {
+        super(sceneEl, barcodeValue, id);
         this.markerElement.setAttribute('registerevents_zone', '');
         this.zone = zone;
         var idNumber = parseInt(id.match(/\d+/)[0]);

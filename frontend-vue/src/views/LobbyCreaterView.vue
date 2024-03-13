@@ -56,7 +56,7 @@ onUnmounted(() => {
                         }"
                         v-on:click="() => conService.changeGame(game.id)"
                     >
-                        <img :src="game.cardBack"></img>
+                        <img :src="game.cardBack" />
                         <label>{{ game.label }}</label>
                     </button>
                 </div>
@@ -71,9 +71,14 @@ onUnmounted(() => {
                     <div class="frame toggleDescription">
                         <div>
                             <h2>No cards?</h2>
-                            <p>You will need a set of marker-cards to play the game.<br/>We recommend you to print them on an A4-paper.</p>
+                            <p>
+                                You will need a set of marker-cards to play the game.<br />We
+                                recommend you to print them on an A4-paper.
+                            </p>
                         </div>
-                        <a href="/InfintyDeck/markers.pdf" target="_blank"  class="button">Print the Cards</a>
+                        <a href="/InfintyDeck/markers.pdf" target="_blank" class="button"
+                            >Print the Cards</a
+                        >
                     </div>
                 </div>
             </div>

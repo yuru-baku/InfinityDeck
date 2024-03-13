@@ -64,18 +64,8 @@ props.conService.onConnection(() => {
             init: function () {
                 var sceneEl = document.querySelector('a-scene');
 
-                hideZone = new Zone(
-                    props.cardService.markerBaseUrl + 'ZoneMarker1.patt',
-                    props.cardService.markerBaseUrl + 'ZoneMarker2.patt',
-                    sceneEl,
-                    'hand'
-                );
-                shareZone = new ShareZone(
-                    props.cardService.markerBaseUrl + 'shareZoneMarker1.patt',
-                    props.cardService.markerBaseUrl + 'shareZoneMarker2.patt',
-                    sceneEl,
-                    'share'
-                );
+                hideZone = new Zone(124, 125, sceneEl, 'hide');
+                shareZone = new ShareZone(126, 127, sceneEl, 'share');
 
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
                 document.querySelector('a-scene').addEventListener('click', (event) => {
@@ -122,7 +112,7 @@ props.conService.onConnection(() => {
                                 foundCard != shareZone.lastFoundCard &&
                                 (isInAnyZone = shareZone.cardInZone(foundCard))
                             ) {
-                                props.cardService.share(foundCard.id);
+                                props.cardService.shareLocal(foundCard.id);
                             }
                         }
 
@@ -175,9 +165,8 @@ props.conService.onConnection(() => {
 
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
-        var markerUrl = props.cardService.markerBaseUrl + 'pattern-' + k + '.patt';
         var cardBackSrc = props.cardService.cardBack;
-        var card = new CardMarker(sceneEl, markerUrl, cardBackSrc, k);
+        var card = new CardMarker(sceneEl, cardBackSrc, k);
         if (debug) {
             card.toggleDebugNumber();
         }
@@ -257,7 +246,7 @@ onUnmounted(() => {
             xr-mode-ui="enabled: false"
             color-space="sRGB"
             renderer="gammaOutput: true"
-            arjs="debugUIEnabled: false; sourceType: webcam; patternRatio: 0.85; trackingMethod: best; sourceWidth: 1280; sourceHeight: 720;"
+            arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 5x5_BCH_22_7_7; debugUIEnabled: false; sourceWidth: 1280; sourceHeight: 720;"
         >
             <a-entity id="userCamera" camera> </a-entity>
         </a-scene>

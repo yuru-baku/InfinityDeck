@@ -1,6 +1,7 @@
-import type { Card, UserCards, Zone } from '@/model/card';
+import type { AllCards, Card, UserCards, Zone } from '@/model/card';
 import { CardService } from './CardService';
 import type { ConnectionService } from '@/services/ConnectionService';
+import type { User } from '@/model/user';
 
 export class CardSync {
     constructor(conService: ConnectionService, cardService: CardService) {
@@ -11,17 +12,27 @@ export class CardSync {
             };
         };
         this.conService.addListener('getCards', partial(this.onGetCards, this));
-        this.conService.addListener('allCards', partial(this.onBroadcastCards, this));
-
+        this.conService.addListener('allCards', partial(this.onAllCards, this));
         this.cardService = cardService;
     }
 
-    onBroadcastCards(cardSync: CardSync, allCards: UserCards[], _conService: ConnectionService) {
+    onAllCards(cardSync: CardSync, allCards: AllCards, _conService: ConnectionService): void {
         console.debug('Backend synced the cards.', allCards);
-        cardSync.cardService.setUsersCards(allCards);
+        let cardService = cardSync.cardService;
+        cardService.setUsersCards(allCards.userCards);
+
+        allCards.userCards.forEach((userCards: UserCards) => {
+            _conService.room.value?.users
+                .filter((user) => user.id == userCards.userId)
+                .forEach((user) => (user.cards = userCards.cards));
+        });
+
+        if (allCards.sharedCard) {
+            cardService.shareGlobal(allCards.sharedCard);
+        }
     }
 
-    onGetCards(cardSync: CardSync, _data: any, conService: ConnectionService) {
+    onGetCards(cardSync: CardSync, _data: any, conService: ConnectionService): void {
         console.debug('Backend wants to see our cards:');
         conService.sendMessage('getCards', cardSync.gatherCards());
     }

@@ -1,8 +1,8 @@
 import { InfinityMarker } from './InfinityMarker';
 
 export class CardMarker extends InfinityMarker {
-    constructor(sceneEl, markerUrl, cardBackSrc, id) {
-        super(sceneEl, markerUrl, id);
+    constructor(sceneEl, cardBackSrc, id) {
+        super(sceneEl, id, id);
 
         this.markerElement.setAttribute('registerevents_card', '');
         this.cardBackSrc = cardBackSrc;
