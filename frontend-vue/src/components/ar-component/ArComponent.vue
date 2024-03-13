@@ -52,7 +52,6 @@ var hideZone;
  */
 var shareZone;
 var debug = true;
-var handDisplayEnabled = true;
 /**
  * @type {CardDisplay}
  */
@@ -79,6 +78,7 @@ props.conService.onConnection(() => {
                     }
                 });
                 generateMarkers(sceneEl);
+                handDisplay.enabled = true;
             }
         });
     }
@@ -122,7 +122,7 @@ props.conService.onConnection(() => {
                             shareZone.cardsInZone.includes(foundCard);
                         if (!isInAnyZone) {
                             showCard(foundCard);
-                        } else if (handDisplayEnabled) {
+                        } else {
                             handDisplay.removeCardFromDisplayAndShow(foundCard);
                         }
                     }
@@ -183,9 +183,7 @@ function showCard(card) {
         card.turnCardCurrentFace();
         card.showCardImage();
     }
-    if (handDisplayEnabled) {
-        handDisplay.addCardToDisplayAndHide(card);
-    }
+    handDisplay.addCardToDisplayAndHide(card);
 }
 
 //TODO check if this is better than showCard for us

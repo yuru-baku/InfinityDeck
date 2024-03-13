@@ -5,16 +5,16 @@ export class CardDisplay {
      * Creates an instance of CardDisplay.
      * @param {string} name - The name of the display.
      * @param {number} [centerX=0] - The starting x-coordinate.
-     * @param {number} [startY=-0.5] - The starting y-coordinate.
+     * @param {number} [startY=-0.4] - The starting y-coordinate.
      * @param {Object} [scale={ x: 0.3 * 0.64, y: 0.3, z: 1 }] - The scale of the image elements.
-     * @param {number} [cardSpacing=0.4] - The spacing between cards.
+     * @param {number} [cardSpacing=0.04] - The spacing between cards.
      */
     constructor(
         name,
         centerX = 0,
         startY = -0.4,
         scale = { x: 0.3 * 0.64, y: 0.3, z: 1 },
-        cardSpacing = 0.1
+        cardSpacing = 0.2
     ) {
         /**
          * An array of numbers.
@@ -28,7 +28,7 @@ export class CardDisplay {
         this.name = name;
         this.scale = scale;
         this.cardSpacing = cardSpacing;
-        this.enabled = true;
+        this.enabled = false;
     }
 
     toggleDisplay() {
@@ -98,14 +98,17 @@ export class CardDisplay {
     refreshDisplay() {
         this.removeDisplay();
         this.#sortCardsByXPosition();
-        this.markersDisplayed.forEach((card, index) => {
-            var startX = this.centerX - (this.cardSpacing * this.markersDisplayed.length) / 2;
+        var startX =
+            this.centerX -
+            (this.scale.x + this.scale.x * this.cardSpacing * this.markersDisplayed.length) / 2;
+        this.markersDisplayed.forEach((card) => {
+            startX = startX + this.scale.x * this.cardSpacing;
             var position = {
-                x: startX + this.cardSpacing * index,
+                x: startX,
                 y: this.startY,
                 z: -1
             };
-            this.#generateImageElement(card, position, -1 + index);
+            this.#generateImageElement(card, position);
             this.#showCards(card.sceneElement);
             this.visible = true;
         });
