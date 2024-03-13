@@ -24,11 +24,9 @@ export class CardMarker extends InfinityMarker {
     }
 
     turnCardOnBack() {
-        if (this.isFaceUp) {
-            this.imageElement.setAttribute('data-state', 'back');
-            this.imageElement.setAttribute('src', this.cardBackSrc);
-            this.isFaceUp = false;
-        }
+        this.imageElement.setAttribute('data-state', 'back');
+        this.imageElement.setAttribute('src', this.cardBackSrc);
+        this.isFaceUp = false;
     }
 
     turnCardOnNewFace(faceUrl) {

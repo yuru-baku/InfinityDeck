@@ -58,6 +58,9 @@ export class Zone {
 
     drawZone() {
         if (this.zoneMarker1 && this.zoneMarker2) {
+            if (this.zoneEntity) {
+                this.zoneEntity.remove();
+            }
             this.setTotalZonePosition();
 
             const width = Math.abs(this.maxX - this.minX);
@@ -102,10 +105,6 @@ export class Zone {
         this.maxY = Math.max(position1.y, position2.y);
     }
 
-    onclick() {
-        console.log('TEST');
-    }
-
     removeZone() {
         if (this.zoneEntity) {
             this.zoneEntity.remove();
@@ -116,8 +115,10 @@ export class Zone {
     }
 
     refreshZone() {
-        this.zoneEntity.parentNode.removeChild(this.zoneEntity);
-        this.zoneEntity = null;
+        if (this.zoneEntity) {
+            this.zoneEntity.remove();
+            this.zoneEntity = null;
+        }
         this.drawZone();
     }
 
@@ -134,13 +135,12 @@ export class Zone {
      */
     cardInZone(card) {
         if (!card) return false;
-        if (!this.zoneMarker1 || !this.zoneMarker2) return false;
 
         const isCardInZone = this.isInZone(card.getMarkerPosition().x, card.getMarkerPosition().y);
         if (isCardInZone) {
-            this.addFoundCard();
+            this.addFoundCard(card);
         } else {
-            this.removeCardFromZoneFound();
+            this.removeCardFromZoneFound(card);
         }
 
         return isCardInZone;
@@ -150,7 +150,6 @@ export class Zone {
         if (!this.zoneEntity) {
             return false;
         }
-        console.log(this.minX + ', ' + this.maxX + ' Y: ' + this.minY + ', ' + this.maxY);
         return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY;
     }
 

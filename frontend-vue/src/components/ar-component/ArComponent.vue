@@ -52,7 +52,6 @@ var hideZone;
  */
 var shareZone;
 var debug = true;
-var handDisplayEnabled = false;
 /**
  * @type {CardDisplay}
  */
@@ -74,8 +73,12 @@ props.conService.onConnection(() => {
                     if (shareZone.isInZone(x, y)) {
                         shareZone.redrawZoneToggle();
                     }
+                    if (hideZone.isInZone(x, y)) {
+                        hideZone.redrawZoneToggle();
+                    }
                 });
                 generateMarkers(sceneEl);
+                //handDisplay.enabled = true;
             }
         });
     }
@@ -102,25 +105,24 @@ props.conService.onConnection(() => {
 
                 function checkMarkerInZone() {
                     for (let foundCard of foundCardMarkers) {
-                        let isInAnyZone = false;
-                        if ((isInAnyZone = hideZone.cardInZone(foundCard))) {
-                            card.turnCardOnBack();
+                        if (hideZone.cardInZone(foundCard)) {
                             foundCard.showCardImage();
-                        }
-                        if (props.cardService.markerMapContainsId(foundCard.id)) {
+                            card.turnCardOnBack();
+                        } else if (props.cardService.markerMapContainsId(foundCard.id)) {
                             if (
-                                foundCard != shareZone.lastFoundCard &&
-                                (isInAnyZone = shareZone.cardInZone(foundCard))
+                                shareZone.cardInZone(foundCard) &&
+                                foundCard != shareZone.lastFoundCard
                             ) {
                                 props.cardService.shareLocal(foundCard.id);
                             }
                         }
 
-                        if (!isInAnyZone && !foundCard.isFaceUp) {
+                        let isInAnyZone =
+                            hideZone.cardsInZone.includes(foundCard) ||
+                            shareZone.cardsInZone.includes(foundCard);
+                        if (!isInAnyZone) {
                             showCard(foundCard);
-                            foundCard.showCardImage();
-                        }
-                        if (isInAnyZone && handDisplayEnabled) {
+                        } else {
                             handDisplay.removeCardFromDisplayAndShow(foundCard);
                         }
                     }
@@ -179,21 +181,20 @@ function generateMarkers(sceneEl) {
 function showCard(card) {
     if (!card.isFaceUp) {
         card.turnCardCurrentFace();
-        if (handDisplayEnabled) {
-            handDisplay.addCardToDisplayAndHide(card);
-        }
+        card.showCardImage();
     }
+    handDisplay.addCardToDisplayAndHide(card);
 }
 
 //TODO check if this is better than showCard for us
 /**
- * @param {CardMarker} marker
+ * @param {CardMarker} card
  */
-function showCardSyncOnlyIfNew(marker) {
-    if (marker.hasFace()) {
-        marker.turnCardCurrentFace();
+function showCardSyncOnlyIfNew(card) {
+    if (card.hasFace()) {
+        card.turnCardCurrentFace();
     } else {
-        showCard();
+        showCard(card);
     }
 }
 

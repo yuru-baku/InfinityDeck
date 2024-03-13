@@ -5,16 +5,16 @@ export class CardDisplay {
      * Creates an instance of CardDisplay.
      * @param {string} name - The name of the display.
      * @param {number} [centerX=0] - The starting x-coordinate.
-     * @param {number} [startY=-0.5] - The starting y-coordinate.
+     * @param {number} [startY=-0.4] - The starting y-coordinate.
      * @param {Object} [scale={ x: 0.3 * 0.64, y: 0.3, z: 1 }] - The scale of the image elements.
-     * @param {number} [cardSpacing=0.4] - The spacing between cards.
+     * @param {number} [cardSpacing=0.04] - The spacing between cards.
      */
     constructor(
         name,
         centerX = 0,
         startY = -0.4,
         scale = { x: 0.3 * 0.64, y: 0.3, z: 1 },
-        cardSpacing = 0.1
+        cardSpacing = 0.2
     ) {
         /**
          * An array of numbers.
@@ -28,7 +28,17 @@ export class CardDisplay {
         this.name = name;
         this.scale = scale;
         this.cardSpacing = cardSpacing;
-        this.enabled = true;
+        this.enabled = false;
+    }
+
+    toggleDisplay() {
+        if (this.enabled) {
+            this.enabled = false;
+            this.removeDisplay();
+        } else {
+            this.enabled = true;
+            this.refreshDisplay();
+        }
     }
 
     /**
@@ -60,38 +70,45 @@ export class CardDisplay {
      * @param {CardMarker} marker
      */
     addCardToDisplayAndHide(card) {
-        card.hideCardImage();
+        if (this.enabled) {
+            card.hideCardImage();
+        }
         this.addCardToDisplay(card);
     }
     /**
      * @param {CardMarker} marker
      */
     removeCardFromDisplayAndShow(card) {
-        card.showCardImage();
-        this.removeCardFromDisplay();
+        if (this.enabled) {
+            card.showCardImage();
+        }
+        this.removeCardFromDisplay(card);
     }
 
     removeDisplay() {
         if (this.visible || this.imageElements.length > 0) {
             this.visible = false;
-            this.imageElements.forEach((image, index) => {
-                this.imageElements.splice(index, 1);
+            this.imageElements.forEach((image) => {
                 image.remove();
             });
+            this.imageElements = [];
         }
     }
 
     refreshDisplay() {
         this.removeDisplay();
-        this.markersDisplayed.forEach((card, index) => {
-            var startX = this.centerX - (this.cardSpacing * this.markersDisplayed.length) / 2;
+        this.#sortCardsByXPosition();
+        var startX =
+            this.centerX -
+            (this.scale.x + this.scale.x * this.cardSpacing * this.markersDisplayed.length) / 2;
+        this.markersDisplayed.forEach((card) => {
+            startX = startX + this.scale.x * this.cardSpacing;
             var position = {
-                x: startX + this.cardSpacing * index,
+                x: startX,
                 y: this.startY,
                 z: -1
             };
-            this.#generateImageElement(card, position, -1 + index);
-            this.#sortElementsByXPosition();
+            this.#generateImageElement(card, position);
             this.#showCards(card.sceneElement);
             this.visible = true;
         });
@@ -105,7 +122,7 @@ export class CardDisplay {
      * @param {number} position.z - The z-coordinate.
      * @private
      */
-    #generateImageElement(card, position, zIndex) {
+    #generateImageElement(card, position) {
         const newImageEl = document.createElement('a-image');
 
         newImageEl.setAttribute('src', card.cardFaceSrc);
@@ -117,10 +134,10 @@ export class CardDisplay {
         this.imageElements.push(newImageEl);
     }
 
-    #sortElementsByXPosition() {
-        this.imageElements.sort((a, b) => {
-            const positionA = a.object3D.position.x;
-            const positionB = b.object3D.position.x;
+    #sortCardsByXPosition() {
+        this.markersDisplayed.sort((a, b) => {
+            const positionA = a.markerElement.object3D.position.x;
+            const positionB = b.markerElement.object3D.position.x;
             return positionA - positionB;
         });
     }
