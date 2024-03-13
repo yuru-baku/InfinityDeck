@@ -93,6 +93,7 @@ export class CardDisplay {
 
     refreshDisplay() {
         this.removeDisplay();
+        this.#sortCardsByXPosition();
         this.markersDisplayed.forEach((card, index) => {
             var startX = this.centerX - (this.cardSpacing * this.markersDisplayed.length) / 2;
             var position = {
@@ -101,7 +102,6 @@ export class CardDisplay {
                 z: -1
             };
             this.#generateImageElement(card, position, -1 + index);
-            this.#sortElementsByXPosition();
             this.#showCards(card.sceneElement);
             this.visible = true;
         });
@@ -127,10 +127,10 @@ export class CardDisplay {
         this.imageElements.push(newImageEl);
     }
 
-    #sortElementsByXPosition() {
-        this.imageElements.sort((a, b) => {
-            const positionA = a.object3D.position.x;
-            const positionB = b.object3D.position.x;
+    #sortCardsByXPosition() {
+        this.markersDisplayed.sort((a, b) => {
+            const positionA = a.markerElement.object3D.position.x;
+            const positionB = b.markerElement.object3D.position.x;
             return positionA - positionB;
         });
     }

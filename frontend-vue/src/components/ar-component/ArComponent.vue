@@ -52,7 +52,7 @@ var hideZone;
  */
 var shareZone;
 var debug = true;
-var handDisplayEnabled = true;
+var handDisplayEnabled = false;
 /**
  * @type {CardDisplay}
  */
@@ -180,7 +180,7 @@ function generateMarkers(sceneEl) {
 function showCard(card) {
     if (!card.isFaceUp) {
         card.turnCardCurrentFace();
-        foundCard.showCardImage();
+        card.showCardImage();
     }
     if (handDisplayEnabled) {
         handDisplay.addCardToDisplayAndHide(card);
