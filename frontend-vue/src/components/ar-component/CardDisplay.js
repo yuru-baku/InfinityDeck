@@ -70,15 +70,19 @@ export class CardDisplay {
      * @param {CardMarker} marker
      */
     addCardToDisplayAndHide(card) {
-        card.hideCardImage();
+        if (this.enabled) {
+            card.hideCardImage();
+        }
         this.addCardToDisplay(card);
     }
     /**
      * @param {CardMarker} marker
      */
     removeCardFromDisplayAndShow(card) {
-        card.showCardImage();
-        this.removeCardFromDisplay();
+        if (this.enabled) {
+            card.showCardImage();
+        }
+        this.removeCardFromDisplay(card);
     }
 
     removeDisplay() {

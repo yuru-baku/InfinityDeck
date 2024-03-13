@@ -52,7 +52,7 @@ var hideZone;
  */
 var shareZone;
 var debug = true;
-var handDisplayEnabled = false;
+var handDisplayEnabled = true;
 /**
  * @type {CardDisplay}
  */
@@ -105,19 +105,21 @@ props.conService.onConnection(() => {
 
                 function checkMarkerInZone() {
                     for (let foundCard of foundCardMarkers) {
-                        let isInAnyZone = false;
-                        if ((isInAnyZone = hideZone.cardInZone(foundCard))) {
+                        if (hideZone.cardInZone(foundCard)) {
                             foundCard.showCardImage();
                             card.turnCardOnBack();
                         } else if (props.cardService.markerMapContainsId(foundCard.id)) {
                             if (
-                                foundCard != shareZone.lastFoundCard &&
-                                (isInAnyZone = shareZone.cardInZone(foundCard))
+                                shareZone.cardInZone(foundCard) &&
+                                foundCard != shareZone.lastFoundCard
                             ) {
                                 props.cardService.shareLocal(foundCard.id);
                             }
                         }
 
+                        let isInAnyZone =
+                            hideZone.cardsInZone.includes(foundCard) ||
+                            shareZone.cardsInZone.includes(foundCard);
                         if (!isInAnyZone) {
                             showCard(foundCard);
                         } else if (handDisplayEnabled) {

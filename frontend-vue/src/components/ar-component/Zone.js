@@ -115,8 +115,10 @@ export class Zone {
     }
 
     refreshZone() {
-        this.zoneEntity.remove();
-        this.zoneEntity = null;
+        if (this.zoneEntity) {
+            this.zoneEntity.remove();
+            this.zoneEntity = null;
+        }
         this.drawZone();
     }
 
@@ -133,13 +135,12 @@ export class Zone {
      */
     cardInZone(card) {
         if (!card) return false;
-        if (!this.zoneMarker1 || !this.zoneMarker2) return false;
 
         const isCardInZone = this.isInZone(card.getMarkerPosition().x, card.getMarkerPosition().y);
         if (isCardInZone) {
-            this.addFoundCard();
+            this.addFoundCard(card);
         } else {
-            this.removeCardFromZoneFound();
+            this.removeCardFromZoneFound(card);
         }
 
         return isCardInZone;
