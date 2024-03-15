@@ -58,9 +58,6 @@ export class Zone {
 
     drawZone() {
         if (this.zoneMarker1 && this.zoneMarker2) {
-            if (this.zoneEntity) {
-                this.zoneEntity.remove();
-            }
             this.setTotalZonePosition();
 
             this.zoneWidth = Math.abs(this.maxX - this.minX);
@@ -68,30 +65,30 @@ export class Zone {
 
             const midpoint = new THREE.Vector3(
                 this.minX + this.zoneWidth / 2,
-                this.minY + this.zoneHeight / 2, // Assuming y position is constant, adjust if necessary
+                this.minY + this.zoneHeight / 2,
                 this.zoneMarker1.getMarkerPosition().z
             );
-
-            this.zoneEntity = document.createElement('a-entity');
+            if (!this.zoneEntity) {
+                this.zoneEntity = document.createElement('a-entity');
+                this.zoneEntity.setAttribute('material', {
+                    color: this.color,
+                    side: 'double',
+                    transparent: true,
+                    opacity: 0.5
+                });
+                this.zoneEntity.zone = this;
+                this.zoneEntity.setAttribute('id', 'zoneRectangle_' + this.name);
+                this.scene.appendChild(this.zoneEntity);
+            }
             this.zoneEntity.setAttribute('geometry', {
                 primitive: 'plane',
                 width: this.zoneWidth,
                 height: this.zoneHeight
             });
-            this.zoneEntity.setAttribute('material', {
-                color: this.color,
-                side: 'double',
-                transparent: true,
-                opacity: 0.5
-            });
-
-            // Set the position to the midpoint between markers
             this.zoneEntity.object3D.position.copy(midpoint);
-            this.zoneEntity.setAttribute('id', 'zoneRectangle_' + this.name);
-
-            this.zoneEntity.zone = this;
-
-            this.scene.appendChild(this.zoneEntity);
+        } else if (this.zoneEntity) {
+            this.zoneEntity.remove();
+            this.zoneEntity = null;
         }
     }
 
@@ -112,14 +109,6 @@ export class Zone {
             console.log('Removed zone');
             this.redrawZoneDisable();
         }
-    }
-
-    refreshZone() {
-        if (this.zoneEntity) {
-            this.zoneEntity.remove();
-            this.zoneEntity = null;
-        }
-        this.drawZone();
     }
 
     getZone() {
@@ -213,7 +202,7 @@ export class Zone {
                     this.lastZoneMarker2Position = new THREE.Vector3().copy(
                         currentZoneMarker2Position
                     );
-                    this.refreshZone();
+                    this.drawZone();
                 }
             }
             this.redrawTimeout = setTimeout(() => this.#redrawZone(), 100);
