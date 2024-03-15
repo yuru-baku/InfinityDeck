@@ -63,20 +63,20 @@ export class Zone {
             }
             this.setTotalZonePosition();
 
-            const width = Math.abs(this.maxX - this.minX);
-            const height = Math.abs(this.maxY - this.minY);
+            this.zoneWidth = Math.abs(this.maxX - this.minX);
+            this.zoneHeight = Math.abs(this.maxY - this.minY);
 
             const midpoint = new THREE.Vector3(
-                this.minX + width / 2,
-                this.minY + height / 2, // Assuming y position is constant, adjust if necessary
+                this.minX + this.zoneWidth / 2,
+                this.minY + this.zoneHeight / 2, // Assuming y position is constant, adjust if necessary
                 this.zoneMarker1.getMarkerPosition().z
             );
 
             this.zoneEntity = document.createElement('a-entity');
             this.zoneEntity.setAttribute('geometry', {
                 primitive: 'plane',
-                width: width,
-                height: height
+                width: this.zoneWidth,
+                height: this.zoneHeight
             });
             this.zoneEntity.setAttribute('material', {
                 color: this.color,

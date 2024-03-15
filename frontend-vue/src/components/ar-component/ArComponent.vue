@@ -64,7 +64,7 @@ props.conService.onConnection(() => {
                 var sceneEl = document.querySelector('a-scene');
 
                 hideZone = new Zone(124, 125, sceneEl, 'hide');
-                shareZone = new ShareZone(126, 127, sceneEl, 'share');
+                shareZone = new ShareZone(126, 127, sceneEl, 'share', props.cardService.cardBack);
 
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
                 document.querySelector('a-scene').addEventListener('click', (event) => {
@@ -113,6 +113,7 @@ props.conService.onConnection(() => {
                                 shareZone.cardInZone(foundCard) &&
                                 foundCard != shareZone.lastFoundCard
                             ) {
+                                shareZone.setLastFoundCard(foundCard);
                                 props.cardService.shareLocal(foundCard.id);
                             }
                         }
