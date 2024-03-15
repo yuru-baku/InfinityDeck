@@ -109,12 +109,12 @@ props.conService.onConnection(() => {
                             foundCard.showCardImage();
                             card.turnCardOnBack();
                         } else if (props.cardService.markerMapContainsId(foundCard.id)) {
-                            if (
-                                shareZone.cardInZone(foundCard) &&
-                                foundCard != shareZone.lastFoundCard
-                            ) {
-                                shareZone.setLastFoundCard(foundCard);
-                                props.cardService.shareLocal(foundCard.id);
+                            if (shareZone.cardInZone(foundCard)) {
+                                foundCard.hideCardImage();
+                                if (foundCard != shareZone.lastFoundCard) {
+                                    shareZone.setLastFoundCard(foundCard);
+                                    props.cardService.shareLocal(foundCard.id);
+                                }
                             }
                         }
 
