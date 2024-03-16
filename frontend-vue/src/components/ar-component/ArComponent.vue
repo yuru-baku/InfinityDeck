@@ -37,6 +37,20 @@ window.addEventListener(
     },
     { signal: resizeController.signal }
 );
+
+//Buttons
+const toggleHand = () => {
+    handDisplay.toggleDisplay();
+    console.log('toggled hand');
+};
+const changeSettings = (a, b) => {
+    console.log('settings changed');
+};
+defineExpose({
+    toggleHand,
+    changeSettings
+});
+
 AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
 // AFRAME.AScene.removeFullScreenStyles();
 /**

@@ -6,9 +6,21 @@ import { ref, onUnmounted } from 'vue';
 
 var showMenu = ref(false);
 var showUsers = ref(false);
+var showSettings = ref(false);
+let settingA = ref<number | null>(null);
+let settingB = ref<number | null>(null);
 
 let conService = new ConnectionService();
 let cardService = new CardService(conService);
+
+const arComponentViewRef = ref();
+
+function toggleHand() {
+    arComponentViewRef.value.toggleHand();
+}
+function submitSettings() {
+    arComponentViewRef.value.changeSettings(settingA, settingB);
+}
 
 onUnmounted(() => {
     conService.killConnection();
@@ -16,7 +28,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <ArComponent :card-service="cardService" :con-service="conService"></ArComponent>
+    <ArComponent
+        ref="arComponentViewRef"
+        :card-service="cardService"
+        :con-service="conService"
+    ></ArComponent>
     <div class="game-overlay">
         <div id="fixed-overlay-content">
             <div class="quick-info-container">
@@ -46,8 +62,23 @@ onUnmounted(() => {
                     <button type="button" @click="$router.go(-1)" v-if="showMenu">
                         <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" />
                     </button>
+                    <button type="button" @click="toggleHand" v-if="showMenu">
+                        <font-awesome-icon :icon="['fas', 'hand']" />
+                    </button>
+                    <button type="button" @click="showSettings = !showSettings" v-if="showMenu">
+                        <font-awesome-icon :icon="['fas', 'gear']" />
+                    </button>
                 </div>
             </div>
+        </div>
+        <div class="number-input" v-if="showSettings && showMenu">
+            <input type="number" v-model="settingA" />
+            <br />
+            <input type="number" v-model="settingB" />
+            <br />
+            <button @click="submitSettings">
+                <font-awesome-icon :icon="['fas', 'hammer']" />
+            </button>
         </div>
     </div>
 </template>
@@ -114,6 +145,18 @@ onUnmounted(() => {
                 margin-top: auto;
             }
         }
+    }
+    input {
+        aspect-ratio: 8;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        filter: none;
+        padding: 0;
+        margin: 0;
+        margin-top: 10px;
+        display: block;
+        font-size: 16px;
     }
 }
 
