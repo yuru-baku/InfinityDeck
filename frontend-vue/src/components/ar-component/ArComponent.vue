@@ -37,26 +37,50 @@ window.addEventListener(
     },
     { signal: resizeController.signal }
 );
-
 //Buttons
 const toggleHand = () => {
     handDisplay.toggleDisplay();
     console.log('toggled hand');
 };
-const changeSettings = (a, b) => {
-    console.log('settings changed');
+const setHandSpacing = (spacing) => {
+    console.log('hand spacing set to ', spacing, '%');
+};
+const setCardSize = (size) => {
+    var baseScaleX = 6.4 / 5;
+    var baseScaleY = 8.9 / 5;
+    if (size.value) {
+        for (const card of cardmarkers) {
+            card.imageElement.object3D.scale.set(
+                baseScaleX * (size.value / 100),
+                baseScaleY * (size.value / 100),
+                1
+            );
+        }
+    } else {
+        for (const card of cardmarkers) {
+            card.imageElement.object3D.scale.set(baseScaleX, baseScaleY, 1);
+        }
+    }
+
+    console.log('set card size to ', size, '%');
 };
 defineExpose({
     toggleHand,
-    changeSettings
+    setHandSpacing,
+    setCardSize
 });
 
+//start
+
 AFRAME.scenes.forEach((scene) => scene.removeFullScreenStyles());
-// AFRAME.AScene.removeFullScreenStyles();
 /**
  * @type {CardMarker[]}
  */
 var foundCardMarkers = [];
+/**
+ * @type {CardMarker[]}
+ */
+var cardmarkers = [];
 /**
  * @type {Zone}
  */
@@ -92,7 +116,6 @@ props.conService.onConnection(() => {
                     }
                 });
                 generateMarkers(sceneEl);
-                //handDisplay.enabled = true;
             }
         });
     }
@@ -187,6 +210,7 @@ function generateMarkers(sceneEl) {
         if (debug) {
             card.toggleDebugNumber();
         }
+        cardmarkers.push(card);
     }
 }
 
@@ -262,7 +286,7 @@ onUnmounted(() => {
             xr-mode-ui="enabled: false"
             color-space="sRGB"
             renderer="gammaOutput: true"
-            arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 5x5_BCH_22_7_7; debugUIEnabled: false; sourceWidth: 1280; sourceHeight: 720;"
+            arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 5x5_BCH_22_7_7; debugUIEnabled: false; sourceWidth:1920; sourceHeight:1080;"
         >
             <a-entity id="userCamera" camera> </a-entity>
         </a-scene>
