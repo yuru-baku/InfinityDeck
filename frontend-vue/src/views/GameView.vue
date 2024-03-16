@@ -59,14 +59,15 @@ onUnmounted(() => {
                         <font-awesome-icon :icon="['fas', 'dice-d20']" />
                     </button>
                     <div class="spacer" v-if="showMenu"></div>
-                    <button type="button" @click="$router.go(-1)" v-if="showMenu">
-                        <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" />
-                    </button>
+
                     <button type="button" @click="toggleHand" v-if="showMenu">
                         <font-awesome-icon :icon="['fas', 'hand']" />
                     </button>
                     <button type="button" @click="showSettings = !showSettings" v-if="showMenu">
                         <font-awesome-icon :icon="['fas', 'gear']" />
+                    </button>
+                    <button type="button" @click="$router.go(-1)" v-if="showMenu">
+                        <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" />
                     </button>
                 </div>
             </div>
@@ -114,37 +115,6 @@ onUnmounted(() => {
             display: flex;
             flex-direction: row;
         }
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            // gap: 1rem;
-            .spacer {
-                flex-grow: 2;
-                height: 100%;
-            }
-        }
-
-        button {
-            aspect-ratio: 1;
-            justify-content: center;
-            align-items: center;
-            border: none;
-            background-color: rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            filter: none;
-            padding: 0;
-            margin: 0;
-            svg {
-                padding: 8px;
-                font-size: 32px;
-                width: 32px;
-                height: 32px;
-            }
-            &:last-child:not(:first-child) {
-                margin-top: auto;
-            }
-        }
     }
     input {
         aspect-ratio: 8;
@@ -157,6 +127,26 @@ onUnmounted(() => {
         margin-top: 10px;
         display: block;
         font-size: 16px;
+    }
+    button {
+        aspect-ratio: 1;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        filter: none;
+        padding: 0;
+        margin: 0;
+        svg {
+            padding: 8px;
+            font-size: 32px;
+            width: 32px;
+            height: 32px;
+        }
+        &:last-child:not(:first-child) {
+            margin-top: auto;
+        }
     }
 }
 
