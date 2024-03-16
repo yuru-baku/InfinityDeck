@@ -43,6 +43,11 @@ const toggleHand = () => {
     console.log('toggled hand');
 };
 const setHandSpacing = (spacing) => {
+    if (spacing.value) {
+        handDisplay.setSpacing(spacing.value / 100);
+    } else {
+        handDisplay.setSpacing(0.2);
+    }
     console.log('hand spacing set to ', spacing, '%');
 };
 const setCardSize = (size) => {

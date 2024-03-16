@@ -7,7 +7,7 @@ export class CardDisplay {
      * @param {number} [centerX=0] - The starting x-coordinate.
      * @param {number} [startY=-0.4] - The starting y-coordinate.
      * @param {Object} [scale={ x: 0.3 * 0.64, y: 0.3, z: 1 }] - The scale of the image elements.
-     * @param {number} [cardSpacing=0.04] - The spacing between cards.
+     * @param {number} [cardSpacing=0.2] - The spacing between cards.
      */
     constructor(
         name,
@@ -29,6 +29,13 @@ export class CardDisplay {
         this.scale = scale;
         this.cardSpacing = cardSpacing;
         this.enabled = false;
+    }
+
+    setSpacing(spacing) {
+        this.cardSpacing = spacing;
+        if (this.enabled) {
+            this.refreshDisplay();
+        }
     }
 
     toggleDisplay() {

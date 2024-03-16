@@ -20,7 +20,7 @@ function toggleHand() {
     arComponentViewRef.value.toggleHand();
 }
 function setHandSpacing() {
-    arComponentViewRef.value.setCardSize(handSpacing);
+    arComponentViewRef.value.setHandSpacing(handSpacing);
 }
 function setCardSize() {
     arComponentViewRef.value.setCardSize(cardSize);
