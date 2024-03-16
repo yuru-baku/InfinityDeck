@@ -6,9 +6,28 @@ import { ref, onUnmounted } from 'vue';
 
 var showMenu = ref(false);
 var showUsers = ref(false);
+var showSettings = ref(false);
+let handSpacing = ref<number | null>(null);
+let cardSize = ref<number | null>(null);
+let resolution = ref();
 
 let conService = new ConnectionService();
 let cardService = new CardService(conService);
+
+const arComponentViewRef = ref();
+
+function toggleHand() {
+    arComponentViewRef.value.toggleHand();
+}
+function setHandSpacing() {
+    arComponentViewRef.value.setHandSpacing(handSpacing);
+}
+function setCardSize() {
+    arComponentViewRef.value.setCardSize(cardSize);
+}
+function setResolution(){
+    arComponentViewRef.value.setResolution(resolution);
+}
 
 onUnmounted(() => {
     conService.killConnection();
@@ -16,7 +35,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <ArComponent :card-service="cardService" :con-service="conService"></ArComponent>
+    <ArComponent
+        ref="arComponentViewRef"
+        :card-service="cardService"
+        :con-service="conService"
+    ></ArComponent>
     <div class="game-overlay">
         <div id="fixed-overlay-content">
             <div class="quick-info-container">
@@ -30,24 +53,43 @@ onUnmounted(() => {
             </div>
             <div class="preAndButtonsRow">
                 <div class="buttons">
-                    <button type="button" @click="showMenu = !showMenu">
-                        <font-awesome-icon :icon="['fas', 'bars']" />
+                    
+                    <button type="button" @click="toggleHand" v-if="showMenu">
+                        <font-awesome-icon :icon="['fas', 'hand']" />
                     </button>
                     <button type="button" @click="showUsers = !showUsers" v-if="showMenu">
                         <font-awesome-icon :icon="['fas', 'users']" />
                     </button>
-                    <button type="button" v-if="showMenu">
-                        <font-awesome-icon :icon="['fas', 'comments']" />
-                    </button>
-                    <button type="button" v-if="showMenu">
-                        <font-awesome-icon :icon="['fas', 'dice-d20']" />
+                    <button type="button" @click="showMenu = !showMenu">
+                        <font-awesome-icon :icon="['fas', 'bars']" />
                     </button>
                     <div class="spacer" v-if="showMenu"></div>
+
+                    
+                    <button type="button" @click="showSettings = !showSettings" v-if="showMenu">
+                        <font-awesome-icon :icon="['fas', 'gear']" />
+                    </button>
                     <button type="button" @click="$router.go(-1)" v-if="showMenu">
                         <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" />
                     </button>
                 </div>
             </div>
+        </div>
+        <div id="number-input" v-if="showSettings && showMenu"> 
+            <p> 
+                <button class="settingsButton" @click="setCardSize">
+                    <font-awesome-icon :icon="['fas', 'check']" />
+                </button>
+                <input type="number" v-model="cardSize" placeholder=100 ></input>
+                card size
+            </p>
+            <p> 
+                <button class="settingsButton" @click="setHandSpacing">
+                    <font-awesome-icon :icon="['fas', 'check']" />
+                </button>
+                <input type="number" v-model="handSpacing" placeholder=20></input>
+                hand card spacing
+            </p>
         </div>
     </div>
 </template>
@@ -83,27 +125,16 @@ onUnmounted(() => {
             display: flex;
             flex-direction: row;
         }
-        .buttons {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            // gap: 1rem;
-            .spacer {
-                flex-grow: 2;
-                height: 100%;
-            }
-        }
-
         button {
-            aspect-ratio: 1;
-            justify-content: center;
-            align-items: center;
-            border: none;
-            background-color: rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            filter: none;
-            padding: 0;
-            margin: 0;
+        aspect-ratio: 1;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        filter: none;
+        padding: 0;
+        margin: 0;
             svg {
                 padding: 8px;
                 font-size: 32px;
@@ -115,6 +146,47 @@ onUnmounted(() => {
             }
         }
     }
+    #number-input {
+        input,
+        select{
+            aspect-ratio: 8;
+            border: none;
+            background-color: rgba(200, 200, 200, 0.5);
+            padding: 0;
+            margin: 0;            
+            font-size: 16px;
+            margin-top: 0%;
+            float: right;
+
+        }
+        p {
+        }
+        input {
+            width: 20%;
+            border: 1px inset #ccc;
+            }
+        select {
+            width: 45%;
+        }
+        button {
+        border: none;
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 0;
+        margin: 0;
+        float: right;
+
+        cursor: pointer;
+            svg {
+                padding: 3px;
+                font-size: 13px;
+                width: 13px;
+                height: 13px;
+            }
+        margin-left: 2%;
+        }
+    }
+    
+    
 }
 
 body {
@@ -122,12 +194,6 @@ body {
 }
 
 video {
-    // position: absolute;
-    // left: 0;
-    // top: 0;
-    // width: 100% !important;
-    // height: 100% !important;
-    // margin: 0 !important;
     border-radius: 0;
     object-fit: cover;
 }
