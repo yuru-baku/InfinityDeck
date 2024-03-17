@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue';
-import { useCookies } from '@vueuse/integrations/useCookies';
 import startButton from '@/components/startButton.vue';
 import { ConnectionService } from '@/services/ConnectionService';
+import { useCookies } from '@vueuse/integrations/useCookies';
+import { onUnmounted, ref } from 'vue';
 
 const conService = new ConnectionService(false);
 const cookies = useCookies(['username']);
