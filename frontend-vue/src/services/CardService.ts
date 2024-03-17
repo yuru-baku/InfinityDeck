@@ -16,7 +16,7 @@ export class CardService {
 
     constructor(conService: ConnectionService) {
         this.conSerivce = conService;
-        this.cardBack = 'url(./InfintyDeck/cardImages/french-suited-cards/card-back-blue.svg)';
+        this.cardBack = 'url(./infinityDeck/cardImages/french-suited-cards/card-back-blue.svg)';
         this.numberOfCards = 0;
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
