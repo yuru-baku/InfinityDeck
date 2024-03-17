@@ -1,5 +1,6 @@
 import { Room, WsMessage } from './room';
 import { User } from './user';
+import { Card } from './card';
 
 export abstract class Game {
     abstract deck: string[]; // All cards of this deck
@@ -71,29 +72,44 @@ export abstract class Game {
 
     drawCard(user: User, message: WsMessage) {
         const markerId = message.data.markerId;
-        let card = user.markerMap.get(markerId);
+        let card = user.markerMap.get(markerId)
         // check if this card is already known
         if (!card) {
             // check if we need to shuffle deck
             if (this.drawPile.length <= 0) {
                 this.shuffleDrawPile();
             }
-            card = this.drawPile.pop()!;
-            this.room.addDataToMarker(markerId, card, user);
+            let cardFace = this.drawPile.pop()!;
+
+            card = {
+                cardFace: cardFace,
+                lastSeen: message.data.lastSeen,
+                found: true,
+                url: undefined,
+                zone: undefined
+            }
+            if (this.room.isLocal) {
+                for (let user of this.room.users) {
+                    user.markerMap.set(markerId, card);
+                }
+            } else {
+                user.markerMap.set(markerId, card);
+            }
         }
-        this.room.sendMessageToUsers('drawCard', { card: card, markerId: markerId });
+        this.room.sendMessageToUsers('drawCard', {
+            card: card,
+            markerId: markerId
+        });
         // it might happen that we draw a card again, since we can shuffle
-        this.history.unshift(`+${user.id}:${card}`);
+        this.history.unshift(`+${user.id}:${card?.cardFace}`);
     }
 
-    playCard(user: User, message: WsMessage) {
-        // check if user has this card in his hand
-        let card = message.data.card;
-        this.playedCards.push(card);
-        this.room.sendMessageToUsers('playedCard', { card: card });
-        this.history.unshift(`-${user.id}:${card}`);
-    }
-
+    /**
+     * There are three reasons why we need to shuffle:
+     *  1. there are no free markers anymore
+     *  2. the drawPile is empty
+     *  3. triggered manually
+     */
     shuffleDrawPile() {
         this.drawPile = this.drawPile.concat(this.playedCards);
         this.drawPile = this.shuffleArray(this.drawPile);
@@ -103,7 +119,7 @@ export abstract class Game {
         this.history.unshift('shuffle');
     }
 
-    shuffleArray(array: any[]) {
+    private shuffleArray(array: any[]) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             const tmp = array[i];

@@ -1,4 +1,5 @@
 export class InfinityMarker {
+
     constructor(sceneEl, barcodeValue, id) {
         this.sceneElement = sceneEl;
         this.barcodeValue = barcodeValue;
@@ -29,7 +30,7 @@ export class InfinityMarker {
             value: this.id,
             width: '5.5'
         });
-        this.textElement.object3D.position.set(0, 0.7, 0);
+        this.textElement.object3D.position.set(0, 0.01, 0);
         this.textElement.object3D.rotation.set(-90, 0, 0);
 
         this.markerElement.appendChild(this.textElement);

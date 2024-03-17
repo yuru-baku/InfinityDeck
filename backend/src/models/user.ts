@@ -7,7 +7,7 @@ export class User {
     name: string;
     isOwner: boolean;
     timeout: NodeJS.Timeout | undefined;
-    markerMap: Map<string, any>;
+    markerMap: Map<string, Card>;
     private cards: Card[];
     private sharedCard?: Card;
 
@@ -47,5 +47,31 @@ export class User {
         }
         this.cards = cards;
         return isSharedUpdated;
+    }
+
+
+
+
+
+    /**
+     * Returns all attributes that are visible for alle players.
+     * @returns 
+     */
+    getPublicInformations(): { name: string; isOwner: boolean; id: string; disconnected: boolean } {
+        return {
+            name: this.name,
+            isOwner: this.isOwner,
+            id: this.id,
+            disconnected: this.timeout !== undefined
+        };
+    }
+    
+    getPrivateInformations(): { name: string; isOwner: boolean; id: string; markerMap: any } {
+        return {
+            name: this.name,
+            isOwner: this.isOwner,
+            id: this.id,
+            markerMap: Object.fromEntries(this.markerMap.entries())
+        };
     }
 }

@@ -73,22 +73,7 @@ async function main() {
             user = new User(ws, undefined, name);
             room.join(user);
         }
-        ws.send(
-            JSON.stringify({
-                action: 'connected',
-                data: {
-                    roomId: room.id,
-                    users: room.getUserInformations(),
-                    you: {
-                        name: name,
-                        id: user.id,
-                        isOwner: user.isOwner
-                    },
-                    state: room.getState(),
-                    selectedGame: room.selectedGame
-                }
-            })
-        );
+        room.sendRoomInfo(user, 'connected');
 
         ws.on('error', console.error);
         ws.on('close', (data) => {

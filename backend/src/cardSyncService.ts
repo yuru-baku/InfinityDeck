@@ -1,10 +1,10 @@
-import { WebSocket as Socket } from 'ws';
 import { setInterval, clearInterval } from 'timers';
-import { AllCards, Card, UserCards } from './models/card';
+import { AllCards, Card } from './models/card';
 import { Room } from './models/room';
 import { User } from './models/user';
 
 export class CardSyncService {
+    private sharedCard?: Card;
     private room: Room;
     private intervalId?: NodeJS.Timeout;
     private period: number;
@@ -53,7 +53,10 @@ export class CardSyncService {
     }
 
     sendAllCards(): void {
-        const allCards: AllCards = { sharedCard: this.sharedCard, userCards: this.userCards };
+        const allCards: AllCards = {
+            sharedCard: this.sharedCard,
+            userCards: this.room.users.map(user => user.getCards())
+        };
         this.room.sendMessageToUsers('allCards', allCards);
     }
 
@@ -64,37 +67,14 @@ export class CardSyncService {
         }
     }
 
-    //Controlling the user cards
-    //------------------------------------------------
-    //
     updateUserCards(user: User, cards: Card[]) {
         console.debug('update userCards');
-        this.userCards[this.find(user)].cards = cards; //my view on the cards
         let isSharedUpdated: boolean = user.updateCards(cards); //update in user
         //update the shared card is needed
         if (isSharedUpdated) {
             this.sharedCard = user.getShared();
             console.debug('New shared card', this.sharedCard);
         }
-        console.debug(this.userCards);
+        console.debug(this.room.users.map(user => user.getCards()));
     }
-
-    /**
-     * Finds the userCards of a given user. May create the entry if needed
-     * @param user which cards are searched
-     * @returns index of the users cardss
-     */
-    private find(user: User): number {
-        for (let i = 0; i < this.userCards.length; ++i) {
-            if (this.userCards[i].userId == user.id) {
-                return i;
-            }
-        }
-        this.userCards.push({ userId: user.id, cards: [] });
-        return this.userCards.length - 1;
-    }
-
-    //We have very few users. So an array is fine to use here.
-    private userCards: UserCards[] = [];
-    private sharedCard?: Card;
 }
