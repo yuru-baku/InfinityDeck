@@ -6,7 +6,7 @@ import { onUnmounted, ref } from 'vue';
 
 var showMenu = ref(false);
 var showUsers = ref(false);
-var showSettings = ref(false);
+var showHand = ref(false);
 let handSpacing = ref<number | null>(null);
 let cardSize = ref<number | null>(null);
 let resolution = ref();
@@ -17,6 +17,7 @@ let cardService = new CardService(conService);
 const arComponentViewRef = ref();
 
 function toggleHand(): void {
+    showHand.value = !showHand.value;
     arComponentViewRef.value.toggleHand();
 }
 function setHandSpacing(): void {
@@ -80,17 +81,31 @@ onUnmounted(() => {
             </div>
         </div>
         <div class="buttons">
-            <button type="button" @click="showMenu = !showMenu">
+            <button
+                type="button"
+                @click="showMenu = !showMenu"
+                :class="showMenu ? 'active' : 'non-active'"
+            >
                 <font-awesome-icon :icon="['fas', 'bars']" />
             </button>
-            <button type="button" @click="toggleHand" v-if="showMenu">
+            <button
+                type="button"
+                @click="toggleHand"
+                v-if="showMenu"
+                :class="showHand ? 'active' : 'non-active'"
+            >
                 <font-awesome-icon :icon="['fas', 'hand']" />
             </button>
-            <button type="button" @click="showUsers = !showUsers" v-if="showMenu">
+            <button
+                type="button"
+                @click="showUsers = !showUsers"
+                v-if="showMenu"
+                :class="showUsers ? 'active' : 'non-active'"
+            >
                 <font-awesome-icon :icon="['fas', 'users']" />
             </button>
             <button type="button" @click="$router.go(-1)" v-if="showMenu">
-                <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" />
+                <font-awesome-icon :icon="['fas', 'door-open']" />
             </button>
         </div>
     </div>
@@ -139,13 +154,14 @@ onUnmounted(() => {
                 flex-direction: column;
                 margin: 0;
                 padding: 0;
-                gap: 0.3rem;
+                gap: 0.2rem;
                 label {
                     margin: 0;
                     padding: 0;
                     border-radius: 0;
                 }
                 input {
+                    width: 100%;
                     border-radius: 8px;
                     padding: 0;
                     margin: 0;
@@ -164,7 +180,6 @@ onUnmounted(() => {
             justify-content: center;
             align-items: center;
             border: none;
-            background-color: rgba(255, 255, 255, 0.8);
             padding: 0;
             svg {
                 padding: 8px;
@@ -173,6 +188,16 @@ onUnmounted(() => {
                 height: 32px;
             }
         }
+    }
+
+    button:active,
+    buttoon:hover,
+    .active {
+        background-color: #acaeb3;
+    }
+
+    non-active {
+        background-color: #fff;
     }
 }
 
