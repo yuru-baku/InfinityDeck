@@ -2,7 +2,7 @@
 import ArComponent from '@/components/ar-component/ArComponent.vue';
 import { CardService } from '@/services/CardService';
 import { ConnectionService } from '@/services/ConnectionService';
-import { ref, onUnmounted } from 'vue';
+import { onUnmounted, ref } from 'vue';
 
 var showMenu = ref(false);
 var showUsers = ref(false);
@@ -16,16 +16,16 @@ let cardService = new CardService(conService);
 
 const arComponentViewRef = ref();
 
-function toggleHand() {
+function toggleHand(): void {
     arComponentViewRef.value.toggleHand();
 }
-function setHandSpacing() {
+function setHandSpacing(): void {
     arComponentViewRef.value.setHandSpacing(handSpacing);
 }
-function setCardSize() {
+function setCardSize(): void {
     arComponentViewRef.value.setCardSize(cardSize);
 }
-function setResolution(){
+function setResolution(): void {
     arComponentViewRef.value.setResolution(resolution);
 }
 
@@ -41,7 +41,7 @@ onUnmounted(() => {
         :con-service="conService"
     ></ArComponent>
     <div class="game-overlay">
-        <div id="fixed-overlay-content">
+        <div id="left-container">
             <div class="quick-info-container">
                 <h1 class="game-title">{{ conService.room.value?.selectedGame }}</h1>
                 <p class="quick-info" v-if="conService.room.value?.id">
@@ -51,45 +51,47 @@ onUnmounted(() => {
                     Player: {{ conService.you.value.name }}
                 </p>
             </div>
-            <div class="preAndButtonsRow">
-                <div class="buttons">
-                    
-                    <button type="button" @click="toggleHand" v-if="showMenu">
-                        <font-awesome-icon :icon="['fas', 'hand']" />
-                    </button>
-                    <button type="button" @click="showUsers = !showUsers" v-if="showMenu">
-                        <font-awesome-icon :icon="['fas', 'users']" />
-                    </button>
-                    <button type="button" @click="showMenu = !showMenu">
-                        <font-awesome-icon :icon="['fas', 'bars']" />
-                    </button>
-                    <div class="spacer" v-if="showMenu"></div>
 
-                    
-                    <button type="button" @click="showSettings = !showSettings" v-if="showMenu">
-                        <font-awesome-icon :icon="['fas', 'gear']" />
-                    </button>
-                    <button type="button" @click="$router.go(-1)" v-if="showMenu">
-                        <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" />
-                    </button>
+            <div id="settings" v-if="showMenu">
+                <div class="number-input">
+                    <label for="cardSize">card size</label>
+                    <input
+                        @change="setCardSize"
+                        type="range"
+                        id="cardSize"
+                        v-model="cardSize"
+                        min="30"
+                        max="200"
+                        defaultValue="100"
+                    />
+                </div>
+                <div class="number-input">
+                    <label for="cardSpacing">hand card spacing</label>
+                    <input
+                        @change="setHandSpacing"
+                        type="range"
+                        id="cardSpacing"
+                        v-model="handSpacing"
+                        min="30"
+                        max="200"
+                        defaultValue="20"
+                    />
                 </div>
             </div>
         </div>
-        <div id="number-input" v-if="showSettings && showMenu"> 
-            <p> 
-                <button class="settingsButton" @click="setCardSize">
-                    <font-awesome-icon :icon="['fas', 'check']" />
-                </button>
-                <input type="number" v-model="cardSize" placeholder=100 ></input>
-                card size
-            </p>
-            <p> 
-                <button class="settingsButton" @click="setHandSpacing">
-                    <font-awesome-icon :icon="['fas', 'check']" />
-                </button>
-                <input type="number" v-model="handSpacing" placeholder=20></input>
-                hand card spacing
-            </p>
+        <div class="buttons">
+            <button type="button" @click="showMenu = !showMenu">
+                <font-awesome-icon :icon="['fas', 'bars']" />
+            </button>
+            <button type="button" @click="toggleHand" v-if="showMenu">
+                <font-awesome-icon :icon="['fas', 'hand']" />
+            </button>
+            <button type="button" @click="showUsers = !showUsers" v-if="showMenu">
+                <font-awesome-icon :icon="['fas', 'users']" />
+            </button>
+            <button type="button" @click="$router.go(-1)" v-if="showMenu">
+                <font-awesome-icon :icon="['fas', 'arrow-right-to-bracket']" />
+            </button>
         </div>
     </div>
 </template>
@@ -105,88 +107,73 @@ onUnmounted(() => {
     max-height: 98vh;
     height: auto;
     width: auto;
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 0.9);
     padding: 8pt;
     overflow: auto;
+    justify-content: end;
 
-    #fixed-overlay-content {
-        display: grid;
-        grid-template-columns: auto auto;
-        height: 100%;
-        align-items: start;
+    display: flex;
+    flex-direction: row;
 
-        .game-title,
-        .quick-info {
-            padding: 0 auto;
-            margin: 0 auto;
+    #left-container {
+        font-size: 12pt;
+        display: flex;
+        flex-direction: column;
+        .quick-info-container {
+            justify-items: right;
+            .game-title,
+            .quick-info {
+                padding: 0 auto;
+                margin: 0 auto;
+            }
         }
-        .preAndButtonsRow {
-            height: 100%;
+
+        #settings {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
+            width: 100%;
+            gap: 0.8rem;
+            .number-input {
+                border-radius: 0;
+                display: flex;
+                flex-direction: column;
+                margin: 0;
+                padding: 0;
+                gap: 0.3rem;
+                label {
+                    margin: 0;
+                    padding: 0;
+                    border-radius: 0;
+                }
+                input {
+                    border-radius: 8px;
+                    padding: 0;
+                    margin: 0;
+                }
+            }
         }
+    }
+
+    .buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
         button {
-        aspect-ratio: 1;
-        justify-content: center;
-        align-items: center;
-        border: none;
-        background-color: rgba(255, 255, 255, 0.2);
-        cursor: pointer;
-        filter: none;
-        padding: 0;
-        margin: 0;
+            aspect-ratio: 1;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0;
             svg {
                 padding: 8px;
                 font-size: 32px;
                 width: 32px;
                 height: 32px;
             }
-            &:last-child:not(:first-child) {
-                margin-top: auto;
-            }
         }
     }
-    #number-input {
-        input,
-        select{
-            aspect-ratio: 8;
-            border: none;
-            background-color: rgba(200, 200, 200, 0.5);
-            padding: 0;
-            margin: 0;            
-            font-size: 16px;
-            margin-top: 0%;
-            float: right;
-
-        }
-        p {
-        }
-        input {
-            width: 20%;
-            border: 1px inset #ccc;
-            }
-        select {
-            width: 45%;
-        }
-        button {
-        border: none;
-        background-color: rgba(255, 255, 255, 0.2);
-        padding: 0;
-        margin: 0;
-        float: right;
-
-        cursor: pointer;
-            svg {
-                padding: 3px;
-                font-size: 13px;
-                width: 13px;
-                height: 13px;
-            }
-        margin-left: 2%;
-        }
-    }
-    
-    
 }
 
 body {
@@ -197,9 +184,11 @@ video {
     border-radius: 0;
     object-fit: cover;
 }
+
 .a-canvas {
     position: fixed !important;
 }
+
 html.a-fullscreen .a-canvas {
     width: auto !important;
     height: auto !important;
