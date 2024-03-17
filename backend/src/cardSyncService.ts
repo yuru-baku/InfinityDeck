@@ -55,7 +55,7 @@ export class CardSyncService {
     sendAllCards(): void {
         const allCards: AllCards = {
             sharedCard: this.sharedCard,
-            userCards: this.room.users.map(user => user.getCards())
+            userCards: this.room.users.map(user => user.getUserCards())
         };
         this.room.sendMessageToUsers('allCards', allCards);
     }
@@ -76,5 +76,9 @@ export class CardSyncService {
             console.debug('New shared card', this.sharedCard);
         }
         console.debug(this.room.users.map(user => user.getCards()));
+    }
+
+    getSharedCard(): Card | undefined {
+        return this.sharedCard;
     }
 }

@@ -155,7 +155,7 @@ export class Room {
         this.sendMessageToUsers(
             actionName,
             {
-                you: { name: user.name, isOwner: user.isOwner, id: user.id },
+                you: user.getPrivateInformations(),
                 room: {
                     isLocal: this.isLocal,
                     selectedGame: this.selectedGame,

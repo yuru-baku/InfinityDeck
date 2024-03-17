@@ -24,7 +24,7 @@ export class User {
             this.name = 'name_' + (Math.random() + 1).toString(36).substring(7);
         }
         this.isOwner = false;
-        this.markerMap = new Map();
+        this.markerMap = new Map<string, Card>();
         this.cards = [];
     }
 
@@ -32,8 +32,12 @@ export class User {
         return this.sharedCard;
     }
 
-    getCards(): UserCards {
+    getUserCards(): UserCards {
         return { userId: this.id, cards: this.cards };
+    }
+
+    getCards(): Card[] {
+        return this.cards;
     }
 
     updateCards(cards: Card[]): boolean {
@@ -45,7 +49,15 @@ export class User {
         if (isSharedUpdated) {
             this.sharedCard = newShared;
         }
+        // update all usercards, also in markerMap
         this.cards = cards;
+        for (let [key, value] of this.markerMap.entries()) {
+            for (let card of cards) {
+                if (value.cardFace === card.cardFace) {
+                    this.markerMap.set(key, card);
+                }
+            }
+        }
         return isSharedUpdated;
     }
 
