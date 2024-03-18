@@ -131,11 +131,14 @@ export class ConnectionService {
                         this.room.value = message.data.room;
                         this.game.value = message.data.game;
                         this.you.value = message.data.you;
-                        if (message.data.state === 'inGame') {
+                        if (message.data.room.state === 'inGame') {
                             this.router.push(`/game?roomId=${message.data.room.id}`);
                         }
-                        if (message.data.state === 'inLobby') {
+                        if (message.data.room.state === 'inLobby') {
                             this.router.push(`/lobby?roomId=${message.data.room.id}`);
+                        }
+                        if (message.data.room.state === 'finished') {
+                            this.router.push(`/summary?roomId=${message.data.room.id}`);
                         }
                         this.connectionCallbacks.forEach((callback) => callback(message.data));
                         this.connectionCallbacks = [];

@@ -15,11 +15,12 @@ const lastGame: {
 const timesShuffled = lastGame.history.filter(el => el === 'shuffle').length;
 const cardsDrawen = lastGame.history.filter(el => el.startsWith('+')).length;
 const cardsPlayed = lastGame.history.filter(el => el.startsWith('>')).length;
-const timeDiff = Math.ceil((new Date(lastGame.endTime) - new Date(lastGame.startTiem)) / 1000); //in ms
+const timeDiff = Math.ceil((new Date(lastGame.endTime) - new Date(lastGame.startTime)) / 1000); //in ms
 console.log(lastGame, timeDiff)
 
 const navigate = () => {
-    const roomId = router.currentRoute.value.query.roomId || cookies.get('roomId');
+    let roomId = router.currentRoute.value.query.roomId || cookies.get('roomId');
+    roomId += '2';
     router.push(`/?roomId=${roomId}`)
 }
 </script>

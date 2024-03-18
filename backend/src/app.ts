@@ -77,10 +77,11 @@ async function main() {
 
         ws.on('error', console.error);
         ws.on('close', (data) => {
-            let userCount = room!.leave(user); // is he actually leaving?
-            // if (userCount <= 0) {
-            // rooms.delete(room.id);
-            // }
+            room!.leave(user).then(userCount => {
+                if (userCount <= 0) {
+                    rooms.delete(room!.id);
+                }
+            })
         });
     });
 
