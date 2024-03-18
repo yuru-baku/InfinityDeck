@@ -76,7 +76,7 @@ onUnmounted(() => {
                                 recommend you to print them on an A4-paper.
                             </p>
                         </div>
-                        <a href="/infinityDeck/markers.pdf" target="_blank" class="button"
+                        <a href="/InfinityDeck/markers.pdf" target="_blank" class="button"
                             >Print the Cards</a
                         >
                     </div>

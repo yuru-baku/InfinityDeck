@@ -1,10 +1,10 @@
 // vite.config.ts
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "file:///D:/Development/infinityDeck/frontend-vue/node_modules/vite/dist/node/index.js";
-import vue from "file:///D:/Development/infinityDeck/frontend-vue/node_modules/@vitejs/plugin-vue/dist/index.mjs";
-var __vite_injected_original_import_meta_url = "file:///D:/Development/infinityDeck/frontend-vue/vite.config.ts";
+import { defineConfig } from "file:///D:/Development/InfinityDeck/frontend-vue/node_modules/vite/dist/node/index.js";
+import vue from "file:///D:/Development/InfinityDeck/frontend-vue/node_modules/@vitejs/plugin-vue/dist/index.mjs";
+var __vite_injected_original_import_meta_url = "file:///D:/Development/InfinityDeck/frontend-vue/vite.config.ts";
 var vite_config_default = defineConfig({
-  base: "/infinityDeck",
+  base: "/InfinityDeck",
   plugins: [
     vue({
       template: {
