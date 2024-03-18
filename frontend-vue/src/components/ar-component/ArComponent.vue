@@ -211,7 +211,7 @@ props.conService.onConnection(() => {
 function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
         var cardBackSrc = props.cardService.cardBack;
-        var card = new CardMarker(sceneEl, cardBackSrc, k);
+        var card = new CardMarker(sceneEl, cardBackSrc, k.toString());
         if (debug) {
             card.toggleDebugNumber();
         }

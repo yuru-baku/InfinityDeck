@@ -20,10 +20,11 @@ export enum Zone {
  * the zone encoding the position on the table
  */
 export type Card = {
-    url: string;
+    url: string | undefined;
     cardFace: string;
     zone: Zone | undefined;
     found: boolean;
+    lastSeen: number;
 };
 
 /**

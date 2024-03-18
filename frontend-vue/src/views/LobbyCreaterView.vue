@@ -8,7 +8,7 @@ import { onUnmounted } from 'vue';
 let conService = new ConnectionService();
 
 function copyInviteToClipboard() {
-    const inviteURL = window.location.origin + window.location.hash.replace('lobby', '');
+    const inviteURL = window.location.href.replace('lobby', '');
     navigator.clipboard.writeText(inviteURL);
 }
 
@@ -56,7 +56,7 @@ onUnmounted(() => {
                         }"
                         v-on:click="() => conService.changeGame(game.id)"
                     >
-                        <img :src="game.cardBack" />
+                        <img :src="`${game.basePath}/${game.cardBack}.svg`" />
                         <label>{{ game.label }}</label>
                     </button>
                 </div>

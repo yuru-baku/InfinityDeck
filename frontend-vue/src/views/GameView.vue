@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ArComponent from '@/components/ar-component/ArComponent.vue';
+import { GAME_CONFIG } from '@/model/game';
 import { CardService } from '@/services/CardService';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
@@ -29,6 +30,9 @@ function setCardSize(): void {
 function setResolution(): void {
     arComponentViewRef.value.setResolution(resolution);
 }
+function shuffle(): void {
+    conService.sendMessage('shuffleDrawPile', {});
+}
 
 onUnmounted(() => {
     conService.killConnection();
@@ -44,12 +48,12 @@ onUnmounted(() => {
     <div class="game-overlay">
         <div id="left-container">
             <div class="quick-info-container">
-                <h1 class="game-title">{{ conService.room.value?.selectedGame }}</h1>
+                <h1 class="game-title" v-if="conService.room.value?.selectedGame">{{ GAME_CONFIG[conService.room.value?.selectedGame || ''].label }}</h1>
                 <p class="quick-info" v-if="conService.room.value?.id">
                     RoomID: {{ conService.room.value.id }}
                 </p>
                 <p class="quick-info" v-if="conService.you.value?.name">
-                    Player: {{ conService.you.value.name }}
+                    Player: {{ conService.you.value.name }} {{ conService.you.value.isOwner ? '(owner)' : ''}}
                 </p>
             </div>
 
@@ -103,6 +107,13 @@ onUnmounted(() => {
                 :class="showUsers ? 'active' : 'non-active'"
             >
                 <font-awesome-icon :icon="['fas', 'users']" />
+            </button>
+            <button
+                type="button"
+                @click="shuffle"
+                v-if="showMenu && conService.you.value?.isOwner"
+            >
+                <font-awesome-icon :icon="['fas', 'shuffle']" />
             </button>
             <button type="button" @click="$router.go(-1)" v-if="showMenu">
                 <font-awesome-icon :icon="['fas', 'door-open']" />

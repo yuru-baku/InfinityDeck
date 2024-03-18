@@ -24,7 +24,7 @@ export class Room {
     game: Game;
     db: Db;
     isLocal: boolean;
-    private cardSync?: CardSyncService;
+    cardSync?: CardSyncService;
 
     constructor(db: Db, id?: string) {
         if (id === undefined || id === null || id === 'undefined' || id === 'null') {
@@ -63,12 +63,6 @@ export class Room {
         }
         this.state = state;
     }
-    sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
-        users = users.filter((user) => !user.timeout); // only send to connected users
-        for (let user of users) {
-            user.ws.send(JSON.stringify({ action, data }));
-        }
-    }
 
     join(user: User) {
         this.setUpUserConnection(user, 'joined');
@@ -99,11 +93,7 @@ export class Room {
         );
 
         // listen for actions of normal players
-        const availableActions = [
-            'drawCard',
-            'playCard'
-            // 'endTurn'
-        ];
+        const availableActions = ['drawCard'];
         const availableRoomActions = ['getRoomInfo'];
         user.ws.on('message', (msg: string) => {
             const message: any = JSON.parse(msg);
@@ -155,21 +145,21 @@ export class Room {
         }, fiveMinutes);
     }
 
-    getRoomInfo(user: User) {
-        console.log('getting room infos');
+    getRoomInfo = (user: User) => this.sendRoomInfo(user, 'gotRoomInfo');
+
+    sendRoomInfo(user: User, actionName: string) {
         this.sendMessageToUsers(
-            'gotRoomInfo',
+            actionName,
             {
-                you: { name: user.name, isOwner: user.isOwner, id: user.id },
+                you: user.getPrivateInformations(),
                 room: {
                     isLocal: this.isLocal,
                     selectedGame: this.selectedGame,
                     state: this.state,
-                    users: this.getUserInformations(),
+                    users: this.users.map(user => user.getPublicInformations()),
                     id: this.id
                 },
-                game: { ...this.game, room: undefined },
-                markerMap: Object.fromEntries(user.markerMap.entries()) // convert to plain object
+                game: { ...this.game, room: undefined }
             },
             [user]
         );
@@ -206,37 +196,25 @@ export class Room {
         this.sendMessageToUsers('settingsChanged', { isLocal: this.isLocal });
     }
 
-    addLocalDataToMarker(user: User, message: WsMessage) {
-        if (this.isLocal) {
-            user.ws.send(JSON.stringify({ error: 'This game is a local game!' }));
-            return;
-        }
-        if (message.data.markerId) {
-            user.ws.send(JSON.stringify({ error: 'markerId is missing!' }));
-            return;
-        }
-        this.addDataToMarker(message.data.markerId, message.data.card, user);
-        this.sendMessageToUsers('addedLocalDataMarker', message.data, [user]);
-    }
+    // addLocalDataToMarker(user: User, message: WsMessage) {
+    //     if (this.isLocal) {
+    //         user.ws.send(JSON.stringify({ error: 'This game is a local game!' }));
+    //         return;
+    //     }
+    //     if (message.data.markerId) {
+    //         user.ws.send(JSON.stringify({ error: 'markerId is missing!' }));
+    //         return;
+    //     }
+    //     this.addDataToMarker(message.data.markerId, message.data.card, user);
+    //     this.sendMessageToUsers('addedLocalDataMarker', message.data, [user]);
+    // }
 
-    getUserInformations(): { name: string; isOwner: boolean; id: string; disconnected: boolean }[] {
-        return this.users.map((user) => {
-            return {
-                name: user.name,
-                isOwner: user.isOwner,
-                id: user.id,
-                disconnected: user.timeout !== undefined
-            };
-        });
-    }
+    // utility-functions ==================================================================================
 
-    addDataToMarker(markerId: string, data: any, user: User) {
-        if (this.isLocal) {
-            for (let user of this.users) {
-                user.markerMap.set(markerId, data);
-            }
-        } else {
-            user.markerMap.set(markerId, data);
+    sendMessageToUsers(action: string, data: any, users: User[] = this.users) {
+        users = users.filter((user) => !user.timeout); // only send to connected users
+        for (let user of users) {
+            user.ws.send(JSON.stringify({ action, data }));
         }
     }
 

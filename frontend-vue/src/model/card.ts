@@ -24,6 +24,7 @@ export type Card = {
     cardFace: string;
     zone: Zone | undefined;
     found: boolean;
+    lastSeen: number;
 };
 
 /**

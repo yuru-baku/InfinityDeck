@@ -1,12 +1,13 @@
 import { Room, WsMessage } from './room';
 import { User } from './user';
 
+const MAX_NUM_OF_MARKERS = 50 - 4;
+
 export abstract class Game {
     abstract deck: string[]; // All cards of this deck
     abstract label: string; // display and ID
 
     room: Room;
-    playedCards: string[];
     drawPile: string[];
     maxUsers: number = 4;
     history: string[];
@@ -15,7 +16,6 @@ export abstract class Game {
 
     constructor(room: Room) {
         this.room = room;
-        this.playedCards = [];
         this.drawPile = []; // "Nachziehstapel"
         this.history = [];
     }
@@ -71,39 +71,99 @@ export abstract class Game {
 
     drawCard(user: User, message: WsMessage) {
         const markerId = message.data.markerId;
-        let card = user.markerMap.get(markerId);
+        let card = user.markerMap.get(markerId)
         // check if this card is already known
         if (!card) {
             // check if we need to shuffle deck
             if (this.drawPile.length <= 0) {
                 this.shuffleDrawPile();
             }
-            card = this.drawPile.pop()!;
-            this.room.addDataToMarker(markerId, card, user);
-        }
-        this.room.sendMessageToUsers('drawCard', { card: card, markerId: markerId });
-        // it might happen that we draw a card again, since we can shuffle
-        this.history.unshift(`+${user.id}:${card}`);
-    }
+            let cardFace = this.drawPile.pop()!;
 
-    playCard(user: User, message: WsMessage) {
-        // check if user has this card in his hand
-        let card = message.data.card;
-        this.playedCards.push(card);
-        this.room.sendMessageToUsers('playedCard', { card: card });
-        this.history.unshift(`-${user.id}:${card}`);
+            card = {
+                cardFace: cardFace,
+                lastSeen: message.data.lastSeen,
+                found: true,
+                url: undefined,
+                zone: undefined
+            }
+            if (this.room.isLocal) {
+                for (let user of this.room.users) {
+                    user.markerMap.set(markerId, card);
+                }
+            } else {
+                user.markerMap.set(markerId, card);
+            }
+        }
+        this.room.sendMessageToUsers('drawCard', {
+            card: card,
+            markerId: markerId
+        });
+        // it might happen that we draw a card again, since we can shuffle
+        this.history.unshift(`+${user.id}:${card?.cardFace}`);
+        if (user.markerMap.size >= MAX_NUM_OF_MARKERS) {
+            this.freeUnusedMarkers(user);
+        }
     }
 
     shuffleDrawPile() {
-        this.drawPile = this.drawPile.concat(this.playedCards);
+        // free unused markers to get maximum amount of unused card
+        if (this.room.isLocal) {
+            this.freeUnusedMarkers(this.room.users[0]); // take any user
+        } else {
+            this.room.users.forEach(user => this.freeUnusedMarkers(user));
+        }
+        // find unused Cards
+        // ToDo: This might be dangerous! They do not equal the unused markers!
+        let usedCardFaces: string[] = this.room.users
+            .map(user => user.getCards())
+            .reduce((a, b) => a.concat(b))
+            .map(card => card.cardFace)
+            .concat(this.room.cardSync?.getSharedCard()?.cardFace || [])    // the shared card is used
+            .concat(this.drawPile); // also consider cards from drawPile as used
+        let unusedCardFaces: string[] = this.deck.filter(cardFace => !usedCardFaces.includes(cardFace));
+        // restock drawPile
+        this.drawPile = this.drawPile.concat(unusedCardFaces);
         this.drawPile = this.shuffleArray(this.drawPile);
-        this.playedCards = [];
         // notify users
         this.room.sendMessageToUsers('shuffled', {});
         this.history.unshift('shuffle');
     }
 
-    shuffleArray(array: any[]) {
+    freeUnusedMarkers(user: User) {
+        let unusedMarkers = this.findUnusedMarkers(user);
+        if (unusedMarkers.length < 5) {
+            console.warn('Could only free', unusedMarkers, 'markers!');
+        }
+        let users = this.room.isLocal ? this.room.users : [user];
+        for (let user of users) {
+            for (let marker of unusedMarkers) {
+                user.markerMap.delete(marker);
+            }
+        }
+        this.room.sendMessageToUsers('freedMarkers', unusedMarkers, users);
+    }
+
+    private findUnusedMarkers(user: User) {
+        let unusedMarkers = [];
+        let timeUnused = (60 * 1000);
+        // we have 46 card-markers, we want to free at least 5
+        while (unusedMarkers.length < 5 && timeUnused > 100) {
+            const threshhold = Date.now() - timeUnused;
+            for (let [markerId, card] of user.markerMap.entries()) {
+                const cardNotInCards = !user.getCards()
+                    .map(card => card.cardFace)
+                    .includes(card.cardFace) && user.getShared()?.cardFace != card.cardFace;
+                if (cardNotInCards && card.lastSeen < threshhold) {
+                    unusedMarkers.push(markerId);
+                }
+            }
+            timeUnused /= 2;
+        }
+        return unusedMarkers;
+    }   
+
+    private shuffleArray(array: any[]) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             const tmp = array[i];

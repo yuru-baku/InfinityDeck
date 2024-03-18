@@ -2,18 +2,18 @@ import { ref } from 'vue';
 import { useRouter, type Router } from 'vue-router';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useWebSocketStore } from '@/stores/webSocketStore';
-// import { registerMarker } from '@/components/ar-component/CardService';
 import type { User } from '@/model/user';
 import type { Game } from '@/model/game';
 import type { Room } from '@/model/room';
 import { Message } from '@/model/message';
+import type { Card } from '@/model/card';
 
 export class ConnectionService {
     router: Router;
     store: any;
     cookies = useCookies(['username', 'roomId', 'userId']);
     connectionCallbacks: ((data: any) => void)[] = [];
-    drawCardCallbacks: ((markerId: string, cardName: string) => void)[] = [];
+    drawCardCallbacks: ((markerId: string, card: Card) => void)[] = [];
     controller = new AbortController();
 
     public room = ref<Room>();
@@ -65,10 +65,10 @@ export class ConnectionService {
                 console.log(message.action, message.data);
                 if (message.action === 'connected') {
                     this.cookies.set('userId', message.data.you.id);
-                    this.cookies.set('roomId', message.data.roomId);
+                    this.cookies.set('roomId', message.data.room.id);
                     if (inLandingPage) {
                         // navigate to lobby
-                        this.router.push(`/lobby?roomId=${message.data.roomId}`);
+                        this.router.push(`/lobby?roomId=${message.data.room.id || roomId}`);
                     } else {
                         this.addListeners();
                     }
@@ -76,7 +76,7 @@ export class ConnectionService {
                     console.error('Could not join!');
                     if (!inLandingPage) {
                         // redirect if we are not already there
-                        this.router.push(`/?roomId=${message.data.roomId}`);
+                        this.router.push(`/?roomId=${message.data.room.id || roomId}`);
                     }
                 }
                 abortController.abort();
@@ -132,10 +132,10 @@ export class ConnectionService {
                         this.game.value = message.data.game;
                         this.you.value = message.data.you;
                         if (message.data.state === 'inGame') {
-                            this.router.push(`/game?roomId=${message.data.roomId}`);
+                            this.router.push(`/game?roomId=${message.data.room.id}`);
                         }
                         if (message.data.state === 'inLobby') {
-                            this.router.push(`/lobby?roomId=${message.data.roomId}`);
+                            this.router.push(`/lobby?roomId=${message.data.room.id}`);
                         }
                         this.connectionCallbacks.forEach((callback) => callback(message.data));
                         this.connectionCallbacks = [];
@@ -222,8 +222,8 @@ export class ConnectionService {
         this.sendMessage('changeGame', { selectedGame: game });
     }
 
-    public drawNewCard(markerId: string) {
-        this.sendMessage('drawCard', { markerId: markerId });
+    public drawNewCard(markerId: string, lastSeen: number) {
+        this.sendMessage('drawCard', { markerId: markerId, lastSeen: lastSeen });
     }
 
     public onConnection(callback: (data: any) => void) {
@@ -233,7 +233,7 @@ export class ConnectionService {
         this.connectionCallbacks.push(callback);
     }
 
-    public onCardDrawed(callback: (markerId: string, cardName: string) => void) {
+    public onCardDrawed(callback: (markerId: string, card: Card) => void) {
         this.drawCardCallbacks.push(callback);
     }
 
@@ -260,7 +260,13 @@ export class ConnectionService {
     public killConnection() {
         this.controller.abort();
         this.connectionCallbacks.forEach((callback) => callback(undefined));
-        this.drawCardCallbacks.forEach((callback) => callback('', ''));
+        this.drawCardCallbacks.forEach((callback) => callback('', {
+                cardFace: '',
+                lastSeen: 0,
+                found: false,
+                url: '',
+                zone: undefined
+            }));
     }
 
     private getSocket() {

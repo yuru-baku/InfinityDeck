@@ -1,5 +1,3 @@
-import { useWebSocketStore } from '@/stores/webSocketStore';
-
 export class Message {
     action: string;
     data: any;

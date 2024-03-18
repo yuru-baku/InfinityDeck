@@ -4,6 +4,8 @@ import { Zone, type Card, type UserCards } from '@/model/card';
 import type { User } from '@/model/user';
 import { GAME_CONFIG } from '@/model/game';
 
+const MAX_NUM_OF_MARKERS = 50 - 4;
+
 export class CardService {
     private conSerivce: ConnectionService;
     private cardSync: CardSync;
@@ -16,7 +18,7 @@ export class CardService {
 
     constructor(conService: ConnectionService) {
         this.conSerivce = conService;
-        this.cardBack = 'url(./InfinityDeck/cardImages/french-suited-cards/card-back-blue.svg)';
+        this.cardBack = this.getCardUrl(GAME_CONFIG['MauMau'].cardBack);
         this.numberOfCards = 0;
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
@@ -24,23 +26,23 @@ export class CardService {
 
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection((data) => {
-            this.numberOfCards = 40; // Todo: Marker Anzahl?!
+            this.numberOfCards = conService.game.value!.deck.length < MAX_NUM_OF_MARKERS ? conService.game.value!.deck.length : MAX_NUM_OF_MARKERS;
+            if (data.room.selectedGame) {
+                this.cardBack = this.getCardUrl(GAME_CONFIG[data.room.selectedGame].cardBack);
+            }
             if (data.markerMap) {
-                this.markerMap = new Map(
-                    Object.entries<string>(data.markerMap).map(([key, value]): [string, Card] => [
-                        key,
-                        {
-                            cardFace: value,
-                            url: this.getCardUrl(value),
-                            zone: undefined,
-                            found: true
-                        }
-                    ])
-                );
-                console.log('recovered markerMap');
+                this.markerMap = new Map(Object.entries<Card>(data.markerMap));
+                console.debug('recovered markerMap');
             }
         });
-        conService.onCardDrawed((markerId, cardName) => this.registerMarker(markerId, cardName));
+        conService.onCardDrawed((markerId, card) => this.registerMarker(markerId, card));
+        conService.addListener('freedMarkers', (unusedMarkers: (string)[]) => {
+            for (let unusedMarker of unusedMarkers) {
+                let res = this.markerMap.delete(unusedMarker);
+                console.log('freed', unusedMarker, res)
+            }
+            console.debug('Freed', unusedMarkers.length, 'markers!', this.markerMap);
+        })
     }
 
     private getCardUrl(cardName: string): string {
@@ -53,6 +55,7 @@ export class CardService {
     }
 
     public lostCard(markerId: string): void {
+        markerId = markerId.toString();
         let card = this.markerMap.get(markerId);
         if (card) {
             card.found = false;
@@ -65,15 +68,17 @@ export class CardService {
      * @returns a promise which will be resolved as soon as the card is available
      */
     public getCardByMarkerId(markerId: string): Promise<Card> {
+        markerId = markerId.toString(); // ensure we get a string here!
         const card = this.markerMap.get(markerId);
         // marker is already known
         if (card) {
             card.found = true;
+            card.lastSeen = Date.now();
             return new Promise((resolve) => resolve(card));
         }
 
         // unknown marker detectet
-        this.conSerivce.drawNewCard(markerId);
+        this.conSerivce.drawNewCard(markerId, Date.now());
         return new Promise((resolve, reject) => {
             this.cardCallbacks.set(markerId, (card: Card) => resolve(card));
             // Todo: add error handling
@@ -88,18 +93,14 @@ export class CardService {
      * Registers a new marker and card combination.
      * If there is a callback waiting it will be called.
      */
-    public registerMarker(markerId: string, cardName: string): void {
+    public registerMarker(markerId: string, card: Card): void {
+        markerId = markerId.toString(); // ensure we get a string here!
         // if it is a local game, update markerMap and check for waiting callbacks
         if (this.conSerivce.room.value?.isLocal) {
             if (this.markerMap.get(markerId)) {
                 console.warn('Marker was already known, but was registered twice!');
             }
-            const card: Card = {
-                cardFace: cardName,
-                url: this.getCardUrl(cardName),
-                zone: Zone.private,
-                found: true
-            };
+            card.url = this.getCardUrl(card.cardFace);
             this.markerMap.set(markerId, card);
             const callback = this.cardCallbacks.get(markerId);
             // if there was no callback someone else drew this card locally
@@ -116,8 +117,9 @@ export class CardService {
         throw new Error('Method not implemented.');
     }
 
-    public shareLocal(id: string): void {
-        let card = this.markerMap.get(id);
+    public shareLocal(markerId: string): void {
+        markerId = markerId.toString(); // ensure we get a string here!
+        let card = this.markerMap.get(markerId);
         if (card) {
             if (card != this.sharedCard) {
                 if (this.sharedCard) {

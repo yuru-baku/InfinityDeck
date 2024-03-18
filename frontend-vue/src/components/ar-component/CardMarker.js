@@ -52,6 +52,9 @@ export class CardMarker extends InfinityMarker {
 
     setFaceUrl(faceUrl) {
         this.cardFaceSrc = faceUrl;
+        if (this.isFaceUp) {
+            this.imageElement.setAttribute('src', faceUrl);
+        }
     }
 
     getVisibility() {
