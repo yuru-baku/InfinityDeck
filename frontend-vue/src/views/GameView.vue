@@ -29,6 +29,9 @@ function setCardSize(): void {
 function setResolution(): void {
     arComponentViewRef.value.setResolution(resolution);
 }
+function shuffle(): void {
+    conService.sendMessage('shuffleDrawPile', {});
+}
 
 onUnmounted(() => {
     conService.killConnection();
@@ -103,6 +106,13 @@ onUnmounted(() => {
                 :class="showUsers ? 'active' : 'non-active'"
             >
                 <font-awesome-icon :icon="['fas', 'users']" />
+            </button>
+            <button
+                type="button"
+                @click="shuffle"
+                v-if="showMenu && conService.you.value?.isOwner"
+            >
+                <font-awesome-icon :icon="['fas', 'shuffle']" />
             </button>
             <button type="button" @click="$router.go(-1)" v-if="showMenu">
                 <font-awesome-icon :icon="['fas', 'door-open']" />

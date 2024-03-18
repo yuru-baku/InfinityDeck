@@ -93,11 +93,7 @@ export class Room {
         );
 
         // listen for actions of normal players
-        const availableActions = [
-            'drawCard',
-            'playCard'
-            // 'endTurn'
-        ];
+        const availableActions = ['drawCard'];
         const availableRoomActions = ['getRoomInfo'];
         user.ws.on('message', (msg: string) => {
             const message: any = JSON.parse(msg);
