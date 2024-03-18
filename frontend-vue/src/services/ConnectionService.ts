@@ -65,10 +65,10 @@ export class ConnectionService {
                 console.log(message.action, message.data);
                 if (message.action === 'connected') {
                     this.cookies.set('userId', message.data.you.id);
-                    this.cookies.set('roomId', message.data.roomId);
+                    this.cookies.set('roomId', message.data.room.id);
                     if (inLandingPage) {
                         // navigate to lobby
-                        this.router.push(`/lobby?roomId=${message.data.roomId}`);
+                        this.router.push(`/lobby?roomId=${message.data.room.id || roomId}`);
                     } else {
                         this.addListeners();
                     }
@@ -76,7 +76,7 @@ export class ConnectionService {
                     console.error('Could not join!');
                     if (!inLandingPage) {
                         // redirect if we are not already there
-                        this.router.push(`/?roomId=${message.data.roomId}`);
+                        this.router.push(`/?roomId=${message.data.room.id || roomId}`);
                     }
                 }
                 abortController.abort();
@@ -132,10 +132,10 @@ export class ConnectionService {
                         this.game.value = message.data.game;
                         this.you.value = message.data.you;
                         if (message.data.state === 'inGame') {
-                            this.router.push(`/game?roomId=${message.data.roomId}`);
+                            this.router.push(`/game?roomId=${message.data.room.id}`);
                         }
                         if (message.data.state === 'inLobby') {
-                            this.router.push(`/lobby?roomId=${message.data.roomId}`);
+                            this.router.push(`/lobby?roomId=${message.data.room.id}`);
                         }
                         this.connectionCallbacks.forEach((callback) => callback(message.data));
                         this.connectionCallbacks = [];

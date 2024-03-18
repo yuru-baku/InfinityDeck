@@ -48,7 +48,7 @@ onUnmounted(() => {
     <div class="game-overlay">
         <div id="left-container">
             <div class="quick-info-container">
-                <h1 class="game-title">{{ GAME_CONFIG[conService.room.value?.selectedGame || ''].label }}</h1>
+                <h1 class="game-title" v-if="conService.room.value?.selectedGame">{{ GAME_CONFIG[conService.room.value?.selectedGame || ''].label }}</h1>
                 <p class="quick-info" v-if="conService.room.value?.id">
                     RoomID: {{ conService.room.value.id }}
                 </p>

@@ -18,7 +18,7 @@ onUnmounted(() => {
 
 <template>
     <main class="vertical">
-        <form class="frame" id="name-chooser">
+        <form class="frame" id="name-chooser" @submit.prevent="joinRoom()">
             <label for="nickname">Choose your name</label>
             <input type="text" id="nickname" default="LustigerName420" v-model="name" />
             <!-- <button type="button" class="startButton" @click="joinRoom()">Start</button> -->
