@@ -12,16 +12,16 @@ export type Game = {
 export const GAME_CONFIG: {
     [game: string]: { label: string; basePath: string; cardBack: string; id: string };
 } = {
+    MauMau: {
+        label: 'french',
+        id: 'MauMau',
+        basePath: '/InfinityDeck/cardImages/french-suited-cards',
+        cardBack: 'card-back-blue'
+    },
     Uno: {
         label: 'Uno',
         id: 'Uno',
         basePath: '/InfinityDeck/cardImages/uno-cards',
         cardBack: 'back'
     },
-    MauMau: {
-        label: 'french',
-        id: 'MauMau',
-        basePath: '/InfinityDeck/cardImages/french-suited-cards',
-        cardBack: 'card-back-blue'
-    }
 };

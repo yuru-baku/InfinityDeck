@@ -74,6 +74,7 @@ export class CardSyncService {
         if (isSharedUpdated) {
             this.sharedCard = user.getShared();
             console.debug('New shared card', this.sharedCard);
+            this.room.game.history.unshift(`>${user.id}:${this.sharedCard!.cardFace}`)
         }
         console.debug(this.room.users.map(user => user.getCards()));
     }

@@ -80,6 +80,9 @@ export class Room {
         clearTimeout(user.timeout);
         user.timeout = undefined;
         this.setUpUserConnection(user, 'reconnected');
+        if (user.isOwner) {
+            this.makeUserAdmin(user);
+        }
     }
 
     private setUpUserConnection(user: User, connectionAction: 'joined' | 'reconnected') {
@@ -125,24 +128,27 @@ export class Room {
     }
 
     leave(user: User) {
-        console.log(user.id, 'disconnected', this.id);
-        this.sendMessageToUsers(
-            'disconnected',
-            { id: user.id, name: user.name },
-            this.users.filter((u) => u != user)
-        );
-        const fiveMinutes: number = 5 * 60 * 1000;
-        user.timeout = setTimeout(() => {
-            console.log('triggered timeout');
-            this.users = this.users.filter((u) => u != user); // remove this user
-            // notify remaining
-            this.sendMessageToUsers('left', { id: user.id, name: user.name });
-            // close game if we were the last one and game hasn't finished
-            if (this.users.length === 0) {
-                // all left :(
-                this.game.end();
-            }
-        }, fiveMinutes);
+        return new Promise<number>((resolve, reject) => {
+            console.log(user.id, 'disconnected', this.id);
+            this.sendMessageToUsers(
+                'disconnected',
+                { id: user.id, name: user.name },
+                this.users.filter((u) => u != user)
+            );
+            const fiveMinutes: number = 5 * 60 * 1000;
+            user.timeout = setTimeout(() => {
+                console.log('triggered timeout');
+                this.users = this.users.filter((u) => u != user); // remove this user
+                // notify remaining
+                this.sendMessageToUsers('left', { id: user.id, name: user.name });
+                // close game if we were the last one and game hasn't finished
+                if (this.users.length === 0) {
+                    // all left :(
+                    this.game.end();
+                }
+                resolve(this.users.length);
+            }, fiveMinutes);
+        })
     }
 
     getRoomInfo = (user: User) => this.sendRoomInfo(user, 'gotRoomInfo');
@@ -219,7 +225,7 @@ export class Room {
     }
 
     public isJoinable(): boolean {
-        return this.users.length < this.game.maxUsers && this.state === 'inLobby';
+        return (this.users.length < this.game.maxUsers) && (this.state === 'inLobby');
     }
 
     public addListenerToAll(
