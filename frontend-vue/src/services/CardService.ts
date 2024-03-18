@@ -18,7 +18,7 @@ export class CardService {
 
     constructor(conService: ConnectionService) {
         this.conSerivce = conService;
-        this.cardBack = 'url(./InfinityDeck/cardImages/french-suited-cards/card-back-blue.svg)';
+        this.cardBack = this.getCardUrl(GAME_CONFIG['MauMau'].cardBack);
         this.numberOfCards = 0;
         this.markerMap = new Map<string, Card>();
         this.cardCallbacks = new Map<string, Function>();
@@ -27,6 +27,9 @@ export class CardService {
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection((data) => {
             this.numberOfCards = conService.game.value!.deck.length < MAX_NUM_OF_MARKERS ? conService.game.value!.deck.length : MAX_NUM_OF_MARKERS;
+            if (data.room.selectedGame) {
+                this.cardBack = this.getCardUrl(GAME_CONFIG[data.room.selectedGame].cardBack);
+            }
             if (data.markerMap) {
                 this.markerMap = new Map(Object.entries<Card>(data.markerMap));
                 console.debug('recovered markerMap');

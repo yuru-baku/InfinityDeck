@@ -10,8 +10,7 @@ import type { User } from './user';
  */
 export enum Zone {
     shared = 'shared',
-    private = 'private',
-    unknown = 'unknown'
+    private = 'private'
 }
 
 /**

@@ -56,7 +56,7 @@ onUnmounted(() => {
                         }"
                         v-on:click="() => conService.changeGame(game.id)"
                     >
-                        <img :src="game.cardBack" />
+                        <img :src="`${game.basePath}/${game.cardBack}.svg`" />
                         <label>{{ game.label }}</label>
                     </button>
                 </div>

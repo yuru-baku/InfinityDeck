@@ -16,12 +16,12 @@ export const GAME_CONFIG: {
         label: 'Uno',
         id: 'Uno',
         basePath: '/InfinityDeck/cardImages/uno-cards',
-        cardBack: '/InfinityDeck/cardImages/uno-cards/back.svg'
+        cardBack: 'back'
     },
     MauMau: {
         label: 'french',
         id: 'MauMau',
         basePath: '/InfinityDeck/cardImages/french-suited-cards',
-        cardBack: '/InfinityDeck/cardImages/french-suited-cards/card-back-blue.svg'
+        cardBack: 'card-back-blue'
     }
 };
