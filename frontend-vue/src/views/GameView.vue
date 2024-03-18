@@ -48,8 +48,8 @@ onUnmounted(() => {
         :card-service="cardService"
         :con-service="conService"
     ></ArComponent>
-    <div class="game-overlay">
-        <div id="left-container">
+    <div class="game-overlay" :class="showMenu ? 'expanded' : ''">
+        <div id="left-container" v-if="showMenu">
             <div class="quick-info-container">
                 <h1 class="game-title" v-if="conService.room.value?.selectedGame">{{ GAME_CONFIG[conService.room.value?.selectedGame || ''].label }}</h1>
                 <p class="quick-info" v-if="conService.room.value?.id">
@@ -103,14 +103,14 @@ onUnmounted(() => {
             >
                 <font-awesome-icon :icon="['fas', 'hand']" />
             </button>
-            <button
+            <!-- <button
                 type="button"
                 @click="showUsers = !showUsers"
                 v-if="showMenu"
                 :class="showUsers ? 'active' : 'non-active'"
             >
                 <font-awesome-icon :icon="['fas', 'users']" />
-            </button>
+            </button> -->
             <button
                 type="button"
                 @click="shuffle"
@@ -140,13 +140,16 @@ onUnmounted(() => {
     max-height: 98vh;
     height: auto;
     width: auto;
-    background-color: rgba(255, 255, 255, 0.9);
     padding: 8pt;
     overflow: auto;
     justify-content: end;
 
     display: flex;
     flex-direction: row;
+
+    &.expanded {
+        background-color: rgba(255, 255, 255, 0.9);
+    }
 
     #left-container {
         font-size: 12pt;
