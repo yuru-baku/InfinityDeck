@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ArComponent from '@/components/ar-component/ArComponent.vue';
+import { GAME_CONFIG } from '@/model/game';
 import { CardService } from '@/services/CardService';
 import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
@@ -47,12 +48,12 @@ onUnmounted(() => {
     <div class="game-overlay">
         <div id="left-container">
             <div class="quick-info-container">
-                <h1 class="game-title">{{ conService.room.value?.selectedGame }}</h1>
+                <h1 class="game-title">{{ GAME_CONFIG[conService.room.value?.selectedGame || ''].label }}</h1>
                 <p class="quick-info" v-if="conService.room.value?.id">
                     RoomID: {{ conService.room.value.id }}
                 </p>
                 <p class="quick-info" v-if="conService.you.value?.name">
-                    Player: {{ conService.you.value.name }}
+                    Player: {{ conService.you.value.name }} {{ conService.you.value.isOwner ? '(owner)' : ''}}
                 </p>
             </div>
 

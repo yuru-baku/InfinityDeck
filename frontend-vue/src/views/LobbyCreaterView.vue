@@ -8,7 +8,7 @@ import { onUnmounted } from 'vue';
 let conService = new ConnectionService();
 
 function copyInviteToClipboard() {
-    const inviteURL = window.location.origin + window.location.hash.replace('lobby', '');
+    const inviteURL = window.location.href.replace('lobby', '');
     navigator.clipboard.writeText(inviteURL);
 }
 
