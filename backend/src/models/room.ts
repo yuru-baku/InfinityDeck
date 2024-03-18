@@ -219,7 +219,7 @@ export class Room {
     }
 
     public isJoinable(): boolean {
-        return this.users.length < this.game.maxUsers && this.state === 'inLobby';
+        return (this.users.length < this.game.maxUsers) && (this.state === 'inLobby');
     }
 
     public addListenerToAll(

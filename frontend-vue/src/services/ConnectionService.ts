@@ -11,7 +11,7 @@ import type { Card } from '@/model/card';
 export class ConnectionService {
     router: Router;
     store: any;
-    cookies = useCookies(['username', 'roomId', 'userId']);
+    cookies = useCookies(['username', 'roomId', 'userId', 'lastGame']);
     connectionCallbacks: ((data: any) => void)[] = [];
     drawCardCallbacks: ((markerId: string, card: Card) => void)[] = [];
     controller = new AbortController();
@@ -192,6 +192,11 @@ export class ConnectionService {
                             callback(message.data.markerId, message.data.card)
                         );
                         break;
+                    case 'end':
+                        console.log('Game end')
+                        this.cookies.set('lastGame', JSON.stringify(message.data));
+                        if (!this.room.value) return;
+                        this.router.push(`/summary?roomId=${this.room.value.id}`);
                     case 'error':
                         console.error('Error:', message.message);
                         break;

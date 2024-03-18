@@ -33,6 +33,9 @@ function setResolution(): void {
 function shuffle(): void {
     conService.sendMessage('shuffleDrawPile', {});
 }
+function endGame(): void {
+    conService.sendMessage('end', {});
+}
 
 onUnmounted(() => {
     conService.killConnection();
@@ -115,7 +118,11 @@ onUnmounted(() => {
             >
                 <font-awesome-icon :icon="['fas', 'shuffle']" />
             </button>
-            <button type="button" @click="$router.go(-1)" v-if="showMenu">
+            <button 
+                type="button"
+                @click="endGame"
+                v-if="showMenu && conService.you.value?.isOwner"
+            >
                 <font-awesome-icon :icon="['fas', 'door-open']" />
             </button>
         </div>

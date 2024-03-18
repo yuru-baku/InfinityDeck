@@ -45,25 +45,20 @@ export abstract class Game {
         console.log('End Game');
         this.room.setState('finished');
         this.endTime = new Date();
-
-        const leaderboard: string[] = [];
-
-        this.room.sendMessageToUsers('end', {
-            startTime: this.startTime,
-            endTime: this.endTime,
-            leaderboard: leaderboard
-        });
-        // finally persist and close
-        try {
-            this.room.db.collection(`${this.label}-Games`).insertOne({
-                leaderboard: leaderboard,
+        
+        const summary = {
                 history: this.history,
-                startTiem: this.startTime,
+                startTime: this.startTime,
                 endTime: this.endTime,
                 users: this.room.users.map((user) => {
-                    return { name: user.name, id: user.id, handcards: [] };
+                    return { name: user.name, id: user.id, handcards: user.getCards().map(card => card.cardFace) };
                 })
-            });
+            };
+
+        this.room.sendMessageToUsers('end', summary);
+        // finally persist and close
+        try {
+            this.room.db.collection(`${this.label}-Games`).insertOne(summary);
         } catch (e) {
             console.warn('Failed to persist game with reason', e);
         }
