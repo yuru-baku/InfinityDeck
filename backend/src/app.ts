@@ -25,9 +25,9 @@ async function main() {
     wss.on('connection', function connection(ws: WebSocket, req) {
         // on connection create new room or join an open room
         const decodedURL = req.url ? decodeURI(req.url) : '';
-        const room_id = decodedURL.match(/(?<=roomId=)\p{Letter}*/u)?.at(0);
-        const name = decodedURL.match(/(?<=name=)\p{Letter}*/u)?.at(0);
-        const user_id = decodedURL.match(/(?<=userId=)\p{Letter}*/u)?.at(0);
+        const room_id = decodedURL.match(/(?<=roomId=)[\p{Number}\p{Letter}_]*/u)?.at(0);
+        const name = decodedURL.match(/(?<=name=)[\p{Number}\p{Letter}_]*/u)?.at(0);
+        const user_id = decodedURL.match(/(?<=userId=)[\p{Number}\p{Letter}_]*/u)?.at(0);
         let room: Room | undefined = rooms.get(room_id);
 
         // if (room_id && room_id !== '' && room_id !== 'undefined') { // get open room
