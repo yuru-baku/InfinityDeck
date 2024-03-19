@@ -284,7 +284,7 @@ onUnmounted(() => {
             arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 5x5_BCH_22_7_7; debugUIEnabled: false; sourceWidth:1920; sourceHeight:1080;"
             cursor="rayOrigin: mouse"
         >
-            <a-camera id="userCamera"> </a-camera>
+            <a-entity camera id="userCamera"> </a-entity>
         </a-scene>
     </div>
 </template>
