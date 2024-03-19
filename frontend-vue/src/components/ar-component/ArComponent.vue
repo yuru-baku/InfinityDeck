@@ -179,6 +179,7 @@ props.conService.onConnection(() => {
     if (!AFRAME.components['registerevents_zone']) {
         AFRAME.registerComponent('registerevents_zone', {
             init: function () {
+                console.log('INIT Zone Events');
                 const zoneMarker = this.el.InfinityMarker;
                 this.el.addEventListener('markerFound', () => {
                     zoneMarker.found = true;
@@ -292,8 +293,9 @@ onUnmounted(() => {
             color-space="sRGB"
             renderer="gammaOutput: true"
             arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 5x5_BCH_22_7_7; debugUIEnabled: false; sourceWidth:1920; sourceHeight:1080;"
+            cursor="rayOrigin: mouse"
         >
-            <a-entity id="userCamera" camera> </a-entity>
+            <a-camera id="userCamera"> </a-camera>
         </a-scene>
     </div>
 </template>

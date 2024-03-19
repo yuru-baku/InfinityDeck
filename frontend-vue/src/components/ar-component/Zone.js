@@ -85,6 +85,9 @@ export class Zone {
                 width: this.zoneWidth,
                 height: this.zoneHeight
             });
+            this.zoneEntity.addEventListener('click', function (evt) {
+                console.warn('Zone got clicked');
+            });
             this.zoneEntity.object3D.position.copy(midpoint);
         } else if (this.zoneEntity) {
             this.zoneEntity.remove();
