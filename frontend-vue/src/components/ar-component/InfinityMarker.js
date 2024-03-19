@@ -15,9 +15,6 @@ export class InfinityMarker {
         this.markerElement.setAttribute('id', this.id);
         this.markerElement.InfinityMarker = this;
         this.sceneElement.appendChild(this.markerElement);
-        this.markerElement.addEventListener('click', function (evt) {
-            console.warn('Marker got clicked');
-        });
         this.#addDebugNumberToMarker();
     }
 
