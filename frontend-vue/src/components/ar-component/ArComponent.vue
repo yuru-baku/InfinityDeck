@@ -207,6 +207,7 @@ props.conService.onConnection(() => {
     }
     AFRAME.registerComponent('warnOnClick', {
         init: function () {
+            debug.log('register warnOnClick on ', this);
             this.el.addEventListener('click', (evnt) => {
                 console.warn('I was clicked!\n Help!');
             });
