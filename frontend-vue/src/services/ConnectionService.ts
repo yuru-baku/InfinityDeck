@@ -124,7 +124,7 @@ export class ConnectionService {
             'message',
             (event: MessageEvent) => {
                 const message = JSON.parse(event.data);
-                console.debug('new message:', message.action, message.data);
+                console.log('new message:', message.action, message.data);
                 switch (message.action) {
                     case 'gotRoomInfo':
                         console.log('gotRoomInfo');
@@ -246,7 +246,7 @@ export class ConnectionService {
     }
 
     public sendMessage(action: string, data: any) {
-        console.debug('Send:', { action: action, data: data });
+        console.log('Send:', { action: action, data: data });
         const message = JSON.stringify({ action: action, data: data });
         this.getSocket().send(message);
     }

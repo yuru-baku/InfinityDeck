@@ -15,6 +15,7 @@ export class InfinityMarker {
         this.markerElement.setAttribute('id', this.id);
         this.markerElement.InfinityMarker = this;
         this.sceneElement.appendChild(this.markerElement);
+
         this.#addDebugNumberToMarker();
     }
 
