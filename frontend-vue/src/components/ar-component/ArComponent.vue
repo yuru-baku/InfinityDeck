@@ -195,6 +195,15 @@ props.conService.onConnection(() => {
         });
     }
 
+    AFRAME.registerComponent('lock_zone', {
+        init: function () {
+            console.warn('add lock_zone listener');
+            this.el.addEventListener('click', () => {
+                console.warn('clicked', this.el.zone);
+                this.el.zone.redrawZoneToggle();
+            });
+        }
+    });
     connected.value = true;
 });
 

@@ -88,10 +88,12 @@ export class Zone {
 
             //add click lstener
             let self = this;
-            this.zoneEntity.addEventListener('click', () => {
+            this.zoneEntity.setAttribute('lock_zone', '');
+
+            /*this.zoneEntity.addEventListener('click', () => {
                 console.debug('Zone locked', self);
                 self.redrawZoneToggle();
-            });
+            });*/
             this.zoneEntity.object3D.position.copy(midpoint);
         } else if (this.zoneEntity) {
             this.zoneEntity.remove();
@@ -177,6 +179,7 @@ export class Zone {
     }
 
     redrawZoneToggle() {
+        console.warn("redrawZoneToggle");
         if (this.moving) {
             this.moving = false;
             this.redrawZoneDisable();
