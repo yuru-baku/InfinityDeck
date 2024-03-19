@@ -85,8 +85,12 @@ export class Zone {
                 width: this.zoneWidth,
                 height: this.zoneHeight
             });
-            this.zoneEntity.addEventListener('click', function (evt) {
-                console.warn('Zone got clicked');
+
+            //add click lstener
+            let self = this;
+            this.zoneEntity.addEventListener('click', () => {
+                console.debug('Zone locked', self);
+                self.redrawZoneToggle();
             });
             this.zoneEntity.object3D.position.copy(midpoint);
         } else if (this.zoneEntity) {
@@ -191,13 +195,13 @@ export class Zone {
                 const currentZoneMarker2Position = this.zoneMarker2.getMarkerPosition();
                 if (
                     Math.abs(this.lastZoneMarker1Position.x - currentZoneMarker1Position.x) >
-                        this.redrawTolerance ||
+                    this.redrawTolerance ||
                     Math.abs(this.lastZoneMarker1Position.y - currentZoneMarker1Position.y) >
-                        this.redrawTolerance ||
+                    this.redrawTolerance ||
                     Math.abs(this.lastZoneMarker2Position.x - currentZoneMarker2Position.x) >
-                        this.redrawTolerance ||
+                    this.redrawTolerance ||
                     Math.abs(this.lastZoneMarker2Position.y - currentZoneMarker2Position.y) >
-                        this.redrawTolerance
+                    this.redrawTolerance
                 ) {
                     this.lastZoneMarker1Position = new THREE.Vector3().copy(
                         currentZoneMarker1Position

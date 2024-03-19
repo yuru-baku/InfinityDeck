@@ -110,16 +110,6 @@ props.conService.onConnection(() => {
                 shareZone = new ShareZone(126, 127, sceneEl, 'share', props.cardService.cardBack);
 
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
-                document.querySelector('a-scene').addEventListener('click', (event) => {
-                    let x = (event.clientX / window.innerWidth) * 4 - 2;
-                    let y = 3 - (event.clientY / window.innerHeight) * 6;
-                    if (shareZone.isInZone(x, y)) {
-                        shareZone.redrawZoneToggle();
-                    }
-                    if (hideZone.isInZone(x, y)) {
-                        hideZone.redrawZoneToggle();
-                    }
-                });
                 generateMarkers(sceneEl);
             }
         });
@@ -179,7 +169,6 @@ props.conService.onConnection(() => {
     if (!AFRAME.components['registerevents_zone']) {
         AFRAME.registerComponent('registerevents_zone', {
             init: function () {
-                console.log('INIT Zone Events');
                 const zoneMarker = this.el.InfinityMarker;
                 this.el.addEventListener('markerFound', () => {
                     zoneMarker.found = true;
@@ -205,14 +194,7 @@ props.conService.onConnection(() => {
             }
         });
     }
-    AFRAME.registerComponent('warnOnClick', {
-        init: function () {
-            debug.log('register warnOnClick on ', this);
-            this.el.addEventListener('click', (evnt) => {
-                console.warn('I was clicked!\n Help!');
-            });
-        }
-    });
+
     connected.value = true;
 });
 

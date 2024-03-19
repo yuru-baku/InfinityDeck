@@ -16,7 +16,6 @@ export class CardMarker extends InfinityMarker {
         this.imageElement.setAttribute('src', this.cardBackSrc);
         this.imageElement.setAttribute('id', 'card');
         this.imageElement.setAttribute('data-state', 'back');
-        this.imageElement.setAttribute('warnOnClick', '');
         this.imageElement.object3D.scale.set(6.4 / 5, 8.9 / 5, 1);
         this.imageElement.object3D.position.set(0, 0, 0);
         this.imageElement.object3D.rotation.set(-Math.PI / 2, 0, 0);
