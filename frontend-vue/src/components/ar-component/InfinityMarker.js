@@ -1,5 +1,4 @@
 export class InfinityMarker {
-
     constructor(sceneEl, barcodeValue, id) {
         this.sceneElement = sceneEl;
         this.barcodeValue = barcodeValue;

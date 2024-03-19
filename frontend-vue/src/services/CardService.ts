@@ -26,7 +26,10 @@ export class CardService {
 
         // conService.onConnection(() => this.numberOfCards = conService.game.value!.deck.length);
         conService.onConnection((data) => {
-            this.numberOfCards = conService.game.value!.deck.length < MAX_NUM_OF_MARKERS ? conService.game.value!.deck.length : MAX_NUM_OF_MARKERS;
+            this.numberOfCards =
+                conService.game.value!.deck.length < MAX_NUM_OF_MARKERS
+                    ? conService.game.value!.deck.length
+                    : MAX_NUM_OF_MARKERS;
             if (data.room.selectedGame) {
                 this.cardBack = this.getCardUrl(GAME_CONFIG[data.room.selectedGame].cardBack);
             }
@@ -36,13 +39,13 @@ export class CardService {
             }
         });
         conService.onCardDrawed((markerId, card) => this.registerMarker(markerId, card));
-        conService.addListener('freedMarkers', (unusedMarkers: (string)[]) => {
+        conService.addListener('freedMarkers', (unusedMarkers: string[]) => {
             for (let unusedMarker of unusedMarkers) {
                 let res = this.markerMap.delete(unusedMarker);
-                console.log('freed', unusedMarker, res)
+                console.log('freed', unusedMarker, res);
             }
             console.debug('Freed', unusedMarkers.length, 'markers!', this.markerMap);
-        })
+        });
     }
 
     private getCardUrl(cardName: string): string {

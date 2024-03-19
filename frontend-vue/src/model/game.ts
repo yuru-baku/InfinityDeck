@@ -23,5 +23,5 @@ export const GAME_CONFIG: {
         id: 'Uno',
         basePath: '/InfinityDeck/cardImages/uno-cards',
         cardBack: 'back'
-    },
+    }
 };

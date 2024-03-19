@@ -196,7 +196,7 @@ export class ConnectionService {
                         );
                         break;
                     case 'end':
-                        console.log('Game end')
+                        console.log('Game end');
                         this.cookies.set('lastGame', JSON.stringify(message.data));
                         if (!this.room.value) return;
                         this.router.push(`/summary?roomId=${this.room.value.id}`);
@@ -268,13 +268,15 @@ export class ConnectionService {
     public killConnection() {
         this.controller.abort();
         this.connectionCallbacks.forEach((callback) => callback(undefined));
-        this.drawCardCallbacks.forEach((callback) => callback('', {
+        this.drawCardCallbacks.forEach((callback) =>
+            callback('', {
                 cardFace: '',
                 lastSeen: 0,
                 found: false,
                 url: '',
                 zone: undefined
-            }));
+            })
+        );
     }
 
     private getSocket() {

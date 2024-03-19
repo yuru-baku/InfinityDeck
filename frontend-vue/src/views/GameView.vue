@@ -50,13 +50,16 @@ onUnmounted(() => {
     ></ArComponent>
     <div class="game-overlay" :class="showMenu ? 'expanded' : ''">
         <div id="left-container" v-if="showMenu">
-            <div class="quick-info-container">
-                <h1 class="game-title" v-if="conService.room.value?.selectedGame">{{ GAME_CONFIG[conService.room.value?.selectedGame || ''].label }}</h1>
+            <div class="quick-info-container" v-if="showMenu">
+                <h1 class="game-title" v-if="conService.room.value?.selectedGame">
+                    {{ GAME_CONFIG[conService.room.value?.selectedGame || ''].label }}
+                </h1>
                 <p class="quick-info" v-if="conService.room.value?.id">
                     RoomID: {{ conService.room.value.id }}
                 </p>
                 <p class="quick-info" v-if="conService.you.value?.name">
-                    Player: {{ conService.you.value.name }} {{ conService.you.value.isOwner ? '(owner)' : ''}}
+                    Player: {{ conService.you.value.name }}
+                    {{ conService.you.value.isOwner ? '(owner)' : '' }}
                 </p>
             </div>
 
@@ -111,18 +114,10 @@ onUnmounted(() => {
             >
                 <font-awesome-icon :icon="['fas', 'users']" />
             </button> -->
-            <button
-                type="button"
-                @click="shuffle"
-                v-if="showMenu && conService.you.value?.isOwner"
-            >
+            <button type="button" @click="shuffle" v-if="showMenu && conService.you.value?.isOwner">
                 <font-awesome-icon :icon="['fas', 'shuffle']" />
             </button>
-            <button 
-                type="button"
-                @click="endGame"
-                v-if="showMenu && conService.you.value?.isOwner"
-            >
+            <button type="button" @click="endGame" v-if="showMenu && conService.you.value?.isOwner">
                 <font-awesome-icon :icon="['fas', 'door-open']" />
             </button>
         </div>
