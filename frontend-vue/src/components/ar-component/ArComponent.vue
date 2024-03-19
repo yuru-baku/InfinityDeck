@@ -205,7 +205,13 @@ props.conService.onConnection(() => {
             }
         });
     }
-
+    AFRAME.registerComponent('warnOnClick', {
+        init: function () {
+            this.el.addEventListener('click', (evnt) => {
+                console.warn('I was clicked!\n Help!');
+            });
+        }
+    });
     connected.value = true;
 });
 
