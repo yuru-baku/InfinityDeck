@@ -110,6 +110,16 @@ props.conService.onConnection(() => {
                 shareZone = new ShareZone(126, 127, sceneEl, 'share', props.cardService.cardBack);
 
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
+                document.querySelector('a-scene').addEventListener('click', (event) => {
+                    let x = (event.clientX / window.innerWidth) * 4 - 2;
+                    let y = 3 - (event.clientY / window.innerHeight) * 6;
+                    if (shareZone.isInZone(x, y)) {
+                        shareZone.redrawZoneToggle();
+                    }
+                    if (hideZone.isInZone(x, y)) {
+                        hideZone.redrawZoneToggle();
+                    }
+                });
                 generateMarkers(sceneEl);
             }
         });
@@ -282,9 +292,8 @@ onUnmounted(() => {
             color-space="sRGB"
             renderer="gammaOutput: true"
             arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 5x5_BCH_22_7_7; debugUIEnabled: false; sourceWidth:1920; sourceHeight:1080;"
-            cursor="rayOrigin: mouse"
         >
-            <a-entity camera id="userCamera"> </a-entity>
+            <a-entity id="userCamera" camera> </a-entity>
         </a-scene>
     </div>
 </template>
