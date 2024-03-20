@@ -82,18 +82,24 @@ export abstract class Game {
                 url: undefined,
                 zone: undefined
             }
+            // only update my markerMap and answer me if this is not a local game
             if (this.room.isLocal) {
                 for (let user of this.room.users) {
                     user.markerMap.set(markerId, card);
                 }
+                this.room.sendMessageToUsers('drawCard', {
+                    card: card,
+                    markerId: markerId
+                });
             } else {
                 user.markerMap.set(markerId, card);
+                this.room.sendMessageToUsers('drawCard', {
+                    card: card,
+                    markerId: markerId
+                }, [user]);
             }
         }
-        this.room.sendMessageToUsers('drawCard', {
-            card: card,
-            markerId: markerId
-        });
+        
         // it might happen that we draw a card again, since we can shuffle
         this.history.unshift(`+${user.id}:${card?.cardFace}`);
         if (user.markerMap.size >= MAX_NUM_OF_MARKERS) {

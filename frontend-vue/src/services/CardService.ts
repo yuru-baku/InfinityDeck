@@ -98,21 +98,15 @@ export class CardService {
      */
     public registerMarker(markerId: string, card: Card): void {
         markerId = markerId.toString(); // ensure we get a string here!
-        // if it is a local game, update markerMap and check for waiting callbacks
-        if (this.conSerivce.room.value?.isLocal) {
-            if (this.markerMap.get(markerId)) {
-                console.warn('Marker was already known, but was registered twice!');
-            }
-            card.url = this.getCardUrl(card.cardFace);
-            this.markerMap.set(markerId, card);
-            const callback = this.cardCallbacks.get(markerId);
-            // if there was no callback someone else drew this card locally
-            if (callback) {
-                callback(card);
-            }
-        } else {
-            // ToDo: What are we doing with not local games?
-            console.warn('This is not a local Game!');
+        if (this.markerMap.get(markerId)) {
+            console.warn('Marker was already known, but was registered twice!');
+        }
+        card.url = this.getCardUrl(card.cardFace);
+        this.markerMap.set(markerId, card);
+        const callback = this.cardCallbacks.get(markerId);
+        // if there was no callback someone else drew this card locally
+        if (callback) {
+            callback(card);
         }
     }
 
