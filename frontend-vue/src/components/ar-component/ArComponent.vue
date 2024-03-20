@@ -7,7 +7,7 @@ import { CardService } from '@/services/CardService';
 import { CardMarker } from './CardMarker';
 import { CardDisplay } from './CardDisplay';
 import { ConnectionService } from '@/services/ConnectionService';
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps({
     cardService: {
@@ -15,10 +15,26 @@ const props = defineProps({
     },
     conService: {
         type: ConnectionService
-    }
+    },
+    debugOverlay: {
+        type: Boolean,
+        default: false
+    },
+    pinShareZone: {
+        type: Boolean,
+        default: false
+    },
+    pinHideZone: {
+        type: Boolean,
+        default: false
+    },
 });
 const connected = ref(false);
 
+/**
+ * This Eventlistener fits the canvas to the size of the arjs-video.
+ * It will be stopped onUnmounted.
+ */
 const resizeController = new AbortController();
 window.addEventListener(
     'resize',
@@ -37,6 +53,7 @@ window.addEventListener(
     },
     { signal: resizeController.signal }
 );
+
 //Buttons
 const toggleHand = () => {
     handDisplay.toggleDisplay();
@@ -94,7 +111,6 @@ var hideZone;
  * @type {Zone}
  */
 var shareZone;
-var debug = true;
 /**
  * @type {CardDisplay}
  */
@@ -108,18 +124,12 @@ props.conService.onConnection(() => {
 
                 hideZone = new Zone(124, 125, sceneEl, 'hide');
                 shareZone = new ShareZone(126, 127, sceneEl, 'share', props.cardService.cardBack);
+                hideZone.zoneMarker1.toggleDebugNumber();
+                hideZone.zoneMarker2.toggleDebugNumber();
+                shareZone.zoneMarker1.toggleDebugNumber();
+                shareZone.zoneMarker2.toggleDebugNumber();
 
                 console.log(`Adding ${props.cardService.numberOfCards} markers to the scene...`);
-                document.querySelector('a-scene').addEventListener('click', (event) => {
-                    let x = (event.clientX / window.innerWidth) * 4 - 2;
-                    let y = 3 - (event.clientY / window.innerHeight) * 6;
-                    if (shareZone.isInZone(x, y)) {
-                        shareZone.redrawZoneToggle();
-                    }
-                    if (hideZone.isInZone(x, y)) {
-                        hideZone.redrawZoneToggle();
-                    }
-                });
                 generateMarkers(sceneEl);
             }
         });
@@ -212,7 +222,7 @@ function generateMarkers(sceneEl) {
     for (var k = 0; k < props.cardService.numberOfCards + 1; k++) {
         var cardBackSrc = props.cardService.cardBack;
         var card = new CardMarker(sceneEl, cardBackSrc, k.toString());
-        if (debug) {
+        if (props.debugOverlay) {
             card.toggleDebugNumber();
         }
         cardmarkers.push(card);
@@ -262,6 +272,21 @@ function removeFoundMarker(marker, markerList) {
     }
 }
 
+watch(() => props.debugOverlay, (enable, _) => {
+    hideZone.zoneMarker1.toggleDebugNumber();
+    hideZone.zoneMarker2.toggleDebugNumber();
+    shareZone.zoneMarker1.toggleDebugNumber();
+    shareZone.zoneMarker2.toggleDebugNumber();
+    for (let card of cardmarkers) {
+        card.toggleDebugNumber();
+    }
+});
+watch(() => props.pinHideZone, (enable, _) => {
+    hideZone.redrawZoneToggle();
+});
+watch(() => props.pinShareZone, (enable, _) => {
+    shareZone.redrawZoneToggle();
+});
 // is called to remove all remainings of AFRAME as far as possible
 onUnmounted(() => {
     // stop resizing and reset

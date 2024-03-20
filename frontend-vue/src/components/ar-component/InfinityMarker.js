@@ -24,13 +24,13 @@ export class InfinityMarker {
 
         this.textElement.setAttribute('id', 'text');
         this.textElement.setAttribute('text', {
-            color: 'red',
+            color: 'black',
             align: 'center',
             value: this.id,
             width: '5.5'
         });
-        this.textElement.object3D.position.set(0, 0.01, 0);
-        this.textElement.object3D.rotation.set(-90, 0, 0);
+        this.textElement.object3D.position.set(0, 0.2, 0);
+        this.textElement.object3D.rotation.set(-Math.PI / 2, 0, 0);
 
         this.markerElement.appendChild(this.textElement);
         this.textElement.setAttribute('visible', false);
