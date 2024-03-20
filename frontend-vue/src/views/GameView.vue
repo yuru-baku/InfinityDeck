@@ -6,9 +6,11 @@ import { ConnectionService } from '@/services/ConnectionService';
 import { onUnmounted, ref } from 'vue';
 
 var showMenu = ref(false);
-var showUsers = ref(false);
 var showHand = ref(false);
 let handSpacing = ref<number | null>(null);
+let pinHideZone = ref(false);
+let pinShareZone = ref(false);
+let debugOverlay = ref(false);
 let cardSize = ref<number | null>(null);
 let resolution = ref();
 
@@ -47,6 +49,9 @@ onUnmounted(() => {
         ref="arComponentViewRef"
         :card-service="cardService"
         :con-service="conService"
+        :pin-hide-zone="pinHideZone"
+        :pin-share-zone="pinShareZone"
+        :debug-overlay="debugOverlay"
     ></ArComponent>
     <div class="game-overlay" :class="showMenu ? 'expanded' : ''">
         <div id="left-container" v-if="showMenu">
@@ -100,6 +105,20 @@ onUnmounted(() => {
             </button>
             <button
                 type="button"
+                @click="pinShareZone = !pinShareZone"
+                :class="pinShareZone ? 'active' : 'non-active'"
+            >
+                <font-awesome-icon :icon="['fas', 'share-nodes']" />
+            </button>
+            <button
+                type="button"
+                @click="pinHideZone = !pinHideZone"
+                :class="pinHideZone ? 'active' : 'non-active'"
+            >
+                <font-awesome-icon :icon="['fas', 'eye-slash']" />
+            </button>
+            <button
+                type="button"
                 @click="toggleHand"
                 v-if="showMenu"
                 :class="showHand ? 'active' : 'non-active'"
@@ -116,6 +135,14 @@ onUnmounted(() => {
             </button> -->
             <button type="button" @click="shuffle" v-if="showMenu && conService.you.value?.isOwner">
                 <font-awesome-icon :icon="['fas', 'shuffle']" />
+            </button>
+            <button
+                type="button"
+                @click="debugOverlay = !debugOverlay"
+                :class="debugOverlay ? 'active' : 'non-active'"
+                v-if="showMenu"
+            >
+                <font-awesome-icon :icon="['fas', 'bug']" />
             </button>
             <button type="button" @click="endGame" v-if="showMenu && conService.you.value?.isOwner">
                 <font-awesome-icon :icon="['fas', 'door-open']" />
