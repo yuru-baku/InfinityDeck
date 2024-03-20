@@ -37,7 +37,7 @@ const navigate = () => {
                     <td>{{ timesShuffled }}</td>
                 </tr>
                 <tr>
-                    <td>cards drawen</td>
+                    <td>cards drawn</td>
                     <td>{{ cardsDrawen }}</td>
                 </tr>
                 <tr>
