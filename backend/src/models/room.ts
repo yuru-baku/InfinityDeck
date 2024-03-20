@@ -38,7 +38,7 @@ export class Room {
         this.game = new MauMau(this);
         this.db = db;
         this.isLocal = true;
-        this.cardSync = new CardSyncService(this, 1000);
+        this.cardSync = new CardSyncService(this, 100);
     }
 
     getState(): 'inLobby' | 'inGame' | 'finished' {
