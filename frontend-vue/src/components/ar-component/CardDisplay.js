@@ -79,6 +79,8 @@ export class CardDisplay {
     addCardToDisplayAndHide(card) {
         if (this.enabled) {
             card.hideCardImage();
+        } else {
+            card.showCardImage();
         }
         this.addCardToDisplay(card);
     }
